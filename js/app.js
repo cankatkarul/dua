@@ -44,7 +44,7 @@
       if (!raw) throw new Error("empty");
       return JSON.parse(raw);
     } catch {
-      return { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {} };
+      return { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {} };
     }
   }
   function saveStore() {
@@ -52,6 +52,7 @@
   }
 
   const state = loadStore();
+  if (!state.cycles) state.cycles = {};
   // Reset daily completion checkmarks on a new day
   if (state.doneDate !== todayKey()) {
     state.doneDate = todayKey();
@@ -89,7 +90,7 @@
         <span class="dua-index">${i + 1}</span>
         <span class="dua-info">
           <p class="dua-name">${dua.name}</p>
-          <p class="dua-meta">${dua.meta}</p>
+          <p class="dua-meta">${dua.meta} ${renderCycleBadgeHtml(dua)}</p>
         </span>
         <span class="dua-done">✓</span>
         <span class="dua-chevron">
@@ -100,7 +101,46 @@
     });
   }
 
-  // ---------- READER ----------
+  // ---------- CYCLE (örn. 40 günlük Vâkıa okuma çevrimi) ----------
+  function getCycle(id) {
+    return state.cycles[id] || { day: 1, lastDate: null };
+  }
+  function markCycleDay(id, length) {
+    const cyc = getCycle(id);
+    if (cyc.lastDate === todayKey()) return false; // bugün zaten işaretlendi
+    const nextDay = (cyc.day % length) + 1;
+    state.cycles[id] = { day: nextDay, lastDate: todayKey() };
+    saveStore();
+    return true;
+  }
+  function renderCycleBadgeHtml(dua) {
+    if (!dua.cycle) return "";
+    const cyc = getCycle(dua.id);
+    return `<span class="dua-cycle-badge">Gün ${cyc.day}/${dua.cycle.length}</span>`;
+  }
+  function renderCycleBanner(dua) {
+    const el = document.getElementById("cycleBanner");
+    if (!el) return;
+    const cyc = getCycle(dua.id);
+    const doneToday = cyc.lastDate === todayKey();
+    el.innerHTML = `
+      <div class="cycle-banner-row">
+        <span class="cycle-banner-label">${dua.cycle.length} günlük çevrim</span>
+        <span class="cycle-banner-day">Gün ${cyc.day} / ${dua.cycle.length}</span>
+      </div>
+      <button class="ghost-btn cycle-advance-btn" ${doneToday ? "disabled" : ""}>
+        ${doneToday ? "Bugün işaretlendi ✓" : `Bugünü tamamladım → Gün ${(cyc.day % dua.cycle.length) + 1}'e geç`}
+      </button>`;
+    const btn = el.querySelector(".cycle-advance-btn");
+    if (btn && !doneToday) {
+      btn.addEventListener("click", () => {
+        markCycleDay(dua.id, dua.cycle.length);
+        renderCycleBanner(dua);
+      });
+    }
+  }
+
+
   function openReader(id) {
     const dua = DUAS.find(d => d.id === id);
     if (!dua) return;
@@ -110,6 +150,9 @@
     els.readerSubtitle.textContent = dua.meta;
 
     let bodyHtml = "";
+    if (dua.cycle) {
+      bodyHtml += `<div class="cycle-banner" id="cycleBanner"></div>`;
+    }
     if (dua.note) {
       bodyHtml += `<div class="reader-note">${dua.note}</div>`;
     }
@@ -122,6 +165,7 @@
         `</div>`;
     }
     els.readerBody.innerHTML = bodyHtml;
+    if (dua.cycle) renderCycleBanner(dua);
 
     // mark as read once opened (simple daily checklist)
     state.done[dua.id] = true;

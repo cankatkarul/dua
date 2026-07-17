@@ -69,7 +69,7 @@ body{
   overscroll-behavior-y: none;
 }
 
-button{ font-family: inherit; border: none; background: none; color: inherit; cursor: pointer; }
+button{ font-family: inherit; border: none; background: none; color: inherit; cursor: pointer; touch-action: manipulation; }
 
 /* ================= HOME ================= */
 .home-screen{
@@ -148,7 +148,12 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 }
 .dua-info{ flex: 1; min-width: 0; }
 .dua-name{ font-size: 17px; font-weight: 600; margin: 0 0 2px; }
-.dua-meta{ font-size: 13px; color: var(--text-secondary); margin: 0; }
+.dua-meta{ font-size: 13px; color: var(--text-secondary); margin: 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dua-cycle-badge{
+  font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  padding: 2px 8px; border-radius: 20px;
+  background: var(--accent-glow); color: var(--accent);
+}
 .dua-chevron{ color: var(--text-tertiary); flex: 0 0 auto; }
 .dua-done{
   position: absolute; top: 10px; right: 10px;
@@ -224,6 +229,15 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 22px;
 }
+.cycle-banner{
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px; margin-bottom: 18px;
+}
+.cycle-banner-row{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cycle-banner-label{ font-size: 13px; color: var(--text-secondary); }
+.cycle-banner-day{ font-family: var(--serif); font-weight: 700; font-size: 16px; color: var(--accent); }
+.cycle-advance-btn{ margin-top: 0; }
+.cycle-advance-btn:disabled{ opacity: .55; }
 .dua-text{
   font-family: var(--serif);
   font-size: calc(19px * var(--font-scale));
