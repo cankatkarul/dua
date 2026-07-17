@@ -21,6 +21,8 @@
     fontSegmented: $("#fontSegmented"),
     counterFab: $("#counterFab"),
     counterFabNum: $("#counterFabNum"),
+    homeCounterFab: $("#homeCounterFab"),
+    homeCounterFabNum: $("#homeCounterFabNum"),
     counterBackdrop: $("#counterBackdrop"),
     counterSheet: $("#counterSheet"),
     counterTarget: $("#counterTarget"),
@@ -147,8 +149,18 @@
     state.counters[id] = Math.max(0, val);
     saveStore();
   }
+  const HOME_COUNTER_ID = "home-zikirmatik";
+
   function updateCounterFab() {
     els.counterFabNum.textContent = String(getCount(currentDuaId));
+  }
+  function updateHomeCounterFab() {
+    els.homeCounterFabNum.textContent = String(getCount(HOME_COUNTER_ID));
+  }
+  function openCounterFor(id) {
+    currentDuaId = id;
+    renderCounterSheet();
+    openSheet(els.counterBackdrop, els.counterSheet);
   }
   function renderCounterSheet() {
     const dua = DUAS.find(d => d.id === currentDuaId);
@@ -168,6 +180,7 @@
     setCount(currentDuaId, getCount(currentDuaId) + 1);
     renderCounterSheet();
     updateCounterFab();
+    updateHomeCounterFab();
     if (navigator.vibrate) navigator.vibrate(8);
   }
 
@@ -187,10 +200,8 @@
     if (btn) applyFontSize(btn.dataset.size);
   });
 
-  els.counterFab.addEventListener("click", () => {
-    renderCounterSheet();
-    openSheet(els.counterBackdrop, els.counterSheet);
-  });
+  els.counterFab.addEventListener("click", () => openCounterFor(currentDuaId));
+  els.homeCounterFab.addEventListener("click", () => openCounterFor(HOME_COUNTER_ID));
   els.counterBackdrop.addEventListener("click", () => closeSheet(els.counterBackdrop, els.counterSheet));
   els.tasbihClose.addEventListener("click", () => closeSheet(els.counterBackdrop, els.counterSheet));
   els.tasbihDial.addEventListener("click", incrementCounter);
@@ -198,10 +209,12 @@
     setCount(currentDuaId, 0);
     renderCounterSheet();
     updateCounterFab();
+    updateHomeCounterFab();
   });
 
   // ---------- INIT ----------
   applyTheme(state.theme || "dark");
   applyFontSize(state.fontSize || "medium");
   renderHome();
+  updateHomeCounterFab();
 })();
