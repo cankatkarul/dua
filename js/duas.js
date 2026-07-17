@@ -208,16 +208,6 @@ const DUAS = [
     verses: [
       "Bismillâhirrahmânirrahîm",
       "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      ""
-      ""
     ]
   }
 ];
