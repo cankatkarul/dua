@@ -242,7 +242,7 @@ const DUAS = [
       "Ve enî'budûnî, hâzâ sırâtun müstekîm",
       "Ve lekad edalle minküm cibillen kesîran efelem tekûnû ta'kılûn",
       "Hâzihî cehennemülletî küntüm tûadûn",
-      "İslevhel yevme bimâ küntüm tekfürûn",
+      "Lslevhel yevme bimâ küntüm tekfürûn",
       "Elyevme nahtimü alâ efvâhihim ve tükellimünâ eydîhim ve teşhedü ercülühüm bimâ kânû yeksibûn",
       "Velev neşâü letamesnâ alâ a'yunihim festebekus sırâta fe ennâ yübsirûn",
       "Velev neşâü lemesahnâhüm alâ mekânetihim femestetâû mudıyyev velâ yerciûn",
