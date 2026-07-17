@@ -14,8 +14,8 @@ const DUAS = [
     meta: "56 âyet",
     note: "Rızık bereketi için sabah okunması tavsiye edilir.",
     counterTarget: null,
+    cycle: { length: 40 },
     verses: [
-      "Bismillâhirrahmânirrahîm",
       "İzâ veka'atil vâkı'ah.",
       "Leyse livak'atihâ kâzibeh.",
       "Hâfıdatun râfi'ah.",
@@ -139,16 +139,7 @@ const DUAS = [
     note: null,
     counterTarget: null,
     verses: [
-      "Bismillâhirrahmânirrahîm",
-      "Veylun li kulli humezetin lumezeh.",
-      "Ellezî ceme'a mâlen ve 'addedeh.",
-      "Yahsebu enne mâlehû ahledeh.",
-      "Kellâ le yunbezenne fîl hutameh.",
-      "Ve mâ edrâke mel hutameh.",
-      "Nârullâhil mûkadeh.",
-      "Elletî tettali'u 'alel ef'ideh.",
-      "İnnehâ aleyhim mu'sadeh.",
-      "Fî 'amedin mumeddedeh."
+      "[[Hümeze Sûresi'nin Türkçe okunuşu buraya eklenecek.]]"
     ]
   },
   {
@@ -158,18 +149,7 @@ const DUAS = [
     note: null,
     counterTarget: null,
     verses: [
-      "Bismillâhirrahmânirrahîm",
-      "Ved duhâ.",
-      "Vel leyli izâ secâ.",
-      "Mâ vedde'ake rabbuke ve mâ kalâ.",
-      "Ve lel âhıretu hayrun leke minel ûlâ.",
-      "Ve le sevfe yu'tîke rabbuke fe terdâ.",
-      "E lem yecidke yetîmen fe âvâ.",
-      "Ve vecedeke dâllen fe hedâ.",
-      "Ve vecedeke âilen fe agnâ.",
-      "Fe emmel yetîme fe lâ takher.",
-      "Ve emmes sâile fe lâ tenher.",
-      "Ve emmâ bi ni'meti rabbike fe haddis."
+      "[[Duhâ Sûresi'nin Türkçe okunuşu buraya eklenecek.]]"
     ]
   },
   {
@@ -179,9 +159,7 @@ const DUAS = [
     note: null,
     counterTarget: null,
     verses: [
-      "Bismillâhirrahmânirrahîm",
-      "Âmener resûlu bimâ unzile ileyhi min rabbihî vel mu'minûn(mu'minûne), kullun âmene billâhi ve melâiketihî ve kutubihî ve rusulih(rusulihî), lâ nuferriku beyne ehadin min rusulih(rusulihî), ve kâlû semi'nâ ve ata'nâ gufrâneke rabbenâ ve ileykel masîr.",
-      "Lâ yukellifullâhu nefsen illâ vus'ahâ, lehâ mâ kesebet ve aleyhâ mektesebet, rabbenâ lâ tuâhıznâ in nesînâ ev ahtâ'nâ, rabbenâ ve lâ tahmil aleynâ ısran kemâ hameltehû alellezîne min kablinâ, rabbenâ ve lâ tuhammilnâ mâ lâ tâkate lenâ bih(bihî), va'fu annâ, vagfir lenâ, verhamnâ, ente mevlânâ fensurnâ alel kavmil kâfirîn."
+      "[[Âmenerrasûlü duasının Türkçe okunuşu buraya eklenecek.]]"
     ]
   },
   {
@@ -191,12 +169,17 @@ const DUAS = [
     note: "Hangi âyet aralığını okuduğunu belirtirsen (örn. ilk 5 âyet) ona göre ekleyeceğim.",
     counterTarget: null,
     verses: [
-      "Bismillâhirrahmânirrahîm",
-      "Elif-lâm-mîm.",
-      "Zâlikel kitâbu lâ raybe fîh(fîhi), huden lil muttekîn.",
-      "Ellezîne yu’minûne bil gaybi ve yukîmûnes salâte ve mimmâ razaknâhum yunfikûn.",
-      "Vellezîne yu’minûne bi mâ unzile ileyke ve mâ unzile min kablik(kablike) ve bil âhıreti hum yûkınûn.",
-      "Ulâike alâ huden min rabbihim ve ulâike humul muflihûn."
+      "[[Bakara Sûresi'nin (Elif-Lâm-Mîm) Türkçe okunuşu buraya eklenecek.]]"
+    ]
+  },
+  {
+    id: "yasin",
+    name: "Yâsîn Sûresi (Yâsîn-i Şerîf)",
+    meta: "Her Perşembe akşamı",
+    note: null,
+    counterTarget: null,
+    verses: [
+      "[[Yâsîn Sûresi'nin Türkçe okunuşu buraya eklenecek.]]"
     ]
   },
   {
@@ -206,8 +189,7 @@ const DUAS = [
     note: "Sayaç 99 hedefiyle açılır, isimleri tek tek sayarak okuyabilirsin.",
     counterTarget: 99,
     verses: [
-      "Bismillâhirrahmânirrahîm",
-      "",
+      "[[Esmâ-i Hüsnâ listesi (99 isim, Türkçe okunuşuyla) buraya eklenecek.]]"
     ]
   }
 ];
