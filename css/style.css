@@ -72,11 +72,35 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 
 /* ================= HOME ================= */
 .home-screen{
+  position: relative;
+  overflow: hidden;
   max-width: 640px;
   margin: 0 auto;
   padding: env(safe-area-inset-top, 24px) 20px 120px;
   min-height: 100dvh;
 }
+
+/* Sağ üstte yumuşak, göz yormayan bir "Allah" amblemi — atmosferik arka plan */
+.home-bg-emblem{
+  position: absolute;
+  top: -70px;
+  right: -90px;
+  width: 380px;
+  height: 600px;
+  background-image: url('../assets/allah-lafza.png');
+  background-repeat: no-repeat;
+  background-position: top right;
+  background-size: contain;
+  opacity: 0.16;
+  filter: drop-shadow(0 0 50px var(--accent-glow));
+  pointer-events: none;
+  z-index: 0;
+  transform: rotate(4deg);
+}
+.theme-light .home-bg-emblem{ opacity: 0.22; }
+
+.home-header, .dua-list{ position: relative; z-index: 1; }
+
 .home-header{ padding: 28px 4px 22px; }
 .eyebrow{
   font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
@@ -287,6 +311,7 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 
 @media (max-width: 380px){
   .home-title{ font-size: 32px; }
+  .home-bg-emblem{ width: 260px; height: 420px; top: -40px; right: -60px; }
   .tasbih-dial{ width: 170px; height: 170px; }
   .tasbih-ring{ width: 170px; height: 170px; }
   .tasbih-count{ font-size: 44px; }
