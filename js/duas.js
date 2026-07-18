@@ -118,7 +118,7 @@ const DUAS = [
     id: "tekasur",
     name: "Tekâsür Sûresi",
     meta: "8 âyet",
-    note: "Sure, adını ilk ayette geçen ve "mal, mülk ve çoluk çocuk çokluğuyla övünmek, çoğaltma yarışı yapmak" anlamına gelen "tekasür" kelimesinden alır.",
+    note: "Sure, adını ilk ayette geçen ve \"mal, mülk ve çoluk çocuk çokluğuyla övünmek, çoğaltma yarışı yapmak\" anlamına gelen \"tekasür\" kelimesinden alır.",
     counterTarget: null,
     verses: [
       "Bismillâhirrahmânirrahîm",
@@ -155,7 +155,7 @@ const DUAS = [
     id: "duha",
     name: "Duhâ Sûresi",
     meta: "11 âyet",
-    note: "Hz. Muhammed'e (s.a.v.) bir süre vahiy gelmemesi üzerine müşriklerin "Rabbi onu terk etti" şeklindeki dedikodularına cevap olarak indirilmiştir. Peygamber Efendimiz'i teselli eden, Yüce Allah'ın onu asla terk etmediğini bildiren ve yetimlere, yoksullara iyi davranılmasını öğütleyen çok rahatlatıcı bir suredir.",
+    note: "Hz. Muhammed'e (s.a.v.) bir süre vahiy gelmemesi üzerine müşriklerin \"Rabbi onu terk etti\" şeklindeki dedikodularına cevap olarak indirilmiştir. Peygamber Efendimiz'i teselli eden, Yüce Allah'ın onu asla terk etmediğini bildiren ve yetimlere, yoksullara iyi davranılmasını öğütleyen çok rahatlatıcı bir suredir.",
     counterTarget: null,
     verses: [
       "Bismillâhirrahmânirrahîm",
@@ -176,7 +176,7 @@ const DUAS = [
     id: "amenerrasulu",
     name: "Âmenerrasûlü",
     meta: "Bakara Sûresi, son iki âyet",
-    note: "Peygamber Efendimiz (s.a.v.) bu iki ayet için, "Geceleyin Bakara Suresi'nin son iki ayetini okuyana, bu iki ayet yeter" buyurmuştur. Genellikle yatsı namazlarından sonra aşr-ı şerif olarak okunur.",
+    note: "Peygamber Efendimiz (s.a.v.) bu iki ayet için, \"Geceleyin Bakara Suresi'nin son iki ayetini okuyana, bu iki ayet yeter\" buyurmuştur. Genellikle yatsı namazlarından sonra aşr-ı şerif olarak okunur.",
     counterTarget: null,
     verses: [
       "Bismillâhirrahmânirrahîm",
@@ -202,7 +202,7 @@ const DUAS = [
     id: "yasin",
     name: "Yâsîn Sûresi (Yâsîn-i Şerîf)",
     meta: "83 âyet · Her Perşembe akşamı",
-    note: "Peygamber Efendimiz (s.a.v.) bu sure için, "Yasin, Kur'an'ın kalbidir" buyurmuştur. İslam dünyasında cuma gecelerinde, vefat edenlerin arkasından, darlık ve sıkıntı anlarında en çok okunan, fazileti çok yüksek bir suredir. Surede temel olarak tevhid, nübüvvet (peygamberlik), öldükten sonra dirilme ve ahiret hayatı gibi imanın esasları anlatılır.",
+    note: "Peygamber Efendimiz (s.a.v.) bu sure için, \"Yasin, Kur'an'ın kalbidir\" buyurmuştur. İslam dünyasında cuma gecelerinde, vefat edenlerin arkasından, darlık ve sıkıntı anlarında en çok okunan, fazileti çok yüksek bir suredir. Surede temel olarak tevhid, nübüvvet (peygamberlik), öldükten sonra dirilme ve ahiret hayatı gibi imanın esasları anlatılır.",
     counterTarget: null,
     verses: [
       "Yâsîn",
