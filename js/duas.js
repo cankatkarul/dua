@@ -11,8 +11,8 @@ const DUAS = [
   {
     id: "vakia",
     name: "Vâkıa Sûresi",
-    meta: "56 âyet",
-    note: "Rızık bereketi için sabah okunması tavsiye edilir.",
+    meta: "96 âyet",
+    note: "Kıyametin kopuş dehşeti, öldükten sonra dirilme, insanların amellerine göre ayrılacağı üç grup (Ashab-ı Meymene, Ashab-ı Meş'eme ve Sabikun) ile cennet ve cehennem ehlinin durumları anlatılır. Ayrıca İslam geleneğinde bolluk ve bereket suresi olarak da bilinir.",
     counterTarget: null,
     cycle: { length: 40 },
     verses: [
@@ -118,7 +118,7 @@ const DUAS = [
     id: "tekasur",
     name: "Tekâsür Sûresi",
     meta: "8 âyet",
-    note: null,
+    note: "Sure, adını ilk ayette geçen ve "mal, mülk ve çoluk çocuk çokluğuyla övünmek, çoğaltma yarışı yapmak" anlamına gelen "tekasür" kelimesinden alır.",
     counterTarget: null,
     verses: [
       "Bismillâhirrahmânirrahîm",
@@ -136,47 +136,73 @@ const DUAS = [
     id: "humeze",
     name: "Hümeze Sûresi",
     meta: "9 âyet",
-    note: null,
+    note: "Genel olarak insanları küçük düşürenlerin, malına güvenerek kibirlenenlerin acı sonunu ve cehennem azabını (Hutame) anlatır.",
     counterTarget: null,
     verses: [
-      "[[Hümeze Sûresi'nin Türkçe okunuşu buraya eklenecek.]]"
+      "Bismillâhirrahmânirrahîm",
+      "Veylün li-külli hümezetin lümezeh.",
+      "Ellezî ceme'a mâlen ve 'addedeh.",
+      "Yahsebü enne mâlehû ahledeh.",
+      "Kellâ le-yünbezenne fîl-hutameh.",
+      "Ve mâ edrâke mel-hutameh.",
+      "Nârullâhil-mûkadeh.",
+      "Elletî tettali'u 'alel-ef'ideh.",
+      "İnnehâ 'aleyhim mü'sadeh.",
+      "Fî 'amedin mümeddedeh."
     ]
   },
   {
     id: "duha",
     name: "Duhâ Sûresi",
     meta: "11 âyet",
-    note: null,
+    note: "Hz. Muhammed'e (s.a.v.) bir süre vahiy gelmemesi üzerine müşriklerin "Rabbi onu terk etti" şeklindeki dedikodularına cevap olarak indirilmiştir. Peygamber Efendimiz'i teselli eden, Yüce Allah'ın onu asla terk etmediğini bildiren ve yetimlere, yoksullara iyi davranılmasını öğütleyen çok rahatlatıcı bir suredir.",
     counterTarget: null,
     verses: [
-      "[[Duhâ Sûresi'nin Türkçe okunuşu buraya eklenecek.]]"
+      "Bismillâhirrahmânirrahîm",
+      "Ved-duhâ.",
+      "Vel-leyli izâ secâ.",
+      "Mâ vedde'ake rabbüke ve mâ kalâ.",
+      "Ve lel-âhiretü hayrün leke minel-ûlâ.",
+      "Ve le-sevfe yu'tîke rabbüke fe-terdâ.",
+      "E-lem yecidke yetîmen fe-âvâ.",
+      "Ve vecedeke dâllen fe-hedâ.",
+      "Ve vecedeke 'âilen fe-agnâ.",
+      "Fe-emmel-yetîme felâ takher.",
+      "Ve emmes-sâile felâ tenher.",
+      "Ve emmâ bi-ni'meti rabbike fe-haddis."
     ]
   },
   {
     id: "amenerrasulu",
     name: "Âmenerrasûlü",
     meta: "Bakara Sûresi, son iki âyet",
-    note: null,
+    note: "Peygamber Efendimiz (s.a.v.) bu iki ayet için, "Geceleyin Bakara Suresi'nin son iki ayetini okuyana, bu iki ayet yeter" buyurmuştur. Genellikle yatsı namazlarından sonra aşr-ı şerif olarak okunur.",
     counterTarget: null,
     verses: [
-      "[[Âmenerrasûlü duasının Türkçe okunuşu buraya eklenecek.]]"
+      "Bismillâhirrahmânirrahîm",
+      "Âmener-rasûlü bimâ ünzile ileyhi min rabbihî vel-mü'minûn. Küllün âmene billâhi ve melâiketihî ve kütübihî ve rusulih. Lâ nüferriku beyne ehadin min rusulih. Ve kâlû semi'nâ ve ata'nâ gufrâneke rabbenâ ve ileykel-masîr.",
+      "Lâ yükellifullâhü nefsen illâ vüs'ahâ. Lehâ mâ kesebet ve 'aleyhâ mektesebet. Rabbenâ lâ tüâhiznâ in nesînâ ev ahta'nâ. Rabbenâ ve lâ tahmil 'aleynâ ısran kemâ hameltehû 'alellezîne min kablinâ. Rabbenâ ve lâ tühammilnâ mâ lâ tâkate lenâ bih. Va'fü 'annâ, vagfir lenâ, verhamnâ. Ente mevlânâ fensurnâ 'alel-kavmil-kâfirîn."
     ]
   },
   {
     id: "bakara-elif-lam-mim",
     name: "Bakara Sûresi (Elif-Lâm-Mîm)",
     meta: "Bakara Sûresi başlangıcı",
-    note: "Hangi âyet aralığını okuduğunu belirtirsen (örn. ilk 5 âyet) ona göre ekleyeceğim.",
+    note: "Kur'an-ı Kerim'deki bazı surelerin başında bulunan ve tek tek okunan bu harflere Hurûf-ı Mukatta'a (kesikli harfler) denir.",
     counterTarget: null,
     verses: [
-      "[[Bakara Sûresi'nin (Elif-Lâm-Mîm) Türkçe okunuşu buraya eklenecek.]]"
+      "Elif-lâm-mîm.",
+      "Zâlikel-kitâbü lâ raybe fîh, hüden lil-müttekîn.",
+      "Ellezîne yü'minûne bil-gaybi ve yukîmûnes-salâte ve mimmâ razaknâhüm yünfikûn.",
+      "Vellezîne yü'minûne bimâ ünzile ileyke ve mâ ünzile min kablik, ve bil-âhireti hüm yûkınûn.",
+      "Ülâike 'alâ hüden min rabbihim ve ülâike hümül-müflihûn."
     ]
   },
   {
     id: "yasin",
     name: "Yâsîn Sûresi (Yâsîn-i Şerîf)",
     meta: "83 âyet · Her Perşembe akşamı",
-    note: null,
+    note: "Peygamber Efendimiz (s.a.v.) bu sure için, "Yasin, Kur'an'ın kalbidir" buyurmuştur. İslam dünyasında cuma gecelerinde, vefat edenlerin arkasından, darlık ve sıkıntı anlarında en çok okunan, fazileti çok yüksek bir suredir. Surede temel olarak tevhid, nübüvvet (peygamberlik), öldükten sonra dirilme ve ahiret hayatı gibi imanın esasları anlatılır.",
     counterTarget: null,
     verses: [
       "Yâsîn",
