@@ -441,3 +441,72 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   background: var(--accent-glow); color: var(--accent);
   border: 1px solid rgba(242,184,75,0.3);
 }
+
+/* ================= SLAYТ MODU ================= */
+.slide-mode{
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 28px 160px;
+  z-index: 5;
+  background: var(--bg-grad), var(--bg);
+}
+.slide-verse{
+  font-family: var(--serif);
+  font-size: calc(22px * var(--font-scale));
+  line-height: 1.9;
+  color: var(--text-primary);
+  text-align: center;
+  max-width: 560px;
+  animation: verseIn .3s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes verseIn{
+  from{ opacity:0; transform: translateY(14px); }
+  to{ opacity:1; transform: translateY(0); }
+}
+.slide-meta{
+  margin-top: 24px;
+  font-size: 13px; color: var(--text-tertiary);
+  letter-spacing: .06em;
+}
+/* Ekranın ortası büyük dokunma alanı */
+.slide-tap-zone{
+  position: absolute; inset: 100px 0 180px;
+  width: 100%; background: none; border: none;
+  touch-action: manipulation; z-index: 1;
+}
+.slide-controls{
+  position: fixed; bottom: calc(24px + env(safe-area-inset-bottom,0px));
+  left: 0; right: 0;
+  display: flex; gap: 8px; justify-content: center; padding: 0 20px;
+  z-index: 6;
+}
+.slide-controls .ghost-btn{ flex: 1; margin-top: 0; max-width: 140px; font-size: 14px; }
+.slide-exit-btn{ flex: 1.4 !important; }
+
+/* Slayt toggle fab — sol altta, zikirmatik karşısında değil, okuma ekranında alt orta */
+.slide-toggle-fab{
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom,0px));
+  left: 20px;
+  z-index: 20;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--surface-strong); border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-soft);
+  transition: background .2s ease, color .2s ease, transform .15s ease;
+  touch-action: manipulation;
+}
+.slide-toggle-fab.active{
+  background: var(--accent); color: #1a1305; border-color: transparent;
+}
+.slide-toggle-fab:active{ transform: scale(.88); }
+
+/* Son okunan âyet vurgu */
+.verse-highlight{
+  background: rgba(242,184,75,0.15);
+  border-radius: 8px;
+  transition: background 1.5s ease;
+}

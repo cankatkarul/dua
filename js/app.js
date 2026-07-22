@@ -10,7 +10,7 @@
     duaList: $("#duaList"),
     readerTitle: $("#readerTitle"),
     readerSubtitle: $("#readerSubtitle"),
-    readerBody: $("#readerBody"),
+
     backBtn: $("#backBtn"),
     openSettings: $("#openSettings"),
     readerSettingsBtn: $("#readerSettingsBtn"),
@@ -23,6 +23,15 @@
     counterFabNum: $("#counterFabNum"),
     homeCounterFab: $("#homeCounterFab"),
     homeCounterFabNum: $("#homeCounterFabNum"),
+    slideMode: $("#slideMode"),
+    slideVerse: $("#slideVerse"),
+    slideMeta: $("#slideMeta"),
+    slideTapZone: $("#slideTapZone"),
+    slidePrev: $("#slidePrev"),
+    slideNext: $("#slideNext"),
+    slideExit: $("#slideExit"),
+    slideToggleFab: $("#slideToggleFab"),
+
     counterBackdrop: $("#counterBackdrop"),
     counterSheet: $("#counterSheet"),
     counterTarget: $("#counterTarget"),
@@ -191,9 +200,14 @@
 
   function openReader(id, list) {
     list = list || DUAS;
+    currentDuaList = list;
     const dua = list.find(d => d.id === id);
     if (!dua) return;
     currentDuaId = id;
+    isSlideModeActive = false;
+    els.slideMode.hidden = true;
+    document.getElementById("readerBody").hidden = false;
+    els.slideToggleFab.classList.remove("active");
 
     els.readerTitle.textContent = dua.name;
     els.readerSubtitle.textContent = dua.meta;
@@ -221,6 +235,19 @@
     window.scrollTo(0, 0);
     updateCounterFab();
     updateDoneBtn(dua.id);
+    // Son okunan yeri vurgula
+    if (!state.positions) state.positions = {};
+    const lastPos = state.positions[id];
+    if (lastPos && lastPos > 0) {
+      requestAnimationFrame(() => {
+        const verseEls = document.getElementById("readerBody").querySelectorAll(".verse");
+        if (verseEls[lastPos]) {
+          verseEls[lastPos].scrollIntoView({ behavior: "smooth", block: "center" });
+          verseEls[lastPos].classList.add("verse-highlight");
+          setTimeout(() => verseEls[lastPos].classList.remove("verse-highlight"), 1800);
+        }
+      });
+    }
   }
 
   function updateDoneBtn(id) {
@@ -258,7 +285,95 @@
     }
   }
 
+  // ---------- SON OKUNAN YER ----------
+  function saveReadPosition(id, index) {
+    if (!state.positions) state.positions = {};
+    state.positions[id] = index;
+    saveStore();
+  }
+  function getReadPosition(id) {
+    return (state.positions && state.positions[id]) || 0;
+  }
+
+  // ---------- SLAYТ MODU ----------
+  let slideVerses = [];
+  let slideIndex = 0;
+  let isSlideModeActive = false;
+  let currentDuaList = DUAS;
+
+  function enterSlideMode(verses, startIndex) {
+    slideVerses = verses;
+    slideIndex = startIndex;
+    isSlideModeActive = true;
+    document.getElementById("readerBody").hidden = true;
+    els.slideMode.hidden = false;
+    els.slideToggleFab.classList.add("active");
+    renderSlide();
+  }
+
+  function exitSlideMode() {
+    isSlideModeActive = false;
+    document.getElementById("readerBody").hidden = false;
+    els.slideMode.hidden = true;
+    els.slideToggleFab.classList.remove("active");
+    // Kaldığı yeri kaydet
+    saveReadPosition(currentDuaId, slideIndex);
+    // Normal okumada o âyete kaydır
+    const verseEls = document.getElementById("readerBody").querySelectorAll(".verse");
+    if (verseEls[slideIndex]) {
+      verseEls[slideIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  function renderSlide() {
+    const verse = slideVerses[slideIndex] || "";
+    els.slideVerse.textContent = verse;
+    els.slideMeta.textContent = `${slideIndex + 1} / ${slideVerses.length}`;
+    els.slidePrev.disabled = slideIndex === 0;
+    els.slideNext.disabled = slideIndex === slideVerses.length - 1;
+    // Kaydet
+    saveReadPosition(currentDuaId, slideIndex);
+    // Titreşim
+    if (navigator.vibrate) navigator.vibrate(6);
+  }
+
+  function slideGoNext() {
+    if (slideIndex < slideVerses.length - 1) { slideIndex++; renderSlide(); }
+  }
+  function slideGoPrev() {
+    if (slideIndex > 0) { slideIndex--; renderSlide(); }
+  }
+
+  // Slayt olayları
+  els.slideTapZone.addEventListener("click", slideGoNext);
+  els.slideNext.addEventListener("click", slideGoNext);
+  els.slidePrev.addEventListener("click", slideGoPrev);
+  els.slideExit.addEventListener("click", exitSlideMode);
+
+  // Slayt toggle fab
+  els.slideToggleFab.addEventListener("click", () => {
+    if (isSlideModeActive) {
+      exitSlideMode();
+    } else {
+      const list = currentDuaList;
+      const dua = list.find(d => d.id === currentDuaId);
+      if (!dua) return;
+      const startIndex = getReadPosition(currentDuaId);
+      enterSlideMode(dua.verses, startIndex);
+    }
+  });
+
+  // Kaydırma (swipe) desteği
+  let touchStartX = 0;
+  els.slideMode.addEventListener("touchstart", e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  els.slideMode.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) { dx < 0 ? slideGoNext() : slideGoPrev(); }
+  });
+
   function closeReader() {
+    // Slayt modundan çık
+    if (isSlideModeActive) exitSlideMode();
     els.reader.hidden = true;
     els.home.hidden = false;
     renderHome();
@@ -386,6 +501,7 @@
   // ---------- INIT ----------
   if (!state.streak) state.streak = 0;
   if (!state.lastStreakDate) state.lastStreakDate = null;
+  if (!state.positions) state.positions = {};
   applyTheme(state.theme || "dark");
   applyFontSize(state.fontSize || "medium");
   renderHome();

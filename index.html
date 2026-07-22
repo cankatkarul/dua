@@ -55,7 +55,25 @@
       </button>
     </header>
 
+    <!-- Normal okuma modu -->
     <div class="reader-body" id="readerBody"><!-- JS ile doldurulur --></div>
+
+    <!-- Slayt modu -->
+    <div class="slide-mode" id="slideMode" hidden>
+      <div class="slide-verse" id="slideVerse"></div>
+      <div class="slide-meta" id="slideMeta"></div>
+      <button class="slide-tap-zone" id="slideTapZone" aria-label="Sonraki âyet"></button>
+      <div class="slide-controls">
+        <button class="ghost-btn" id="slidePrev">← Önceki</button>
+        <button class="ghost-btn slide-exit-btn" id="slideExit">Liste görünümü</button>
+        <button class="ghost-btn" id="slideNext">Sonraki →</button>
+      </div>
+    </div>
+
+    <!-- Slayt modu aç/kapat butonu -->
+    <button class="slide-toggle-fab" id="slideToggleFab" aria-label="Slayt modu">
+      <svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="3" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
 
     <button class="counter-fab" id="counterFab" aria-label="Sayaç">
       <span class="counter-fab-ring"><span class="counter-fab-num" id="counterFabNum">0</span></span>
