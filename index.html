@@ -64,14 +64,19 @@
   <div class="sheet-backdrop" id="counterBackdrop" hidden></div>
   <section class="sheet counter-sheet" id="counterSheet" hidden>
     <div class="sheet-handle"></div>
-    <div class="counter-target" id="counterTarget">Hedef: 99</div>
-    <button class="tasbih-dial" id="tasbihDial">
-      <svg class="tasbih-ring" viewBox="0 0 200 200">
-        <circle cx="100" cy="100" r="88" class="tasbih-ring-track"/>
-        <circle cx="100" cy="100" r="88" class="tasbih-ring-progress" id="tasbihRingProgress"/>
-      </svg>
-      <div class="tasbih-count" id="tasbihCount">0</div>
-      <div class="tasbih-hint">dokun</div>
+    <div class="counter-top">
+      <div class="counter-target" id="counterTarget">Hedef: 99</div>
+      <div class="counter-ring-wrap">
+        <svg class="tasbih-ring" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="88" class="tasbih-ring-track"/>
+          <circle cx="100" cy="100" r="88" class="tasbih-ring-progress" id="tasbihRingProgress"/>
+        </svg>
+        <div class="tasbih-count" id="tasbihCount">0</div>
+      </div>
+    </div>
+    <!-- Ekranın geri kalanına basan büyük sayaç alanı -->
+    <button class="tasbih-tap-zone" id="tasbihDial">
+      <span class="tasbih-tap-label">Saymak için dokun</span>
     </button>
     <div class="sheet-actions">
       <button class="ghost-btn" id="tasbihReset">Sıfırla</button>

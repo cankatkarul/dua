@@ -321,31 +321,46 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 .ghost-btn.full{ margin-top: 20px; background: var(--accent); color: #1a1305; border-color: transparent; }
 
 /* Counter sheet specifics */
-.counter-target{ text-align: center; color: var(--text-secondary); font-size: 13px; margin-bottom: 6px; }
-.tasbih-dial{
-  display: block; margin: 8px auto 4px; position: relative;
-  width: 200px; height: 200px;
-}
-.tasbih-ring{ width: 200px; height: 200px; transform: rotate(-90deg); }
+.counter-top{ display: flex; flex-direction: column; align-items: center; padding: 4px 0 8px; }
+.counter-target{ text-align: center; color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; }
+.counter-ring-wrap{ position: relative; width: 160px; height: 160px; }
+.tasbih-ring{ width: 160px; height: 160px; transform: rotate(-90deg); }
 .tasbih-ring-track{ fill: none; stroke: var(--divider); stroke-width: 10; }
 .tasbih-ring-progress{
   fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round;
   stroke-dasharray: 553; stroke-dashoffset: 553;
-  transition: stroke-dashoffset .25s cubic-bezier(.2,.8,.2,1);
+  transition: stroke-dashoffset .25s cubic-bezier(.2,.8,.2,1), stroke .3s ease;
   filter: drop-shadow(0 0 8px var(--accent-glow));
 }
 .tasbih-count{
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif); font-size: 52px; font-weight: 700; color: var(--text-primary);
-  transition: transform .12s ease;
+  font-family: var(--serif); font-size: 44px; font-weight: 700; color: var(--text-primary);
+  transition: transform .1s ease, color .3s ease;
 }
-.tasbih-hint{
-  position: absolute; bottom: 34px; left: 0; right: 0; text-align: center;
-  font-size: 12px; color: var(--text-tertiary); letter-spacing: .08em; text-transform: uppercase;
+
+/* Büyük dokunma alanı — parmak nereye basarsa bassın sayar */
+.tasbih-tap-zone{
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; flex: 1;
+  min-height: 120px;
+  border-radius: 22px;
+  margin: 8px 0 4px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  transition: background .15s ease, transform .1s ease;
+  touch-action: manipulation;
 }
-.tasbih-dial:active .tasbih-count{ transform: scale(1.12); }
+.tasbih-tap-zone:active{
+  background: var(--surface-strong);
+  transform: scale(.97);
+}
+.tasbih-tap-label{
+  font-size: 16px; font-weight: 600; color: var(--text-tertiary);
+  letter-spacing: .04em; pointer-events: none;
+}
+
 .sheet-actions{ display: flex; gap: 10px; }
-.sheet-actions .ghost-btn{ margin-top: 18px; }
+.sheet-actions .ghost-btn{ margin-top: 10px; }
 
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration: .001s !important; transition-duration: .001s !important; }

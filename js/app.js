@@ -244,16 +244,23 @@
     renderCounterSheet();
     openSheet(els.counterBackdrop, els.counterSheet);
   }
+  function isTesbihat(id) {
+    return TESBIHAT.some(t => t.id === id);
+  }
   function renderCounterSheet() {
-    const dua = DUAS.find(d => d.id === currentDuaId);
+    const list = isTesbihat(currentDuaId) ? TESBIHAT : DUAS;
+    const item = list.find(d => d.id === currentDuaId);
     const count = getCount(currentDuaId);
     els.tasbihCount.textContent = String(count);
-    if (dua && dua.counterTarget) {
-      els.counterTarget.textContent = `Hedef: ${dua.counterTarget}`;
-      const ratio = Math.min(count / dua.counterTarget, 1);
+    // Tesbihat ise halka rengi yeşil, dua ise amber
+    els.tasbihRingProgress.style.stroke = isTesbihat(currentDuaId) ? "#4ade80" : "var(--accent)";
+    els.tasbihCount.style.color = isTesbihat(currentDuaId) ? "#4ade80" : "var(--text-primary)";
+    if (item && item.counterTarget) {
+      els.counterTarget.textContent = `Hedef: ${item.counterTarget}`;
+      const ratio = Math.min(count / item.counterTarget, 1);
       els.tasbihRingProgress.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - ratio));
     } else {
-      els.counterTarget.textContent = "Serbest sayaç";
+      els.counterTarget.textContent = isTesbihat(currentDuaId) ? "Serbest tesbihat" : "Serbest sayaç";
       const ratio = (count % 33) / 33;
       els.tasbihRingProgress.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - ratio));
     }
