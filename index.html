@@ -29,7 +29,7 @@
       <button class="tab-btn" data-tab="tesbihat">Tesbihat</button>
     </div>
 
-    <div class="streak-badge" id="streakBadge"></div>
+    <button class="streak-badge" id="streakBadge" aria-label="İstatistikler"></button>
 
     <section class="dua-list" id="duaList"><!-- JS ile doldurulur --></section>
 
@@ -108,6 +108,21 @@
       <button class="ghost-btn" id="tasbihClose">Kapat</button>
     </div>
   </section>
+
+  <!-- ================= İSTATİSTİK EKRANI ================= -->
+  <main id="stats" class="screen stats-screen" hidden>
+    <header class="reader-header">
+      <button class="icon-btn" id="statsBackBtn" aria-label="Geri">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="reader-title-wrap">
+        <div class="reader-title">İstatistikler</div>
+        <div class="reader-subtitle">Okuma geçmişin</div>
+      </div>
+      <div style="width:38px"></div>
+    </header>
+    <div class="stats-body" id="statsBody"></div>
+  </main>
 
   <!-- ================= SETTINGS SHEET ================= -->
   <div class="sheet-backdrop" id="settingsBackdrop" hidden></div>

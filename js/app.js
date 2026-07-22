@@ -40,6 +40,10 @@
     tasbihRingProgress: $("#tasbihRingProgress"),
     tasbihReset: $("#tasbihReset"),
     tasbihClose: $("#tasbihClose"),
+    stats: $("#stats"),
+    statsBody: $("#statsBody"),
+    statsBackBtn: $("#statsBackBtn"),
+    streakBadge: $("#streakBadge"),
   };
 
   const STORE_KEY = "sabahVirdi:v1";
@@ -278,21 +282,27 @@
 
   function updateStreak() {
     const allDone = DUAS.every(d => state.done[d.id]);
+    const today = todayKey();
+    // Günlük geçmişe ekle (haftalık/aylık özet için)
+    if (!state.history) state.history = {};
     if (allDone) {
-      const today = todayKey();
+      state.history[today] = true;
       if (state.lastStreakDate !== today) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yKey = yesterday.toISOString().slice(0, 10);
         if (state.lastStreakDate === yKey) {
           state.streak = (state.streak || 0) + 1;
-        } else if (state.lastStreakDate !== today) {
+        } else {
           state.streak = 1;
         }
         state.lastStreakDate = today;
-        saveStore();
       }
+    } else {
+      // Tamamlanmadıysa bugünü geçmişten sil
+      if (state.history[today] && !allDone) delete state.history[today];
     }
+    saveStore();
   }
 
   // ---------- SON OKUNAN YER ----------
@@ -480,6 +490,142 @@
     updateHomeCounterFab();
   });
 
+  // ---------- İSTATİSTİK EKRANI ----------
+  function openStats() {
+    renderStats();
+    els.home.classList.add("screen-exit");
+    setTimeout(() => {
+      els.home.hidden = true;
+      els.home.classList.remove("screen-exit");
+      els.stats.hidden = false;
+      els.stats.classList.add("screen-enter");
+      requestAnimationFrame(() => {
+        els.stats.classList.add("screen-enter-active");
+        setTimeout(() => els.stats.classList.remove("screen-enter", "screen-enter-active"), 350);
+      });
+    }, 200);
+  }
+
+  function closeStats() {
+    els.stats.classList.add("screen-exit");
+    setTimeout(() => {
+      els.stats.hidden = true;
+      els.stats.classList.remove("screen-exit");
+      els.home.hidden = false;
+      els.home.classList.add("screen-enter");
+      requestAnimationFrame(() => {
+        els.home.classList.add("screen-enter-active");
+        setTimeout(() => els.home.classList.remove("screen-enter", "screen-enter-active"), 350);
+      });
+    }, 200);
+  }
+
+  function renderStats() {
+    const history = state.history || {};
+    const streak = state.streak || 0;
+    const today = new Date();
+
+    // Son 4 haftayı oluştur (28 gün)
+    const weeks = [];
+    for (let w = 3; w >= 0; w--) {
+      const days = [];
+      for (let d = 6; d >= 0; d--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - (w * 7 + d));
+        const key = date.toISOString().slice(0, 10);
+        const isFuture = date > today;
+        days.push({ key, done: !!history[key], isFuture, day: date.getDate(), month: date.getMonth() });
+      }
+      weeks.push(days);
+    }
+
+    // Son 30 gün tamamlanma sayısı
+    const last30 = Array.from({ length: 30 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      return d.toISOString().slice(0, 10);
+    });
+    const completedLast30 = last30.filter(k => history[k]).length;
+
+    // Toplam gün
+    const totalDays = Object.keys(history).length;
+
+    // Ay isimleri
+    const months = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+    const days = ["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
+
+    // Haftalık ısı haritası HTML
+    const heatMap = weeks.map(week =>
+      `<div class="heat-week">${week.map(d =>
+        `<div class="heat-day ${d.done ? "done" : ""} ${d.isFuture ? "future" : ""}" title="${d.key}">
+          <span class="heat-day-num">${d.day}</span>
+        </div>`
+      ).join("")}</div>`
+    ).join("");
+
+    // Gün etiketleri
+    const dayLabels = days.map(d => `<div class="heat-label">${d}</div>`).join("");
+
+    els.statsBody.innerHTML = `
+      <!-- Streak kartı -->
+      <div class="stat-card streak-card">
+        <div class="streak-flame">${streak > 0 ? "🔥" : "✨"}</div>
+        <div class="streak-num">${streak}</div>
+        <div class="streak-label">günlük seri</div>
+        ${streak >= 7 ? `<div class="streak-badge-big">Bir hafta kesintisiz! 🎉</div>` : ""}
+        ${streak >= 30 ? `<div class="streak-badge-big">Bir ay tam! 🏆</div>` : ""}
+      </div>
+
+      <!-- Özet istatistikler -->
+      <div class="stat-row">
+        <div class="stat-pill">
+          <div class="stat-num">${completedLast30}</div>
+          <div class="stat-lbl">Son 30 gün</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num">${totalDays}</div>
+          <div class="stat-lbl">Toplam gün</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num">${totalDays > 0 ? Math.round((completedLast30 / 30) * 100) : 0}%</div>
+          <div class="stat-lbl">Bu ay</div>
+        </div>
+      </div>
+
+      <!-- Isı haritası -->
+      <div class="stat-card">
+        <div class="stat-card-title">Son 4 Hafta</div>
+        <div class="heat-map-wrap">
+          <div class="heat-day-labels">${dayLabels}</div>
+          <div class="heat-grid">${heatMap}</div>
+        </div>
+        <div class="heat-legend">
+          <span class="heat-day"></span> Okunmadı &nbsp;
+          <span class="heat-day done"></span> Tamamlandı
+        </div>
+      </div>
+
+      <!-- Vâkıa çevrimi -->
+      ${(() => {
+        const cyc = state.cycles["vakia"] || { day: 1 };
+        const pct = Math.round((cyc.day / 40) * 100);
+        return `<div class="stat-card">
+          <div class="stat-card-title">Vâkıa Çevrimi</div>
+          <div class="cycle-stat-row">
+            <span class="cycle-stat-day">Gün <strong>${cyc.day}</strong> / 40</span>
+            <span class="cycle-stat-pct">${pct}%</span>
+          </div>
+          <div class="cycle-bar-wrap">
+            <div class="cycle-bar-fill" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+      })()}
+    `;
+  }
+
+  els.statsBackBtn.addEventListener("click", closeStats);
+  els.streakBadge.addEventListener("click", openStats);
+
   // ---------- DONE FAB EVENTS ----------
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("#doneFab");
@@ -522,6 +668,7 @@
   if (!state.streak) state.streak = 0;
   if (!state.lastStreakDate) state.lastStreakDate = null;
   if (!state.positions) state.positions = {};
+  if (!state.history) state.history = {};
   applyTheme(state.theme || "dark");
   applyFontSize(state.fontSize || "medium");
   renderHome();

@@ -535,3 +535,68 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 
 /* Slayt âyet animasyonu güçlendir */
 .slide-verse{ animation: verseIn .25s cubic-bezier(.2,.8,.2,1); }
+
+/* ================= İSTATİSTİK EKRANI ================= */
+.stats-screen{ min-height: 100dvh; max-width: 680px; margin: 0 auto; padding-bottom: 40px; }
+.stats-body{ padding: 8px 20px 40px; display: flex; flex-direction: column; gap: 14px; }
+
+.stat-card{
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 20px;
+  backdrop-filter: blur(16px);
+}
+.stat-card-title{ font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 14px; letter-spacing: .04em; text-transform: uppercase; }
+
+/* Streak kartı */
+.streak-card{ text-align: center; padding: 28px 20px; }
+.streak-flame{ font-size: 40px; margin-bottom: 6px; }
+.streak-num{ font-family: var(--serif); font-size: 64px; font-weight: 700; color: var(--accent); line-height: 1; }
+.streak-label{ font-size: 15px; color: var(--text-secondary); margin-top: 4px; }
+.streak-badge-big{ margin-top: 12px; font-size: 14px; font-weight: 600; color: var(--accent); }
+
+/* Özet pill'lar */
+.stat-row{ display: flex; gap: 10px; }
+.stat-pill{
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px 10px; text-align: center;
+}
+.stat-num{ font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--text-primary); }
+.stat-lbl{ font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+/* Isı haritası */
+.heat-map-wrap{ display: flex; gap: 4px; }
+.heat-day-labels{ display: flex; flex-direction: column; gap: 3px; padding-top: 2px; }
+.heat-label{ font-size: 10px; color: var(--text-tertiary); height: 28px; display: flex; align-items: center; }
+.heat-grid{ display: flex; gap: 3px; flex: 1; }
+.heat-week{ display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.heat-day{
+  height: 28px; border-radius: 6px;
+  background: var(--divider);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s ease;
+}
+.heat-day.done{ background: var(--accent); }
+.heat-day.future{ opacity: .25; }
+.heat-day-num{ font-size: 9px; color: var(--text-tertiary); }
+.heat-day.done .heat-day-num{ color: #1a1305; font-weight: 700; }
+.heat-legend{ display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12px; color: var(--text-tertiary); }
+.heat-legend .heat-day{ width: 16px; height: 16px; display: inline-flex; }
+
+/* Vâkıa çevrim bar */
+.cycle-stat-row{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.cycle-stat-day{ font-size: 15px; color: var(--text-primary); }
+.cycle-stat-pct{ font-size: 14px; font-weight: 700; color: var(--accent); }
+.cycle-bar-wrap{ height: 8px; background: var(--divider); border-radius: 4px; overflow: hidden; }
+.cycle-bar-fill{ height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 4px; transition: width .5s cubic-bezier(.2,.8,.2,1); }
+
+/* Streak badge buton */
+button.streak-badge{
+  font-size: 13px; font-weight: 600;
+  color: var(--text-secondary);
+  padding: 6px 2px 10px;
+  min-height: 28px;
+  text-align: left;
+  touch-action: manipulation;
+  transition: color .2s ease;
+}
+button.streak-badge:active{ color: var(--accent); }
