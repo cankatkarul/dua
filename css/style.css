@@ -510,3 +510,28 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   border-radius: 8px;
   transition: background 1.5s ease;
 }
+
+/* ================= SAYFA GEÇİŞ ANİMASYONLARI ================= */
+.screen{ transition: opacity .2s ease, transform .2s ease; }
+
+.screen-exit{
+  animation: screenSlideOut .2s cubic-bezier(.4,0,1,1) forwards;
+  pointer-events: none;
+}
+.screen-enter{
+  opacity: 0;
+  transform: translateX(32px);
+}
+.screen-enter-active{
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes screenSlideOut{
+  from{ opacity:1; transform: translateX(0); }
+  to{ opacity:0; transform: translateX(-24px); }
+}
+
+/* Slayt âyet animasyonu güçlendir */
+.slide-verse{ animation: verseIn .25s cubic-bezier(.2,.8,.2,1); }

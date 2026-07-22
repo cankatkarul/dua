@@ -230,8 +230,18 @@
     els.readerBody.innerHTML = bodyHtml;
     if (dua.cycle) renderCycleBanner(dua);
 
-    els.home.hidden = true;
-    els.reader.hidden = false;
+    // Animasyonlu geçiş: home → reader
+    els.home.classList.add("screen-exit");
+    setTimeout(() => {
+      els.home.hidden = true;
+      els.home.classList.remove("screen-exit");
+      els.reader.hidden = false;
+      els.reader.classList.add("screen-enter");
+      requestAnimationFrame(() => {
+        els.reader.classList.add("screen-enter-active");
+        setTimeout(() => els.reader.classList.remove("screen-enter", "screen-enter-active"), 350);
+      });
+    }, 200);
     window.scrollTo(0, 0);
     updateCounterFab();
     updateDoneBtn(dua.id);
@@ -374,10 +384,20 @@
   function closeReader() {
     // Slayt modundan çık
     if (isSlideModeActive) exitSlideMode();
-    els.reader.hidden = true;
-    els.home.hidden = false;
-    renderHome();
-    renderStreakBadge();
+    // Animasyonlu geçiş: reader → home
+    els.reader.classList.add("screen-exit");
+    setTimeout(() => {
+      els.reader.hidden = true;
+      els.reader.classList.remove("screen-exit");
+      els.home.hidden = false;
+      els.home.classList.add("screen-enter");
+      requestAnimationFrame(() => {
+        els.home.classList.add("screen-enter-active");
+        setTimeout(() => els.home.classList.remove("screen-enter", "screen-enter-active"), 350);
+      });
+      renderHome();
+      renderStreakBadge();
+    }, 200);
   }
 
   // ---------- SETTINGS SHEET ----------
