@@ -408,3 +408,36 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   background: rgba(74,222,128,0.15);
   color: #4ade80;
 }
+
+/* ================= STREAK BADGE ================= */
+.streak-badge{
+  font-size: 13px; font-weight: 600;
+  color: var(--text-secondary);
+  padding: 6px 2px 10px;
+  min-height: 28px;
+}
+
+/* ================= OKUNDU BUTONU ================= */
+.done-fab{ transition: background .2s ease, color .2s ease; }
+.done-fab.is-done{
+  background: var(--accent);
+  color: #1a1305;
+  border-color: transparent;
+}
+
+/* Kart okundu hali — daha belirgin yeşil tik */
+.dua-card.is-done{ border-color: rgba(74,222,128,0.25); }
+.dua-card.is-done .dua-index{
+  background: linear-gradient(155deg, #4ade80 0%, #16a34a 100%);
+  color: #0a1f0f;
+  box-shadow: 0 4px 10px rgba(74,222,128,0.3);
+}
+.dua-card.is-done .dua-done{ display: flex; }
+
+/* ================= VAKİA ÇEVRİM ROZETİ — DAHA BELİRGİN ================= */
+.dua-cycle-badge{
+  font-size: 12px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--accent-glow); color: var(--accent);
+  border: 1px solid rgba(242,184,75,0.3);
+}

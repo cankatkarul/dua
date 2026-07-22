@@ -100,12 +100,23 @@
   });
 
   // ---------- HOME LIST ----------
+  function renderStreakBadge() {
+    const el = document.getElementById("streakBadge");
+    if (!el) return;
+    const streak = state.streak || 0;
+    const doneCount = DUAS.filter(d => state.done[d.id]).length;
+    el.textContent = streak > 0
+      ? `🔥 ${streak} günlük seri · ${doneCount}/${DUAS.length} okundu`
+      : `${doneCount}/${DUAS.length} okundu`;
+  }
+
   function renderHome() {
     els.duaList.innerHTML = "";
     if (activeTab === "dualar") {
       DUAS.forEach((dua, i) => {
+        const done = !!state.done[dua.id];
         const card = document.createElement("button");
-        card.className = "dua-card" + (state.done[dua.id] ? " is-done" : "");
+        card.className = "dua-card" + (done ? " is-done" : "");
         card.innerHTML = `
           <span class="dua-index">${i + 1}</span>
           <span class="dua-info">
@@ -205,20 +216,53 @@
     els.readerBody.innerHTML = bodyHtml;
     if (dua.cycle) renderCycleBanner(dua);
 
-    // mark as read once opened (simple daily checklist)
-    state.done[dua.id] = true;
-    saveStore();
-
     els.home.hidden = true;
     els.reader.hidden = false;
     window.scrollTo(0, 0);
     updateCounterFab();
+    updateDoneBtn(dua.id);
+  }
+
+  function updateDoneBtn(id) {
+    const btn = document.getElementById("doneFab");
+    if (!btn) return;
+    const done = !!state.done[id];
+    btn.classList.toggle("is-done", done);
+    btn.title = done ? "Okundu işareti kaldır" : "Okundu olarak işaretle";
+  }
+
+  function toggleDone(id) {
+    state.done[id] = !state.done[id];
+    saveStore();
+    updateDoneBtn(id);
+    // streak güncelle
+    updateStreak();
+  }
+
+  function updateStreak() {
+    const allDone = DUAS.every(d => state.done[d.id]);
+    if (allDone) {
+      const today = todayKey();
+      if (state.lastStreakDate !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yKey = yesterday.toISOString().slice(0, 10);
+        if (state.lastStreakDate === yKey) {
+          state.streak = (state.streak || 0) + 1;
+        } else if (state.lastStreakDate !== today) {
+          state.streak = 1;
+        }
+        state.lastStreakDate = today;
+        saveStore();
+      }
+    }
   }
 
   function closeReader() {
     els.reader.hidden = true;
     els.home.hidden = false;
     renderHome();
+    renderStreakBadge();
   }
 
   // ---------- SETTINGS SHEET ----------
@@ -301,9 +345,51 @@
     updateHomeCounterFab();
   });
 
+  // ---------- DONE FAB EVENTS ----------
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("#doneFab");
+    if (btn) toggleDone(currentDuaId);
+  });
+
+  // ---------- YASIN PERŞEMBELERİ BİLDİRİMİ ----------
+  function scheduleYasinReminder() {
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      doScheduleYasin();
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then(p => {
+        if (p === "granted") doScheduleYasin();
+      });
+    }
+  }
+  function doScheduleYasin() {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Paz, 4=Per, 5=Cum
+    // Perşembe akşamı = Cuma başlangıcı yani Perşembe günü akşam (Türk/İslami gelenek)
+    // En yakın Perşembeyi bul
+    let daysUntilThursday = (4 - dayOfWeek + 7) % 7;
+    if (daysUntilThursday === 0) daysUntilThursday = 0; // bugün Perşembe
+    const next = new Date(now);
+    next.setDate(now.getDate() + daysUntilThursday);
+    next.setHours(20, 0, 0, 0); // saat 20:00
+    const ms = next - now;
+    if (ms > 0 && ms < 7 * 24 * 60 * 60 * 1000) {
+      setTimeout(() => {
+        new Notification("🌙 Yâsîn-i Şerîf", {
+          body: "Bu akşam Yâsîn Sûresi okuma zamanı.",
+          icon: "assets/allah-lafza.png"
+        });
+      }, ms);
+    }
+  }
+
   // ---------- INIT ----------
+  if (!state.streak) state.streak = 0;
+  if (!state.lastStreakDate) state.lastStreakDate = null;
   applyTheme(state.theme || "dark");
   applyFontSize(state.fontSize || "medium");
   renderHome();
+  renderStreakBadge();
   updateHomeCounterFab();
+  scheduleYasinReminder();
 })();
