@@ -80,25 +80,62 @@
     saveStore();
   }
 
+  // ---------- SEKMELER ----------
+  let activeTab = "dualar";
+
+  function renderTabBar() {
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === activeTab);
+    });
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    renderTabBar();
+    renderHome();
+  }
+
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+
   // ---------- HOME LIST ----------
   function renderHome() {
     els.duaList.innerHTML = "";
-    DUAS.forEach((dua, i) => {
-      const card = document.createElement("button");
-      card.className = "dua-card" + (state.done[dua.id] ? " is-done" : "");
-      card.innerHTML = `
-        <span class="dua-index">${i + 1}</span>
-        <span class="dua-info">
-          <p class="dua-name">${dua.name}</p>
-          <p class="dua-meta">${dua.meta} ${renderCycleBadgeHtml(dua)}</p>
-        </span>
-        <span class="dua-done">✓</span>
-        <span class="dua-chevron">
-          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>`;
-      card.addEventListener("click", () => openReader(dua.id));
-      els.duaList.appendChild(card);
-    });
+    if (activeTab === "dualar") {
+      DUAS.forEach((dua, i) => {
+        const card = document.createElement("button");
+        card.className = "dua-card" + (state.done[dua.id] ? " is-done" : "");
+        card.innerHTML = `
+          <span class="dua-index">${i + 1}</span>
+          <span class="dua-info">
+            <p class="dua-name">${dua.name}</p>
+            <p class="dua-meta">${dua.meta} ${renderCycleBadgeHtml(dua)}</p>
+          </span>
+          <span class="dua-done">✓</span>
+          <span class="dua-chevron">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>`;
+        card.addEventListener("click", () => openReader(dua.id, DUAS));
+        els.duaList.appendChild(card);
+      });
+    } else {
+      TESBIHAT.forEach((t, i) => {
+        const card = document.createElement("button");
+        card.className = "dua-card tesbihat-card";
+        card.innerHTML = `
+          <span class="dua-index">${i + 1}</span>
+          <span class="dua-info">
+            <p class="dua-name">${t.name}</p>
+            <p class="dua-meta">${t.meta}</p>
+          </span>
+          <span class="dua-chevron">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>`;
+        card.addEventListener("click", () => openReader(t.id, TESBIHAT));
+        els.duaList.appendChild(card);
+      });
+    }
   }
 
   // ---------- CYCLE (örn. 40 günlük Vâkıa okuma çevrimi) ----------
@@ -141,8 +178,9 @@
   }
 
 
-  function openReader(id) {
-    const dua = DUAS.find(d => d.id === id);
+  function openReader(id, list) {
+    list = list || DUAS;
+    const dua = list.find(d => d.id === id);
     if (!dua) return;
     currentDuaId = id;
 

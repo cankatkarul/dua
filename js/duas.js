@@ -291,6 +291,23 @@ const DUAS = [
     ]
   },
   {
+    id: "alak",
+    name: "Alak Sûresi",
+    meta: "19 âyet",
+    note: "Okumanın, ilmin, kalemin ve öğrenmenin önemini vurgular. İnsana aslı hatırlatılarak kibirlenmemesi istenir.",
+    counterTarget: null,
+    verses: [
+      "Bismillâhirrahmânirrahîm",
+      "Ikra' bismi rabbikellezî halak. Halakal insâne min alak.",
+      "Ikra' ve rabbukel ekrem. Ellezî alleme bil kalem. Allemel insâne mâ lem ya'lem.",
+      "Kellâ innel insâne le yatgâ. En raâhustagnâ. İnne ilâ rabbiker ruc'â.",
+      "E raeytellezî yenhâ. Abden izâ sallâ.",
+      "E raeyte in kâne alâl hudâ. Ev emera bit takvâ. E raeyte in kezzebe ve tevellâ.",
+      "E lem ya'lem bi ennellâhe yerâ.",
+      "Kellâ le in lem yentehi le nesfean bin nâsıyeti. Nâsiyetin kâzibetin hâtıetin. Felyed'u nâdiyehu. Se ned'uz zebâniyete. Kellâ, lâ tutı'hu vescud vakterib."
+    ]
+  },
+  {
     id: "esmaulhusna",
     name: "Esmâ-i Hüsnâ",
     meta: "Allah'ın 99 ismi",
@@ -298,6 +315,31 @@ const DUAS = [
     counterTarget: 99,
     verses: [
       "[[Esmâ-i Hüsnâ listesi (99 isim, Türkçe okunuşuyla) buraya eklenecek.]]"
+    ]
+  }
+];
+
+/* =========================================================
+   TESBİHAT VERİLERİ
+   ========================================================= */
+
+const TESBIHAT = [
+  {
+    id: "rizik-bereket",
+    name: "Rızık ve Bereket",
+    meta: "20 kez",
+    note: null,
+    verses: [
+      "Yâ İlâhel Âliheter-Refîi Celâlühü"
+    ]
+  },
+  {
+    id: "borctan-kurtulma",
+    name: "Borçtan Kurtulma",
+    meta: "20 kez",
+    note: null,
+    verses: [
+      "Allahümme'kfinî bi halâlike an harâmike ve ağninî bi fadlike ammen sivâke."
     ]
   }
 ];
