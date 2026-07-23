@@ -154,15 +154,12 @@
   <script src="js/duas.js"></script>
   <script src="js/app.js"></script>
   <script>
-    // Service Worker - mevcut kayıtları temizle
+    // Service Worker - tüm eski kayıtları sil, PWA önbelleğini temizle
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {
         regs.forEach(r => r.unregister());
       });
-      // Temizledikten sonra yeniden kaydet
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
-      });
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
     }
   </script>
 </body>
