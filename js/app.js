@@ -13,7 +13,6 @@
 
     backBtn: $("#backBtn"),
     openSettings: $("#openSettings"),
-    readerSettingsBtn: $("#readerSettingsBtn"),
     settingsBackdrop: $("#settingsBackdrop"),
     settingsSheet: $("#settingsSheet"),
     settingsClose: $("#settingsClose"),
@@ -463,7 +462,6 @@
   // ---------- EVENTS ----------
   els.backBtn.addEventListener("click", closeReader);
   els.openSettings.addEventListener("click", () => openSheet(els.settingsBackdrop, els.settingsSheet));
-  els.readerSettingsBtn.addEventListener("click", () => openSheet(els.settingsBackdrop, els.settingsSheet));
   els.settingsClose.addEventListener("click", () => closeSheet(els.settingsBackdrop, els.settingsSheet));
   els.settingsBackdrop.addEventListener("click", () => closeSheet(els.settingsBackdrop, els.settingsSheet));
 
