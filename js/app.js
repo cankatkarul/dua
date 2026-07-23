@@ -202,6 +202,27 @@
   }
 
 
+  // ---------- SAYFA GEÇİŞİ ----------
+  function showScreen(toEl, fromEl) {
+    // Önce hedef ekranı hazırla (görünmez ama yerleşik)
+    toEl.style.opacity = "0";
+    toEl.style.transform = "translateX(20px)";
+    toEl.hidden = false;
+    // Kaynak ekranı gizle
+    if (fromEl) fromEl.hidden = true;
+    // Sonra animasyonla göster
+    requestAnimationFrame(() => {
+      toEl.style.transition = "opacity .28s ease, transform .28s cubic-bezier(.2,.8,.2,1)";
+      toEl.style.opacity = "1";
+      toEl.style.transform = "translateX(0)";
+      setTimeout(() => {
+        toEl.style.transition = "";
+        toEl.style.opacity = "";
+        toEl.style.transform = "";
+      }, 300);
+    });
+  }
+
   function openReader(id, list) {
     list = list || DUAS;
     currentDuaList = list;
@@ -234,18 +255,7 @@
     els.readerBody.innerHTML = bodyHtml;
     if (dua.cycle) renderCycleBanner(dua);
 
-    // Animasyonlu geçiş: home → reader
-    els.home.classList.add("screen-exit");
-    setTimeout(() => {
-      els.home.hidden = true;
-      els.home.classList.remove("screen-exit");
-      els.reader.hidden = false;
-      els.reader.classList.add("screen-enter");
-      requestAnimationFrame(() => {
-        els.reader.classList.add("screen-enter-active");
-        setTimeout(() => els.reader.classList.remove("screen-enter", "screen-enter-active"), 350);
-      });
-    }, 200);
+    showScreen(els.reader, els.home);
     window.scrollTo(0, 0);
     updateCounterFab();
     updateDoneBtn(dua.id);
@@ -392,22 +402,10 @@
   });
 
   function closeReader() {
-    // Slayt modundan çık
     if (isSlideModeActive) exitSlideMode();
-    // Animasyonlu geçiş: reader → home
-    els.reader.classList.add("screen-exit");
-    setTimeout(() => {
-      els.reader.hidden = true;
-      els.reader.classList.remove("screen-exit");
-      els.home.hidden = false;
-      els.home.classList.add("screen-enter");
-      requestAnimationFrame(() => {
-        els.home.classList.add("screen-enter-active");
-        setTimeout(() => els.home.classList.remove("screen-enter", "screen-enter-active"), 350);
-      });
-      renderHome();
-      renderStreakBadge();
-    }, 200);
+    renderHome();
+    renderStreakBadge();
+    showScreen(els.home, els.reader);
   }
 
   // ---------- SETTINGS SHEET ----------
@@ -493,31 +491,11 @@
   // ---------- İSTATİSTİK EKRANI ----------
   function openStats() {
     renderStats();
-    els.home.classList.add("screen-exit");
-    setTimeout(() => {
-      els.home.hidden = true;
-      els.home.classList.remove("screen-exit");
-      els.stats.hidden = false;
-      els.stats.classList.add("screen-enter");
-      requestAnimationFrame(() => {
-        els.stats.classList.add("screen-enter-active");
-        setTimeout(() => els.stats.classList.remove("screen-enter", "screen-enter-active"), 350);
-      });
-    }, 200);
+    showScreen(els.stats, els.home);
   }
 
   function closeStats() {
-    els.stats.classList.add("screen-exit");
-    setTimeout(() => {
-      els.stats.hidden = true;
-      els.stats.classList.remove("screen-exit");
-      els.home.hidden = false;
-      els.home.classList.add("screen-enter");
-      requestAnimationFrame(() => {
-        els.home.classList.add("screen-enter-active");
-        setTimeout(() => els.home.classList.remove("screen-enter", "screen-enter-active"), 350);
-      });
-    }, 200);
+    showScreen(els.home, els.stats);
   }
 
   function renderStats() {
@@ -671,6 +649,10 @@
   if (!state.history) state.history = {};
   applyTheme(state.theme || "dark");
   applyFontSize(state.fontSize || "medium");
+  // Başlangıçta sadece home ekranı görünür, diğerleri gizli
+  els.home.hidden = false;
+  els.reader.hidden = true;
+  els.stats.hidden = true;
   renderHome();
   renderStreakBadge();
   updateHomeCounterFab();
