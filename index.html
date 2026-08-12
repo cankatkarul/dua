@@ -1190,8 +1190,16 @@ const TESBIHAT = [
     renderHome();
   }
 
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  // Tab butonları - event delegation ile güvenli bağlantı
+  document.getElementById("home").addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab-btn");
+    if (btn && btn.dataset.tab) {
+      switchTab(btn.dataset.tab);
+    }
+    const card = e.target.closest(".dua-card");
+    if (card && card._duaId) {
+      openReader(card._duaId, card._duaList);
+    }
   });
 
   // ---------- HOME LIST ----------
@@ -1222,7 +1230,8 @@ const TESBIHAT = [
           <span class="dua-chevron">
             <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>`;
-        card.addEventListener("click", () => openReader(dua.id, DUAS));
+        card._duaId = dua.id;
+        card._duaList = DUAS;
         els.duaList.appendChild(card);
       });
     } else {
@@ -1238,7 +1247,8 @@ const TESBIHAT = [
           <span class="dua-chevron">
             <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>`;
-        card.addEventListener("click", () => openReader(t.id, TESBIHAT));
+        card._duaId = t.id;
+        card._duaList = TESBIHAT;
         els.duaList.appendChild(card);
       });
     }
@@ -1286,23 +1296,9 @@ const TESBIHAT = [
 
   // ---------- SAYFA GEÇİŞİ ----------
   function showScreen(toEl, fromEl) {
-    // Önce hedef ekranı hazırla (görünmez ama yerleşik)
-    toEl.style.opacity = "0";
-    toEl.style.transform = "translateX(20px)";
-    toEl.hidden = false;
-    // Kaynak ekranı gizle
     if (fromEl) fromEl.hidden = true;
-    // Sonra animasyonla göster
-    requestAnimationFrame(() => {
-      toEl.style.transition = "opacity .28s ease, transform .28s cubic-bezier(.2,.8,.2,1)";
-      toEl.style.opacity = "1";
-      toEl.style.transform = "translateX(0)";
-      setTimeout(() => {
-        toEl.style.transition = "";
-        toEl.style.opacity = "";
-        toEl.style.transform = "";
-      }, 300);
-    });
+    toEl.hidden = false;
+    window.scrollTo(0, 0);
   }
 
   function openReader(id, list) {
@@ -1334,7 +1330,7 @@ const TESBIHAT = [
         dua.verses.map((v, i) => `<span class="verse"><span class="verse-num">${i + 1}</span>${v}</span>`).join("") +
         `</div>`;
     }
-    els.readerBody.innerHTML = bodyHtml;
+    document.getElementById("readerBody").innerHTML = bodyHtml;
     if (dua.cycle) renderCycleBanner(dua);
 
     showScreen(els.reader, els.home);
