@@ -338,19 +338,41 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 /* Counter sheet specifics */
 .counter-top{ display: flex; flex-direction: column; align-items: center; padding: 4px 0 8px; }
 .counter-target{ text-align: center; color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; }
-.counter-ring-wrap{ position: relative; width: 160px; height: 160px; }
-.tasbih-ring{ width: 160px; height: 160px; transform: rotate(-90deg); }
-.tasbih-ring-track{ fill: none; stroke: var(--divider); stroke-width: 10; }
-.tasbih-ring-progress{
-  fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round;
-  stroke-dasharray: 553; stroke-dashoffset: 553;
-  transition: stroke-dashoffset .25s cubic-bezier(.2,.8,.2,1), stroke .3s ease;
+.counter-ring-wrap{ position: relative; width: 180px; height: 180px; }
+.tasbih-ring{ width: 180px; height: 180px; }
+.tasbih-ring-track{ fill: none; stroke: var(--divider); stroke-width: 1.5; opacity: .5; }
+
+/* Tesbih boncukları */
+.tasbih-bead{
+  fill: var(--divider);
+  stroke: var(--bg);
+  stroke-width: 2;
+  transition: fill .25s ease, r .2s ease, filter .2s ease;
+}
+.tasbih-bead.lit{
+  fill: var(--accent);
+  filter: drop-shadow(0 0 4px var(--accent-glow));
+}
+.tasbih-bead.current{
+  r: 9;
   filter: drop-shadow(0 0 8px var(--accent-glow));
 }
+/* Boncukları birbirine bağlayan ip görünümü */
+.tasbih-thread{ fill: none; stroke: var(--divider); stroke-width: 1; opacity: .4; }
+
+.tasbih-center{
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
 .tasbih-count{
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-family: var(--serif); font-size: 44px; font-weight: 700; color: var(--text-primary);
+  font-family: var(--serif); font-size: 46px; font-weight: 700; color: var(--text-primary);
   transition: transform .1s ease, color .3s ease;
+  line-height: 1;
+}
+.tasbih-count-sub{
+  font-size: 11px; color: var(--text-tertiary); margin-top: 4px;
+  letter-spacing: .04em;
+  min-height: 14px;
 }
 
 /* Büyük dokunma alanı — parmak nereye basarsa bassın sayar */
@@ -727,6 +749,55 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
   100%{ opacity: 0; transform: scale(1.4) translateY(-20px); }
 }
 
+
+/* ================= BUGÜNÜN ÂYETİ KARTI ================= */
+.daily-verse-card{
+  position: relative;
+  background: linear-gradient(155deg, var(--surface-strong) 0%, var(--surface) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .2s ease;
+  overflow: hidden;
+}
+.daily-verse-card:active{ transform: scale(.98); }
+.daily-verse-card::before{
+  content: "✦";
+  position: absolute; top: 12px; right: 16px;
+  color: var(--accent); opacity: .5; font-size: 14px;
+}
+.dv-label{
+  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+.dv-text{
+  font-family: var(--serif); font-size: 16px; line-height: 1.6;
+  color: var(--text-primary); margin-bottom: 6px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.dv-source{ font-size: 12px; color: var(--text-tertiary); }
+
+/* ================= PAYLAŞIM TOAST ================= */
+.share-toast{
+  position: fixed; left: 50%; bottom: 40px;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  color: var(--text-primary);
+  font-size: 14px; font-weight: 600;
+  padding: 12px 20px; border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+  opacity: 0;
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 50;
+  pointer-events: none;
+}
+.share-toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+
 </style>
 </head>
 <body class="theme-dark" data-font-size="medium">
@@ -738,6 +809,8 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
       <div class="eyebrow" id="greetingText">Günaydın</div>
       <h1 class="home-title">Günlük Dualarım</h1>
     </header>
+
+    <div class="daily-verse-card" id="dailyVerseCard" role="button" tabindex="0" aria-label="Bugünün âyeti"></div>
 
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="dualar">Dualar</button>
@@ -772,6 +845,9 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
         <div class="reader-title" id="readerTitle">-</div>
         <div class="reader-subtitle" id="readerSubtitle">-</div>
       </div>
+      <button class="icon-btn" id="shareBtn" aria-label="Paylaş">
+        <svg viewBox="0 0 24 24" width="19" height="19"><path d="M12 3v12M12 3l-4 4M12 3l4 4M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
       <button class="icon-btn done-fab" id="doneFab" aria-label="Okundu işaretle">
         <svg viewBox="0 0 24 24" width="20" height="20"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -811,9 +887,12 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
       <div class="counter-ring-wrap">
         <svg class="tasbih-ring" viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="88" class="tasbih-ring-track"/>
-          <circle cx="100" cy="100" r="88" class="tasbih-ring-progress" id="tasbihRingProgress"/>
+          <g id="tasbihBeads"></g>
         </svg>
-        <div class="tasbih-count" id="tasbihCount">0</div>
+        <div class="tasbih-center">
+          <div class="tasbih-count" id="tasbihCount">0</div>
+          <div class="tasbih-count-sub" id="tasbihCountSub"></div>
+        </div>
       </div>
     </div>
     <!-- Ekranın geri kalanına basan büyük sayaç alanı -->
@@ -1253,7 +1332,6 @@ const TESBIHAT = [
     counterTarget: $("#counterTarget"),
     tasbihDial: $("#tasbihDial"),
     tasbihCount: $("#tasbihCount"),
-    tasbihRingProgress: $("#tasbihRingProgress"),
     tasbihReset: $("#tasbihReset"),
     tasbihClose: $("#tasbihClose"),
     stats: $("#stats"),
@@ -1676,22 +1754,46 @@ const TESBIHAT = [
   function isTesbihat(id) {
     return TESBIHAT.some(t => t.id === id);
   }
+  function renderTasbihBeads(beadCount, litCount, color) {
+    const g = document.getElementById("tasbihBeads");
+    if (!g) return;
+    const cx = 100, cy = 100, r = 88;
+    let svg = "";
+    for (let i = 0; i < beadCount; i++) {
+      const angle = (i / beadCount) * 2 * Math.PI - Math.PI / 2;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      const isLit = i < litCount;
+      const isCurrent = i === litCount - 1;
+      svg += `<circle class="tasbih-bead${isLit ? " lit" : ""}${isCurrent ? " current" : ""}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6" style="${isLit ? `fill:${color}` : ""}"/>`;
+    }
+    g.innerHTML = svg;
+  }
+
   function renderCounterSheet() {
     const list = isTesbihat(currentDuaId) ? TESBIHAT : DUAS;
     const item = list.find(d => d.id === currentDuaId);
     const count = getCount(currentDuaId);
+    const isT = isTesbihat(currentDuaId);
+    const color = isT ? "#4ade80" : "#F2B84B";
     els.tasbihCount.textContent = String(count);
-    // Tesbihat ise halka rengi yeşil, dua ise amber
-    els.tasbihRingProgress.style.stroke = isTesbihat(currentDuaId) ? "#4ade80" : "var(--accent)";
-    els.tasbihCount.style.color = isTesbihat(currentDuaId) ? "#4ade80" : "var(--text-primary)";
+    els.tasbihCount.style.color = isT ? "#4ade80" : "var(--text-primary)";
+
     if (item && item.counterTarget) {
-      els.counterTarget.textContent = `Hedef: ${item.counterTarget}`;
-      const ratio = Math.min(count / item.counterTarget, 1);
-      els.tasbihRingProgress.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - ratio));
+      const target = item.counterTarget;
+      els.counterTarget.textContent = `Hedef: ${target}`;
+      // Hedef küçükse her sayı bir boncuk, büyükse (99 gibi) 33 boncuğa sıkıştır
+      const beadCount = target <= 40 ? target : 33;
+      const litCount = target <= 40
+        ? Math.min(count, target)
+        : Math.round((Math.min(count, target) / target) * 33);
+      renderTasbihBeads(beadCount, litCount, color);
+      document.getElementById("tasbihCountSub").textContent = `/ ${target}`;
     } else {
-      els.counterTarget.textContent = isTesbihat(currentDuaId) ? "Serbest tesbihat" : "Serbest sayaç";
-      const ratio = (count % 33) / 33;
-      els.tasbihRingProgress.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - ratio));
+      els.counterTarget.textContent = isT ? "Serbest tesbihat" : "Serbest sayaç";
+      const litCount = count % 33 === 0 && count > 0 ? 33 : count % 33;
+      renderTasbihBeads(33, litCount, color);
+      document.getElementById("tasbihCountSub").textContent = count > 0 ? `tur ${Math.floor((count - 1) / 33) + 1}` : "";
     }
   }
   function incrementCounter() {
@@ -1911,6 +2013,81 @@ const TESBIHAT = [
     }
   }
 
+  // ---------- BUGÜNÜN ÂYETİ ----------
+  function seededRandom(seed) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function renderDailyVerse() {
+    const el = document.getElementById("dailyVerseCard");
+    if (!el) return;
+    // Gerçek içeriği olan (placeholder olmayan) duaları topla
+    const eligible = [];
+    DUAS.forEach(dua => {
+      dua.verses.forEach((v, i) => {
+        if (!v.startsWith("[[") && v.length > 15) eligible.push({ dua, verse: v, index: i });
+      });
+    });
+    if (eligible.length === 0) { el.hidden = true; return; }
+
+    // Bugüne göre sabit bir seed - gün boyunca aynı âyet gösterilir
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    const idx = Math.floor(seededRandom(dayOfYear) * eligible.length);
+    const pick = eligible[idx];
+
+    el.innerHTML = `
+      <div class="dv-label">Bugünün Âyeti</div>
+      <div class="dv-text">${pick.verse}</div>
+      <div class="dv-source">${pick.dua.name} — ${pick.index + 1}. âyet</div>
+    `;
+    el.onclick = () => openReader(pick.dua.id, DUAS);
+    el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.onclick(); } };
+  }
+
+  // ---------- PAYLAŞIM ----------
+  function showToast(msg) {
+    let toast = document.querySelector(".share-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.className = "share-toast";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    requestAnimationFrame(() => toast.classList.add("show"));
+    setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  async function shareDua() {
+    const list = currentDuaList;
+    const dua = list.find(d => d.id === currentDuaId);
+    if (!dua) return;
+    const isPlaceholder = dua.verses.length === 1 && dua.verses[0].startsWith("[[");
+    let text = `${dua.name}\n\n`;
+    if (isPlaceholder) {
+      text += "Bu duayı Günlük Dualarım uygulamasında oku.";
+    } else {
+      const preview = dua.verses.slice(0, 6);
+      text += preview.join("\n");
+      if (dua.verses.length > 6) text += `\n... (devamı uygulamada)`;
+    }
+    text += `\n\n— Günlük Dualarım`;
+    const shareData = { title: dua.name, text };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(text);
+        showToast("Panoya kopyalandı");
+      }
+    } catch (err) {
+      // Kullanıcı paylaşımı iptal etti - sessizce geç
+    }
+  }
+
+  els.shareBtn = document.getElementById("shareBtn");
+  if (els.shareBtn) els.shareBtn.addEventListener("click", shareDua);
+
   // ---------- ZAMANA DUYARLI SELAMLAMA ----------
   function updateGreeting() {
     const hour = new Date().getHours();
@@ -1944,6 +2121,7 @@ const TESBIHAT = [
   els.stats.hidden = true;
   updateGreeting();
   highlightYasinIfThursdayEvening();
+  renderDailyVerse();
   renderHome();
   renderStreakBadge();
   updateHomeCounterFab();
