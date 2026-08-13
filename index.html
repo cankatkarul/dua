@@ -466,6 +466,7 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   z-index: 5;
   background: var(--bg-grad), var(--bg);
 }
+.slide-mode[hidden]{ display: none !important; }
 .slide-verse{
   font-family: var(--serif);
   font-size: calc(22px * var(--font-scale));
@@ -1434,7 +1435,8 @@ const TESBIHAT = [
   }
 
   function renderSlide() {
-    const verse = slideVerses[slideIndex] || "";
+    if (slideIndex < 0 || slideIndex >= slideVerses.length) slideIndex = 0;
+    const verse = slideVerses[slideIndex] || "(âyet bulunamadı)";
     els.slideVerse.textContent = verse;
     els.slideMeta.textContent = `${slideIndex + 1} / ${slideVerses.length}`;
     els.slidePrev.disabled = slideIndex === 0;
@@ -1466,7 +1468,9 @@ const TESBIHAT = [
       const list = currentDuaList;
       const dua = list.find(d => d.id === currentDuaId);
       if (!dua) return;
-      const startIndex = getReadPosition(currentDuaId);
+      let startIndex = getReadPosition(currentDuaId);
+      // Geçersiz/eski kaydedilmiş konum varsa sınırla
+      if (startIndex < 0 || startIndex >= dua.verses.length) startIndex = 0;
       enterSlideMode(dua.verses, startIndex);
     }
   });
