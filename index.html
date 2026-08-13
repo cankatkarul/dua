@@ -355,6 +355,7 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 
 /* Büyük dokunma alanı — parmak nereye basarsa bassın sayar */
 .tasbih-tap-zone{
+  position: relative;
   display: flex; align-items: center; justify-content: center;
   width: 100%; flex: 1;
   min-height: 120px;
@@ -364,6 +365,7 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   border: 1.5px solid var(--border);
   transition: background .15s ease, transform .1s ease;
   touch-action: manipulation;
+  overflow: hidden;
 }
 .tasbih-tap-zone:active{
   background: var(--surface-strong);
@@ -596,6 +598,135 @@ button.streak-badge{
 }
 button.streak-badge:active{ color: var(--accent); }
 
+
+
+/* ================= TASARIM GELİŞTİRMELERİ ================= */
+
+/* Hafif İslami geometrik doku - arka planda çok soluk */
+body::before{
+  content: "";
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, var(--accent-glow) 0%, transparent 2%),
+    radial-gradient(circle at 80% 10%, var(--accent-glow) 0%, transparent 2%),
+    radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 1.5%),
+    radial-gradient(circle at 10% 80%, var(--accent-glow) 0%, transparent 1.5%),
+    radial-gradient(circle at 90% 70%, var(--accent-glow) 0%, transparent 1.5%);
+  background-size: 400px 400px;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+.home-screen, .reader-screen, .stats-screen{ position: relative; z-index: 1; }
+
+/* Perşembe akşamı Yâsîn kartı vurgusu */
+body.yasin-time .dua-card[data-id="yasin"]{
+  border-color: rgba(242,184,75,0.5);
+  box-shadow: 0 0 0 1px rgba(242,184,75,0.3), 0 8px 24px rgba(242,184,75,0.15);
+}
+body.yasin-time .dua-card[data-id="yasin"] .dua-index{
+  animation: gentlePulse 2.4s ease-in-out infinite;
+}
+@keyframes gentlePulse{
+  0%, 100%{ box-shadow: 0 4px 10px var(--accent-glow); }
+  50%{ box-shadow: 0 4px 20px var(--accent-glow), 0 0 0 4px var(--accent-glow); }
+}
+
+/* Okunmamış kartlarda nefes alan hafif parıltı */
+.dua-card:not(.is-done)::after{
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 0 var(--accent-glow);
+  animation: cardBreathe 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes cardBreathe{
+  0%, 100%{ box-shadow: 0 0 0 0 transparent; }
+  50%{ box-shadow: 0 0 14px 0 var(--accent-glow); }
+}
+
+/* Reader header - scroll ile küçülme */
+.reader-header{ transition: padding .25s ease, background .25s ease; }
+.reader-header.scrolled{
+  padding-top: calc(env(safe-area-inset-top,0px) + 8px);
+  padding-bottom: 8px;
+  background: var(--surface);
+  backdrop-filter: blur(24px) saturate(160%);
+  border-bottom: 1px solid var(--border);
+}
+.reader-header.scrolled .reader-title{ font-size: 15px; }
+.reader-header.scrolled .reader-subtitle{ display: none; }
+
+/* Dropcap - ilk âyet büyük harfle başlasın */
+.verse-first{
+  position: relative;
+  padding-top: 4px;
+}
+.verse-first::first-letter{
+  font-size: 2.6em;
+  font-weight: 700;
+  color: var(--accent);
+  float: left;
+  line-height: 0.8;
+  margin: 0.05em 0.08em 0 0;
+}
+
+/* Vâkıa çevrim büyük kartı */
+.vakia-cycle-card{
+  background: linear-gradient(155deg, var(--surface) 0%, var(--surface-strong) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  backdrop-filter: blur(16px);
+  cursor: pointer;
+  transition: transform .2s ease;
+  touch-action: manipulation;
+}
+.vakia-cycle-card:active{ transform: scale(.98); }
+.vc-top{ flex: 1; }
+.vc-title{ font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.vc-day{ font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--text-primary); }
+.vc-day span{ font-size: 15px; color: var(--text-tertiary); font-weight: 500; }
+.vc-status{ font-size: 12px; color: var(--text-tertiary); margin-top: 6px; }
+.vc-status.done{ color: #4ade80; font-weight: 600; }
+.vc-ring-wrap{ position: relative; width: 64px; height: 64px; flex: 0 0 auto; }
+.vc-ring{ width: 64px; height: 64px; transform: rotate(-90deg); }
+.vc-ring-track{ fill: none; stroke: var(--divider); stroke-width: 8; }
+.vc-ring-progress{
+  fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round;
+  stroke-dasharray: 264; transition: stroke-dashoffset .5s cubic-bezier(.2,.8,.2,1);
+}
+.vc-ring-pct{
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--accent);
+}
+
+/* Zikirmatik hedef tamamlanınca parlama efekti */
+.tasbih-tap-zone.target-reached{
+  animation: targetFlash .6s ease;
+}
+@keyframes targetFlash{
+  0%{ background: var(--surface); }
+  40%{ background: var(--accent-glow); }
+  100%{ background: var(--surface); }
+}
+.celebrate-burst{
+  position: absolute; inset: 0;
+  pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  opacity: 0;
+  animation: burstPop .9s ease forwards;
+}
+@keyframes burstPop{
+  0%{ opacity: 0; transform: scale(0.4); }
+  30%{ opacity: 1; transform: scale(1.15); }
+  100%{ opacity: 0; transform: scale(1.4) translateY(-20px); }
+}
+
 </style>
 </head>
 <body class="theme-dark" data-font-size="medium">
@@ -604,7 +735,7 @@ button.streak-badge:active{ color: var(--accent); }
   <main id="home" class="screen home-screen">
     <div class="home-bg-emblem" aria-hidden="true"></div>
     <header class="home-header">
-      <div class="eyebrow">Günaydın</div>
+      <div class="eyebrow" id="greetingText">Günaydın</div>
       <h1 class="home-title">Günlük Dualarım</h1>
     </header>
 
@@ -614,6 +745,8 @@ button.streak-badge:active{ color: var(--accent); }
     </div>
 
     <button class="streak-badge" id="streakBadge" aria-label="İstatistikler"></button>
+
+    <div class="vakia-cycle-card" id="vakiaCycleCard" role="button" tabindex="0" aria-label="Vâkıa çevrimini aç" hidden></div>
 
     <section class="dua-list" id="duaList"><!-- JS ile doldurulur --></section>
 
@@ -1214,7 +1347,33 @@ const TESBIHAT = [
       : `${doneCount}/${DUAS.length} okundu`;
   }
 
+  function renderVakiaCycleCard() {
+    const el = document.getElementById("vakiaCycleCard");
+    if (!el) return;
+    const cyc = getCycle("vakia");
+    const pct = Math.round((cyc.day / 40) * 100);
+    const doneToday = cyc.lastDate === todayKey();
+    el.hidden = false;
+    el.innerHTML = `
+      <div class="vc-top">
+        <div class="vc-title">Vâkıa Çevrimi</div>
+        <div class="vc-day">Gün ${cyc.day}<span>/40</span></div>
+      </div>
+      <div class="vc-ring-wrap">
+        <svg class="vc-ring" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" class="vc-ring-track"/>
+          <circle cx="50" cy="50" r="42" class="vc-ring-progress" style="stroke-dashoffset:${264 - (264 * pct / 100)}"/>
+        </svg>
+        <div class="vc-ring-pct">${pct}%</div>
+      </div>
+      ${doneToday ? '<div class="vc-status done">✓ Bugün okundu</div>' : '<div class="vc-status">Bugün henüz okunmadı</div>'}
+    `;
+    el.onclick = () => openReader("vakia", DUAS);
+    el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openReader("vakia", DUAS); } };
+  }
+
   function renderHome() {
+    renderVakiaCycleCard();
     els.duaList.innerHTML = "";
     if (activeTab === "dualar") {
       DUAS.forEach((dua, i) => {
@@ -1233,6 +1392,7 @@ const TESBIHAT = [
           </span>`;
         card._duaId = dua.id;
         card._duaList = DUAS;
+        card.dataset.id = dua.id;
         els.duaList.appendChild(card);
       });
     } else {
@@ -1328,7 +1488,7 @@ const TESBIHAT = [
       bodyHtml += `<div class="placeholder-note">${dua.verses[0].replace(/\[\[|\]\]/g, "")}</div>`;
     } else {
       bodyHtml += `<div class="dua-text">` +
-        dua.verses.map((v, i) => `<span class="verse"><span class="verse-num">${i + 1}</span>${v}</span>`).join("") +
+        dua.verses.map((v, i) => `<span class="verse${i === 0 ? " verse-first" : ""}"><span class="verse-num">${i + 1}</span>${v}</span>`).join("") +
         `</div>`;
     }
     document.getElementById("readerBody").innerHTML = bodyHtml;
@@ -1535,14 +1695,42 @@ const TESBIHAT = [
     }
   }
   function incrementCounter() {
-    setCount(currentDuaId, getCount(currentDuaId) + 1);
+    const newCount = getCount(currentDuaId) + 1;
+    setCount(currentDuaId, newCount);
     renderCounterSheet();
     updateCounterFab();
     updateHomeCounterFab();
     if (navigator.vibrate) navigator.vibrate(8);
+
+    // Hedefe ulaşınca kutlama efekti
+    const list = isTesbihat(currentDuaId) ? TESBIHAT : DUAS;
+    const item = list.find(d => d.id === currentDuaId);
+    const target = item && item.counterTarget;
+    if (target && newCount === target) {
+      celebrateTarget();
+    }
+  }
+
+  function celebrateTarget() {
+    if (navigator.vibrate) navigator.vibrate([15, 40, 15]);
+    els.tasbihDial.classList.add("target-reached");
+    setTimeout(() => els.tasbihDial.classList.remove("target-reached"), 700);
+    const burst = document.createElement("div");
+    burst.className = "celebrate-burst";
+    burst.textContent = "✨";
+    els.tasbihDial.appendChild(burst);
+    setTimeout(() => burst.remove(), 900);
   }
 
   // ---------- EVENTS ----------
+  // Okuma başlığı kaydırdıkça küçülsün
+  window.addEventListener("scroll", () => {
+    if (els.reader.hidden) return;
+    const header = document.querySelector(".reader-header");
+    if (!header) return;
+    header.classList.toggle("scrolled", window.scrollY > 40);
+  }, { passive: true });
+
   els.backBtn.addEventListener("click", closeReader);
   els.openSettings.addEventListener("click", () => openSheet(els.settingsBackdrop, els.settingsSheet));
   els.settingsClose.addEventListener("click", () => closeSheet(els.settingsBackdrop, els.settingsSheet));
@@ -1723,6 +1911,26 @@ const TESBIHAT = [
     }
   }
 
+  // ---------- ZAMANA DUYARLI SELAMLAMA ----------
+  function updateGreeting() {
+    const hour = new Date().getHours();
+    const el = document.getElementById("greetingText");
+    if (!el) return;
+    let text;
+    if (hour >= 5 && hour < 12) text = "Günaydın";
+    else if (hour >= 12 && hour < 18) text = "İyi günler";
+    else if (hour >= 18 && hour < 22) text = "İyi akşamlar";
+    else text = "İyi geceler";
+    el.textContent = text;
+  }
+
+  // Perşembe akşamı Yâsîn kartını öne çıkar
+  function highlightYasinIfThursdayEvening() {
+    const now = new Date();
+    const isThursdayEvening = now.getDay() === 4 && now.getHours() >= 17;
+    document.body.classList.toggle("yasin-time", isThursdayEvening);
+  }
+
   // ---------- INIT ----------
   if (!state.streak) state.streak = 0;
   if (!state.lastStreakDate) state.lastStreakDate = null;
@@ -1734,6 +1942,8 @@ const TESBIHAT = [
   els.home.hidden = false;
   els.reader.hidden = true;
   els.stats.hidden = true;
+  updateGreeting();
+  highlightYasinIfThursdayEvening();
   renderHome();
   renderStreakBadge();
   updateHomeCounterFab();
