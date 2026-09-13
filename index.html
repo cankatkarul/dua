@@ -949,12 +949,7 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 
   <script>
 /* =========================================================
-   DUA VERİLERİ
-   -----------------------------------------------------------
-   Her bölüm için "verses" dizisini kendi Türkçe okunuşu
-   metniyle doldur. Her eleman bir ayet/satır olarak ekrana
-   basılır. "counterTarget" belirtilen bölümlerde sayaç sayfası
-   açıldığında hedef otomatik gösterilir (örn. Esmâ-i Hüsnâ -> 99).
+   DUA VE SÛRE VERİLERİ (GÜNCELLENMİŞ VE TAMAMLANMIŞ)
    ========================================================= */
 
 const DUAS = [
@@ -1152,7 +1147,7 @@ const DUAS = [
     id: "yasin",
     name: "Yâsîn Sûresi (Yâsîn-i Şerîf)",
     meta: "83 âyet · Her Perşembe akşamı",
-    note: "Peygamber Efendimiz (s.a.v.) bu sure için, \"Yasin, Kur'an'ın kalbidir\" buyurmuştur. İslam dünyasında cuma gecelerinde, vefat edenlerin arkasından, darlık ve sıkıntı anlarında en çok okunan, fazileti çok yüksek bir suredir. Surede temel olarak tevhid, nübüvvet (peygamberlik), öldükten sonra dirilme ve ahiret hayatı gibi imanın esasları anlatılır.",
+    note: "Peygamber Efendimiz (s.a.v.) bu sure için, \"Yasin, Kur'an'ın kalbidir\" buyurmuştur. İslam dünyasında cuma gecelerinde, vefat edenlerin arkasından, darlık ve sıkıntı anlarında en çok okunan, fazileti çok yüksek bir suredir.",
     counterTarget: null,
     verses: [
       "Yâsîn",
@@ -1260,36 +1255,165 @@ const DUAS = [
   {
     id: "esmaulhusna",
     name: "Esmâ-i Hüsnâ",
-    meta: "Allah'ın 99 ismi",
-    note: "Sayaç 99 hedefiyle açılır, isimleri tek tek sayarak okuyabilirsin.",
+    meta: "Allah'ın 99 İsmi",
+    note: "Sayaç 99 hedefiyle açılır, isimleri tek tek zikrederek okuyabilirsiniz.",
     counterTarget: 99,
     verses: [
-      "[[Esmâ-i Hüsnâ listesi (99 isim, Türkçe okunuşuyla) buraya eklenecek.]]"
+      "1. Allah (C.C.)", "2. Er-Rahmân", "3. Er-Rahîm", "4. El-Melik", "5. El-Kuddûs",
+      "6. Es-Selâm", "7. El-Mü'min", "8. El-Müheymin", "9. El-Azîz", "10. El-Cebbâr",
+      "11. El-Mütekebbır", "12. El-Hâlık", "13. El-Bâri'", "14. El-Musavvir", "15. El-Gaffâr",
+      "16. El-Kahhâr", "17. El-Vehhâb", "18. Er-Razzâk", "19. El-Fettâh", "20. El-Alîm",
+      "21. El-Kâbıd", "22. El-Bâsıt", "23. El-Hâfıd", "24. Er-Râfi'", "25. El-Mü'ızz",
+      "26. El-Müzill", "27. Es-Semî'", "28. El-Basîr", "29. El-Hakem", "30. El-Adl",
+      "31. El-Latîf", "32. El-Habîr", "33. El-Halîm", "34. El-Azîm", "35. El-Gafûr",
+      "36. Eş-Şekûr", "37. El-Aliyy", "38. El-Kebîr", "39. El-Hafîz", "40. El-Mukît",
+      "41. El-Hasîb", "42. El-Celîl", "43. El-Kerîm", "44. Er-Rakîb", "45. El-Mucîb",
+      "46. El-Vâsi'", "47. El-Hakîm", "48. El-Vedûd", "49. El-Mecîd", "50. El-Bâ'ıs",
+      "51. Eş-Şehîd", "52. El-Hakk", "53. El-Vekîl", "54. El-Kaviyy", "55. El-Metîn",
+      "56. El-Veliyy", "57. El-Hamîd", "58. El-Muhsî", "59. El-Mubdi'", "60. El-Mu'îd",
+      "61. El-Muhyî", "62. El-Mümît", "63. El-Hayy", "64. El-Kayyûm", "65. El-Vâcid",
+      "66. El-Mâcid", "67. El-Vâhid", "68. Es-Samed", "69. El-Kâdir", "70. El-Muktedir",
+      "71. El-Mukaddim", "72. El-Muahhir", "73. El-Evvel", "74. El-Âhir", "75. Ez-Zâhir",
+      "76. El-Bâtın", "77. El-Vâlî", "78. El-Müte'âlî", "79. El-Berr", "80. Et-Tevvâb",
+      "81. El-Müntekım", "82. El-Afüvv", "83. Er-Ra'ûf", "84. Mâlikü'l-Mülk", "85. Zü'l-Celâli ve'l-İkrâm",
+      "86. El-Muksıt", "87. El-Câmi'", "88. El-Ganiyy", "89. El-Mugnî", "90. El-Mâni'",
+      "91. Ed-Dârr", "92. En-Nâfi'", "93. En-Nûr", "94. El-Hâdî", "95. El-Bedî'",
+      "96. El-Bâkı", "97. El-Vâris", "98. Er-Reşîd", "99. Es-Sabûr"
+    ]
+  },
+  {
+    id: "ayetel-kursi",
+    name: "Âyetel Kursî",
+    meta: "Bakara Sûresi, 255. âyet",
+    note: "Kur'an-ı Kerim'in en azametli ayetidir. Farz namazlardan sonra ve korunma amacıyla sıklıkla okunur.",
+    counterTarget: null,
+    verses: [
+      "Bismillâhirrahmânirrahîm",
+      "Allâhu lâ ilâhe illâ huvel hayyul kayyûm, lâ te'huzuhû sinetun ve lâ nevm, lehû mâ fis semâvâti ve mâ fil ard, men zellezî yeşfe'u indehû illâ bi iznih, ya'lemu mâ beyne eydîhim ve mâ halfehum, ve lâ yuhîtûne bi şey'in min ilmihî illâ bimâ şâe, vesia kursiyyuhus semâvâti vel arda, ve lâ yeûduhû hıfzuhumâ, ve huvel aliyyul azîm."
+    ]
+  },
+  {
+    id: "fatiha",
+    name: "Fâtiha Sûresi",
+    meta: "7 âyet",
+    note: "Kur'an-ı Kerim'in ilk suresidir, 'Açılış' anlamına gelir. Bütün namazların her rekatında okunur.",
+    counterTarget: null,
+    verses: [
+      "Bismillâhirrahmânirrahîm",
+      "Elhamdü lillâhi rabbil 'âlemîn.",
+      "Er-rahmânir-rahîm.",
+      "Mâliki yevmid-dîn.",
+      "İyyâke na'büdü ve iyyâke neste'în.",
+      "İhdinas-sırâtal-müstekîm.",
+      "Sırâtallezîne en'amte 'aleyhim gayril-magdûbi 'aleyhim ve lad-dâllîn."
+    ]
+  },
+  {
+    id: "ihlas",
+    name: "İhlâs Sûresi",
+    meta: "4 âyet",
+    note: "Allah'ın birliğini, samimiyeti ve tevhid inancını en özlü şekilde anlatan suredir.",
+    counterTarget: null,
+    verses: [
+      "Bismillâhirrahmânirrahîm",
+      "Kul hüvellâhü ehad.",
+      "Allâhüs-samed.",
+      "Lem yelid ve lem yûled.",
+      "Ve lem yekün lehû küfüven ehad."
+    ]
+  },
+  {
+    id: "felak",
+    name: "Felak Sûresi",
+    meta: "5 âyet",
+    note: "Dıştan gelebilecek şerlerden, yaratılanların kötülüğünden Allah'a sığınmayı ifade eder.",
+    counterTarget: null,
+    verses: [
+      "Bismillâhirrahmânirrahîm",
+      "Kul e'ûzü bi-rabbil-felak.",
+      "Min şerri mâ halak.",
+      "Ve min şerri gâsıkın izâ vekab.",
+      "Ve min şerrin-neffâsâti fîl-'ukad.",
+      "Ve min şerri hâsidin izâ hased."
+    ]
+  },
+  {
+    id: "nas",
+    name: "Nâs Sûresi",
+    meta: "6 âyet",
+    note: "İçten gelebilecek vesvese, vesveseciler ve gizli tehlikelere karşı Allah'a sığınma duasıdır.",
+    counterTarget: null,
+    verses: [
+      "Bismillâhirrahmânirrahîm",
+      "Kul e'ûzü bi-rabbin-nâs.",
+      "Melikin-nâs.",
+      "İlâhin-nâs.",
+      "Min şerril-vesvâsil-hannâs.",
+      "Ellezî yüvesvisü fî sudûrin-nâs.",
+      "Minel-cinneti ven-nâs."
     ]
   }
 ];
 
 /* =========================================================
-   TESBİHAT VERİLERİ
+   TESBİHAT VERİLERİ (GÜNCELLENMİŞ VE TAMAMLANMIŞ)
    ========================================================= */
 
 const TESBIHAT = [
   {
     id: "rizik-bereket",
-    name: "Rızık ve Bereket",
+    name: "Rızık ve Bereket Zikri",
     meta: "20 kez",
-    note: null,
+    note: "Bol rızık, bereket ve helal kazanç niyetiyle okunur.",
     verses: [
       "Yâ İlâhel Âliheter-Refîi Celâlühü"
     ]
   },
   {
     id: "borctan-kurtulma",
-    name: "Borçtan Kurtulma",
+    name: "Borçtan Kurtulma Duası",
     meta: "20 kez",
-    note: null,
+    note: "Maddi darlıklardan feraha çıkmak ve borçları ödeme kolaylığı için tavsiye edilir.",
     verses: [
       "Allahümme'kfinî bi halâlike an harâmike ve ağninî bi fadlike ammen sivâke."
+    ]
+  },
+  {
+    id: "namaz-sonrasi-tesbihat",
+    name: "Namaz Sonrası Tesbihatı",
+    meta: "33'er kez",
+    note: "Farz namazlardan sonra çekilmesi sünnet olan temel tesbihattır.",
+    verses: [
+      "Sübhânallâh (33 Defa)",
+      "Elhamdülillâh (33 Defa)",
+      "Allâhu Ekber (33 Defa)"
+    ]
+  },
+  {
+    id: "salavat-i-serif",
+    name: "Salavât-ı Şerîfe",
+    meta: "100 kez",
+    note: "Peygamber Efendimiz'e (s.a.v.) selam ve hürmet sunmak, duaların kabulüne vesile olmak için okunur.",
+    verses: [
+      "Allahümme salli 'alâ seyyidinâ Muhammedin ve 'alâ âli seyyidinâ Muhammed."
+    ]
+  },
+  {
+    id: "istigfar-duasi",
+    name: "Tevbe ve İstiğfâr Zikri",
+    meta: "100 kez",
+    note: "Günahlardan arınma ve kalbi ferahlatma amacıyla çekilir.",
+    verses: [
+      "Estagfirullâhel-'azîm ve etûbu ileyh."
+    ]
+  },
+  {
+    id: "kelime-i-tevhid",
+    name: "Kelime-i Tevhîd",
+    meta: "100 kez",
+    note: "Zikirlerin en faziletlisidir.",
+    verses: [
+      "Lâ ilâhe illallâh, Muhammedun resûlullâh."
     ]
   }
 ];

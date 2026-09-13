@@ -9,19 +9,27 @@ Sabah rutini olarak okunan duaların Türkçe okunuşlarını içeren, mobil uyu
 4. Duhâ Sûresi
 5. Âmenerrasûlü
 6. Bakara Sûresi (Elif-Lâm-Mîm)
-7. Esmâ-i Hüsnâ
+7. Yâsîn Sûresi
+8. Alak Sûresi
+9. Esmâ-i Hüsnâ
+10. Âyetel Kursî
+11. Fâtiha Sûresi
+12. İhlâs Sûresi
+13. Felak Sûresi
+14. Nâs Sûresi
 
 ## Proje yapısı
 ```
 sabah-virdi/
-├── index.html      # Uygulamanın tamamı (tek sayfa)
-├── css/style.css   # Görünüm (koyu/açık tema, kart tasarımı, sayaç)
-├── js/duas.js       # Dua metinleri — İÇERİĞİ BURADAN DÜZENLE
-└── js/app.js        # Uygulama mantığı (gezinme, tema, sayaç, ayarlar)
+├── index.html      # Uygulamanın tamamı: stil, dua verileri ve uygulama mantığı tek dosyada
+├── sw.js           # Service worker (offline önbellekleme, bildirim)
+├── manifest.json   # PWA manifesti
+└── assets/         # Görseller
 ```
+Not: `index.html` kendi kendine yeterlidir; harici bir CSS/JS dosyası yüklemez. Bu yüzden görünüm, dua verisi (`DUAS`/`TESBIHAT` dizileri) ve uygulama mantığının tamamı bu dosyanın içindeki `<style>` ve `<script>` bloklarında yer alır.
 
 ## Dua metinlerini ekleme
-`js/duas.js` dosyasını aç. Her bölümün `verses` dizisi şu an yer tutucu metin içeriyor:
+`index.html` dosyasını aç, içindeki `const DUAS = [ ... ]` dizisini bul. Her bölümün `verses` dizisi şu an yer tutucu metin içeriyor:
 
 ```js
 verses: [
