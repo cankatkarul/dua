@@ -4,8 +4,8 @@
   "description": "Sabah okunacak günlük dualar ve tesbihat",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0a0a0c",
-  "theme_color": "#0a0a0c",
+  "background_color": "#0A2A22",
+  "theme_color": "#0A2A22",
   "orientation": "portrait",
   "icons": [
     {
