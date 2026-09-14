@@ -103,21 +103,21 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 /* Sağ üstte yumuşak, göz yormayan bir "Allah" amblemi — atmosferik arka plan */
 .home-bg-emblem{
   position: absolute;
-  top: -70px;
-  right: -90px;
-  width: 380px;
-  height: 600px;
+  top: -10px;
+  right: -10px;
+  width: 150px;
+  height: 230px;
   background-image: var(--emblem-img);
   background-repeat: no-repeat;
-  background-position: top right;
-  background-size: contain;
-  opacity: 0.16;
-  filter: drop-shadow(0 0 50px var(--accent-glow));
+  background-position: top right -30px;
+  background-size: 150px auto;
+  opacity: 0.14;
+  filter: drop-shadow(0 0 30px var(--accent-glow));
   pointer-events: none;
   z-index: 0;
   transform: rotate(4deg);
 }
-.theme-light .home-bg-emblem{ opacity: 0.22; }
+.theme-light .home-bg-emblem{ opacity: 0.18; }
 
 .home-header, .dua-list{ position: relative; z-index: 1; }
 
@@ -251,23 +251,23 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 /* Okuma ekranında çok soluk, sabit (scroll ile kaymayan) amblem — dikkat dağıtmadan atmosfer */
 .reader-bg-emblem{
   position: fixed;
-  top: 90px;
-  right: -70px;
-  width: 240px;
-  height: 380px;
+  top: 60px;
+  right: -10px;
+  width: 120px;
+  height: 190px;
   background-image: var(--emblem-img);
   background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  opacity: 0.05;
+  background-position: top right;
+  background-size: 120px auto;
+  opacity: 0.06;
   pointer-events: none;
   z-index: 0;
   transform: rotate(4deg);
 }
-.theme-light .reader-bg-emblem{ opacity: 0.07; }
+.theme-light .reader-bg-emblem{ opacity: 0.08; }
 .reader-header, .reader-body{ position: relative; z-index: 1; }
 @media (max-width: 380px){
-  .reader-bg-emblem{ width: 170px; height: 270px; top: 60px; right: -50px; }
+  .reader-bg-emblem{ width: 100px; height: 160px; top: 50px; right: -10px; }
 }
 .reader-header{
   position: sticky; top: 0; z-index: 10;
@@ -462,7 +462,6 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 
 @media (max-width: 380px){
   .home-title{ font-size: 32px; }
-  .home-bg-emblem{ width: 260px; height: 420px; top: -40px; right: -60px; }
   .tasbih-dial{ width: 170px; height: 170px; }
   .tasbih-ring{ width: 170px; height: 170px; }
   .tasbih-count{ font-size: 44px; }
@@ -1845,6 +1844,7 @@ const TESBIHAT = [
   }
 
   let currentDuaId = null;
+  let homeScrollY = 0;
 
   // ---------- THEME ----------
   function applyTheme(theme) {
@@ -2087,13 +2087,15 @@ const TESBIHAT = [
 
 
   // ---------- SAYFA GEÇİŞİ ----------
-  function showScreen(toEl, fromEl) {
+  function showScreen(toEl, fromEl, resetScroll = true) {
     if (fromEl) fromEl.hidden = true;
     toEl.hidden = false;
-    window.scrollTo(0, 0);
+    if (resetScroll) window.scrollTo(0, 0);
   }
 
   function openReader(id, list) {
+    // Ana sayfadaki kaydırma konumunu geri dönüşte geri yüklemek için sakla
+    if (els.home && !els.home.hidden) homeScrollY = window.scrollY;
     list = list || DUAS;
     currentDuaList = list;
     const dua = list.find(d => d.id === id);
@@ -2278,7 +2280,9 @@ const TESBIHAT = [
     if (isSlideModeActive) exitSlideMode();
     renderHome();
     renderStreakBadge();
-    showScreen(els.home, els.reader);
+    showScreen(els.home, els.reader, false);
+    // Liste yeniden çizildikten sonra önceki kaydırma konumuna dön
+    requestAnimationFrame(() => window.scrollTo(0, homeScrollY));
   }
 
   // ---------- SETTINGS SHEET ----------
