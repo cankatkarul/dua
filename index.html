@@ -451,6 +451,11 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   font-size: 16px; font-weight: 600; color: var(--text-tertiary);
   letter-spacing: .04em; pointer-events: none;
 }
+.tasbih-tap-label.has-phrase{
+  font-family: var(--serif); font-size: 18px; font-weight: 500;
+  color: var(--text-primary); letter-spacing: 0; line-height: 1.5;
+  padding: 0 18px; text-align: center;
+}
 
 .sheet-actions{ display: flex; gap: 10px; }
 .sheet-actions .ghost-btn{ margin-top: 10px; flex: 1; width: auto; min-width: 0; }
@@ -998,7 +1003,7 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
     </div>
     <!-- Ekranın geri kalanına basan büyük sayaç alanı -->
     <button class="tasbih-tap-zone" id="tasbihDial">
-      <span class="tasbih-tap-label">Saymak için dokun</span>
+      <span class="tasbih-tap-label" id="tasbihTapLabel">Saymak için dokun</span>
     </button>
     <div class="sheet-actions">
       <button class="ghost-btn" id="tasbihUndo">− Geri al</button>
@@ -1881,6 +1886,7 @@ const HADITHS = [
     counterTarget: $("#counterTarget"),
     counterStageLabel: $("#counterStageLabel"),
     tasbihDial: $("#tasbihDial"),
+    tasbihTapLabel: $("#tasbihTapLabel"),
     tasbihCount: $("#tasbihCount"),
     tasbihUndo: $("#tasbihUndo"),
     tasbihReset: $("#tasbihReset"),
@@ -2423,12 +2429,26 @@ const HADITHS = [
     return list.find(d => d.id === currentDuaId);
   }
 
+  // Sayarken ne okunacağı unutulmasın diye, kısa (1-3 cümlelik) dualarda
+  // metni dokunma alanının içinde büyük puntoyla gösteriyoruz.
+  function updateTapLabelPhrase(item) {
+    const eligible = item && item.verses && item.verses.length > 0 && item.verses.length <= 3 && !item.stages;
+    if (eligible) {
+      els.tasbihTapLabel.textContent = item.verses.join(" ");
+      els.tasbihTapLabel.classList.add("has-phrase");
+    } else {
+      els.tasbihTapLabel.textContent = "Saymak için dokun";
+      els.tasbihTapLabel.classList.remove("has-phrase");
+    }
+  }
+
   function renderCounterSheet() {
     const item = getCurrentItem();
     const count = getCount(currentDuaId);
     const isT = isTesbihat(currentDuaId);
     const color = isT ? "#4ade80" : "#C9A24C";
     els.tasbihCount.style.color = isT ? "#4ade80" : "var(--text-primary)";
+    updateTapLabelPhrase(item);
 
     if (item && item.stages) {
       const info = getStageInfo(item.stages, count);
