@@ -497,6 +497,40 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   box-shadow: 0 3px 10px var(--accent-glow);
 }
 
+/* ---------- Arama kutusu ---------- */
+.search-box{
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; margin: 0 0 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; backdrop-filter: blur(16px);
+}
+.search-box-icon{ color: var(--text-tertiary); flex: 0 0 auto; }
+.search-box-input{
+  flex: 1; min-width: 0; border: none; background: none; outline: none;
+  font-family: inherit; font-size: 15px; color: var(--text-primary);
+}
+.search-box-input::placeholder{ color: var(--text-tertiary); }
+.search-box-input::-webkit-search-cancel-button{ display: none; }
+.search-box-clear{
+  flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-strong); color: var(--text-secondary); font-size: 12px;
+}
+.search-box-clear[hidden]{ display: none; }
+.search-empty{
+  text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 14px;
+}
+
+/* ---------- Favori yıldızı ---------- */
+.dua-fav-btn{
+  flex: 0 0 auto; width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-tertiary); font-size: 17px; line-height: 1;
+  border-radius: 50%; transition: transform .15s ease, color .15s ease;
+}
+.dua-fav-btn:active{ transform: scale(.85); }
+.dua-fav-btn.is-fav{ color: var(--accent); }
+
 /* Tesbihat kartları — farklı renk (yeşil ton) */
 .tesbihat-card .dua-index{
   background: linear-gradient(155deg, #4ade80 0%, #16a34a 100%);
@@ -920,6 +954,12 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
       <button class="tab-btn active" data-tab="sure">Sûreler</button>
       <button class="tab-btn" data-tab="dualar">Dualar</button>
       <button class="tab-btn" data-tab="tesbihat">Tesbihat</button>
+    </div>
+
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" width="17" height="17" class="search-box-icon"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" id="searchInput" class="search-box-input" placeholder="Bu sekmede ara..." autocomplete="off" autocorrect="off" spellcheck="false" />
+      <button class="search-box-clear" id="searchClearBtn" aria-label="Aramayı temizle" hidden>✕</button>
     </div>
 
     <button class="streak-badge" id="streakBadge" aria-label="İstatistikler"></button>
@@ -1858,6 +1898,8 @@ const HADITHS = [
     home: $("#home"),
     reader: $("#reader"),
     duaList: $("#duaList"),
+    searchInput: $("#searchInput"),
+    searchClearBtn: $("#searchClearBtn"),
     readerTitle: $("#readerTitle"),
     readerSubtitle: $("#readerSubtitle"),
 
@@ -1908,7 +1950,7 @@ const HADITHS = [
       if (!raw) throw new Error("empty");
       return JSON.parse(raw);
     } catch {
-      return { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {} };
+      return { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} };
     }
   }
   function saveStore() {
@@ -1917,6 +1959,7 @@ const HADITHS = [
 
   const state = loadStore();
   if (!state.cycles) state.cycles = {};
+  if (!state.favorites) state.favorites = {};
   // Reset daily completion checkmarks on a new day
   if (state.doneDate !== todayKey()) {
     state.doneDate = todayKey();
@@ -1947,6 +1990,7 @@ const HADITHS = [
 
   // ---------- SEKMELER ----------
   let activeTab = "sure";
+  let searchQuery = "";
 
   function renderTabBar() {
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -1956,6 +2000,9 @@ const HADITHS = [
 
   function switchTab(tab) {
     activeTab = tab;
+    searchQuery = "";
+    if (els.searchInput) els.searchInput.value = "";
+    if (els.searchClearBtn) els.searchClearBtn.hidden = true;
     renderTabBar();
     renderHome();
   }
@@ -1970,6 +2017,12 @@ const HADITHS = [
     if (counterBtn) {
       e.stopPropagation();
       openCounterFor(counterBtn.dataset.counterId);
+      return;
+    }
+    const favBtn = e.target.closest("[data-fav-id]");
+    if (favBtn) {
+      e.stopPropagation();
+      toggleFavorite(favBtn.dataset.favId);
       return;
     }
     const card = e.target.closest(".dua-card");
@@ -2020,11 +2073,28 @@ const HADITHS = [
   function hasCounterFeature(item) {
     return !!(item && (item.counterTarget || item.stages));
   }
+  function isFavorite(id) { return !!state.favorites[id]; }
+  function toggleFavorite(id) {
+    if (state.favorites[id]) delete state.favorites[id];
+    else state.favorites[id] = true;
+    saveStore();
+    renderHome();
+  }
+  function favStarHtml(id) {
+    const fav = isFavorite(id);
+    return `<span class="dua-fav-btn${fav ? " is-fav" : ""}" data-fav-id="${id}" aria-label="Favori">${fav ? "★" : "☆"}</span>`;
+  }
 
   function buildSectionLabelEl(title, count) {
     const el = document.createElement("div");
     el.className = "section-label";
     el.innerHTML = `<span>${title}</span><span class="count">${count}</span>`;
+    return el;
+  }
+  function buildEmptyStateEl() {
+    const el = document.createElement("div");
+    el.className = "search-empty";
+    el.textContent = "Sonuç bulunamadı.";
     return el;
   }
 
@@ -2039,6 +2109,7 @@ const HADITHS = [
         <p class="dua-meta">${dua.meta} ${renderCycleBadgeHtml(dua)}</p>
       </span>
       <span class="dua-done">✓</span>
+      ${favStarHtml(dua.id)}
       <span class="dua-chevron">${CHEVRON_SVG}</span>`;
     card._duaId = dua.id;
     card._duaList = DUAS;
@@ -2067,6 +2138,7 @@ const HADITHS = [
         <p class="dua-name">${t.name}</p>
         <p class="dua-meta">${t.meta}</p>
       </span>
+      ${favStarHtml(t.id)}
       <span class="dua-chevron">${CHEVRON_SVG}</span>`;
     card._duaId = t.id;
     card._duaList = TESBIHAT;
@@ -2101,16 +2173,59 @@ const HADITHS = [
     return card;
   }
 
+  // Arama sırasında â/î/ş/ğ/ü/ö/ı gibi aksanlı harfleri sadeleştirir,
+  // böylece "yasin" yazınca "Yâsîn Sûresi" de bulunur.
+  function normalizeSearchText(s) {
+    return s
+      .toLocaleLowerCase("tr-TR")
+      .replace(/ı/g, "i")
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "");
+  }
+  function matchesQuery(item, q) {
+    if (!q) return true;
+    const hay = normalizeSearchText(item.name + " " + (item.meta || ""));
+    return hay.includes(q);
+  }
+
   function renderHome() {
     renderVakiaCycleCard();
     els.duaList.innerHTML = "";
+    const q = normalizeSearchText(searchQuery.trim());
+
     if (activeTab === "sure") {
       const sureler = DUAS.filter(d => d.group === "sure");
+      if (q) {
+        const filtered = sureler.filter(d => matchesQuery(d, q));
+        if (!filtered.length) { els.duaList.appendChild(buildEmptyStateEl()); return; }
+        filtered.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
+        return;
+      }
+      const favs = sureler.filter(d => isFavorite(d.id));
+      if (favs.length) {
+        els.duaList.appendChild(buildSectionLabelEl("Favorilerim", favs.length));
+        favs.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
+      }
       sureler.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
+
     } else if (activeTab === "dualar") {
       const namazDualari = DUAS.filter(d => d.group === "namaz");
       const esma = DUAS.find(d => d.group === "esma");
 
+      if (q) {
+        const filtered = namazDualari.filter(d => matchesQuery(d, q));
+        const esmaMatches = !!(esma && matchesQuery(esma, q));
+        if (!filtered.length && !esmaMatches) { els.duaList.appendChild(buildEmptyStateEl()); return; }
+        filtered.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
+        if (esmaMatches) els.duaList.appendChild(buildHeroEsmaCard(esma));
+        return;
+      }
+
+      const favs = namazDualari.filter(d => isFavorite(d.id));
+      if (favs.length) {
+        els.duaList.appendChild(buildSectionLabelEl("Favorilerim", favs.length));
+        favs.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
+      }
       els.duaList.appendChild(buildSectionLabelEl("Namazda Okunan Dualar", namazDualari.length));
       namazDualari.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
 
@@ -2118,10 +2233,20 @@ const HADITHS = [
         els.duaList.appendChild(buildSectionLabelEl("Esmâ-i Hüsnâ", ""));
         els.duaList.appendChild(buildHeroEsmaCard(esma));
       }
+
     } else {
-      TESBIHAT.forEach((t, i) => {
-        els.duaList.appendChild(buildTesbihatCardRow(t, i + 1));
-      });
+      if (q) {
+        const filtered = TESBIHAT.filter(t => matchesQuery(t, q));
+        if (!filtered.length) { els.duaList.appendChild(buildEmptyStateEl()); return; }
+        filtered.forEach((t, i) => els.duaList.appendChild(buildTesbihatCardRow(t, i + 1)));
+        return;
+      }
+      const favs = TESBIHAT.filter(t => isFavorite(t.id));
+      if (favs.length) {
+        els.duaList.appendChild(buildSectionLabelEl("Favorilerim", favs.length));
+        favs.forEach((t, i) => els.duaList.appendChild(buildTesbihatCardRow(t, i + 1)));
+      }
+      TESBIHAT.forEach((t, i) => els.duaList.appendChild(buildTesbihatCardRow(t, i + 1)));
     }
   }
 
@@ -2547,6 +2672,19 @@ const HADITHS = [
     if (!header) return;
     header.classList.toggle("scrolled", window.scrollY > 40);
   }, { passive: true });
+
+  els.searchInput.addEventListener("input", () => {
+    searchQuery = els.searchInput.value;
+    els.searchClearBtn.hidden = !searchQuery;
+    renderHome();
+  });
+  els.searchClearBtn.addEventListener("click", () => {
+    searchQuery = "";
+    els.searchInput.value = "";
+    els.searchClearBtn.hidden = true;
+    renderHome();
+    els.searchInput.focus();
+  });
 
   els.backBtn.addEventListener("click", closeReader);
   els.openSettings.addEventListener("click", () => openSheet(els.settingsBackdrop, els.settingsSheet));
