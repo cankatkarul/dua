@@ -918,6 +918,54 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 }
 .dv-source{ font-size: 12px; color: var(--text-tertiary); }
 
+/* ================= GÜNÜN ESMÂSI KARTI ================= */
+.daily-esma-card{
+  position: relative;
+  background: linear-gradient(155deg, var(--surface-strong) 0%, var(--surface) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .2s ease;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+.daily-esma-card:active{ transform: scale(.98); }
+.de-label{
+  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--accent);
+}
+.de-name{
+  position: relative; z-index: 1;
+  font-family: var(--display); font-size: 36px; line-height: 1.15; font-weight: 700;
+  margin: 8px 0 2px; color: var(--text-primary);
+}
+.de-meaning{
+  position: relative; z-index: 1;
+  font-family: var(--serif); font-style: italic; font-size: 15px; line-height: 1.4;
+  color: var(--text-secondary); max-width: 80%;
+}
+.de-ghost{
+  position: absolute; right: 14px; bottom: 30px;
+  font-family: var(--display); font-weight: 700; font-size: 80px; line-height: 1;
+  color: var(--accent); opacity: .16; letter-spacing: -.02em; pointer-events: none;
+}
+.de-bar{ position: relative; height: 3px; border-radius: 3px; background: var(--divider); margin-top: 14px; }
+.de-bar-fill{ position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); }
+.de-foot{
+  display: flex; justify-content: space-between; margin-top: 6px;
+  font-size: 11.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums;
+}
+
+/* Esmâ-i Hüsnâ okuma ekranında isim altındaki anlam */
+.dua-text .verse-meaning{
+  display: block; margin-top: 2px;
+  font-family: var(--sans); font-size: calc(13px * var(--font-scale)); line-height: 1.4;
+  color: var(--text-tertiary);
+}
+
 /* ================= PAYLAŞIM TOAST ================= */
 .share-toast{
   position: fixed; left: 50%; bottom: 40px;
@@ -951,6 +999,8 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
     <div class="calendar-leaf-card" id="calendarLeafCard" aria-label="Günün sayfası"></div>
 
     <div class="daily-verse-card" id="dailyVerseCard" role="button" tabindex="0" aria-label="Bugünün âyeti"></div>
+
+    <div class="daily-esma-card" id="dailyEsmaCard" role="button" tabindex="0" aria-label="Günün Esmâ'sı"></div>
 
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="sure">Sûreler</button>
@@ -1100,6 +1150,109 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 /* =========================================================
    DUA VE SÛRE VERİLERİ (GÜNCELLENMİŞ VE TAMAMLANMIŞ)
    ========================================================= */
+
+// Esmâ-i Hüsnâ kısa anlamları — sırası DUAS içindeki "esmaulhusna" âyetleriyle birebir aynı
+const ESMA_MEANINGS = [
+  "Bütün isim ve sıfatları kendinde toplayan, her şeyi yaratan Zât",
+  "Dünyada bütün yaratılmışlara merhamet eden",
+  "Âhirette müminlere merhamet eden",
+  "Mülkün ve her şeyin gerçek sahibi",
+  "Her türlü eksiklikten uzak, tertemiz olan",
+  "Her türlü tehlikeden selâmete çıkaran",
+  "Güven veren, emniyet bahşeden",
+  "Her şeyi gözetip koruyan",
+  "Her şeye galip gelen, izzet sahibi",
+  "Dilediğini yaptıran, kırıkları onaran",
+  "Büyüklükte eşi olmayan",
+  "Yaratan",
+  "Yoktan var eden, uyumla yaratan",
+  "Her şeye şekil ve suret veren",
+  "Günahları örten, çokça bağışlayan",
+  "Her şeye gücü yeten, her şeyi boyun eğdiren",
+  "Karşılıksız, çokça ihsan eden",
+  "Rızık veren",
+  "Hayır kapılarını açan, hüküm veren",
+  "Her şeyi bilen",
+  "Dilediğinin rızkını daraltan",
+  "Dilediğinin rızkını genişleten",
+  "Dilediğini alçaltan",
+  "Dilediğini yükselten",
+  "İzzet ve şeref veren",
+  "Zillete düşüren",
+  "Her şeyi işiten",
+  "Her şeyi gören",
+  "Hüküm veren, hakkı bâtıldan ayıran",
+  "Çok âdil olan",
+  "Lütuf sahibi, en ince işleri bilen",
+  "Her şeyden haberdar olan",
+  "Yumuşak davranan, cezada acele etmeyen",
+  "Pek yüce, azamet sahibi",
+  "Çok bağışlayan",
+  "Az amele çok karşılık veren",
+  "Çok yüce olan",
+  "Pek büyük olan",
+  "Koruyan, hiçbir şeyi zayi etmeyen",
+  "Her varlığın rızkını ve gücünü veren",
+  "Kulların hesabını gören, herkese yeten",
+  "Celâl ve azamet sahibi",
+  "Çok cömert, ikram sahibi",
+  "Her şeyi gözetleyen",
+  "Duaları kabul eden",
+  "İlmi ve rahmeti geniş olan",
+  "Her işi hikmetli olan",
+  "Kullarını seven, sevilmeye lâyık olan",
+  "Şanı yüce, şerefi büyük olan",
+  "Ölüleri dirilten",
+  "Her şeye şahit olan",
+  "Varlığı hiç değişmeyen gerçek olan",
+  "Kendisine güvenilen, işleri üstlenen",
+  "Çok güçlü olan",
+  "Çok sağlam, kuvvetli olan",
+  "Müminlerin dostu ve yardımcısı",
+  "Övülmeye lâyık olan",
+  "Her şeyi sayısıyla bilen",
+  "Yoktan ilk defa yaratan",
+  "Ölümden sonra yeniden diriltip döndüren",
+  "Hayat veren",
+  "Ölümü yaratan",
+  "Ezelî ve ebedî diri olan",
+  "Her şeyi ayakta tutan",
+  "Dilediğini bulan, hiçbir şeye muhtaç olmayan",
+  "Şanı ve şerefi yüce olan",
+  "Bir olan, tek olan",
+  "Eşi ve benzeri olmayan tek",
+  "Her şey ona muhtaç, o hiçbir şeye muhtaç olmayan",
+  "Her şeye gücü yeten",
+  "Her şey üzerinde kudret sahibi",
+  "Dilediğini öne geçiren",
+  "Dilediğini geri bırakan",
+  "Başlangıcı olmayan, ilk",
+  "Sonu olmayan, son",
+  "Varlığı apaçık olan",
+  "Zâtının hakikati gizli olan",
+  "Bütün kâinatı idare eden",
+  "Pek yüce, her şeyden yüksek",
+  "İyilik ve ihsanı bol olan",
+  "Tövbeleri kabul eden",
+  "Zalimleri cezalandıran",
+  "Affı çok olan",
+  "Çok şefkatli olan",
+  "Mülkün sahibi, celâl ve ikram sahibi, adaletle hükmeden",
+  "Her şeyi bir araya toplayan",
+  "Hiçbir şeye ihtiyacı olmayan, zengin",
+  "Zengin kılan",
+  "Çokça veren",
+  "Dilediğini engelleyen, koruyan",
+  "Zarar verecek şeyleri de yaratan",
+  "Fayda veren",
+  "Nur veren, aydınlatan",
+  "Hidayet veren",
+  "Eşsiz yaratan",
+  "Varlığı sonsuz olan",
+  "Her şeyin asıl sahibi, varislerin varisi",
+  "Doğru yolu gösteren",
+  "Çok sabırlı olan"
+];
 
 const DUAS = [
   {
@@ -1484,6 +1637,7 @@ const DUAS = [
     meta: "Allah'ın 99 İsmi",
     note: "Sayaç 99 hedefiyle açılır, isimleri tek tek zikrederek okuyabilirsiniz.",
     counterTarget: 99,
+    meanings: ESMA_MEANINGS,
     verses: [
       "1. Allâh", "2. er-Rahmân", "3. er-Rahıym", "4. el-Melikü", "5. el-Kuddûsü",
       "6. es-Selâmü", "7. el-Mü'minü", "8. el-Müheyminü", "9. el-Azîzü", "10. el-Cebbâru",
@@ -2299,7 +2453,7 @@ const HADITHS = [
     if (resetScroll) window.scrollTo(0, 0);
   }
 
-  function openReader(id, list) {
+  function openReader(id, list, focusIndex) {
     // Ana sayfadaki kaydırma konumunu geri dönüşte geri yüklemek için sakla
     if (els.home && !els.home.hidden) homeScrollY = window.scrollY;
     list = list || DUAS;
@@ -2328,7 +2482,7 @@ const HADITHS = [
       bodyHtml += `<div class="placeholder-note">${dua.verses[0].replace(/\[\[|\]\]/g, "")}</div>`;
     } else {
       bodyHtml += `<div class="dua-text">` +
-        dua.verses.map((v, i) => `<span class="verse${i === 0 ? " verse-first" : ""}"><span class="verse-num">${i + 1}</span>${v}</span>`).join("") +
+        dua.verses.map((v, i) => `<span class="verse${i === 0 ? " verse-first" : ""}"><span class="verse-num">${i + 1}</span>${v}${dua.meanings && dua.meanings[i] ? `<span class="verse-meaning">${dua.meanings[i]}</span>` : ""}</span>`).join("") +
         `</div>`;
     }
     document.getElementById("readerBody").innerHTML = bodyHtml;
@@ -2340,8 +2494,8 @@ const HADITHS = [
     updateDoneBtn(dua.id);
     // Son okunan yeri vurgula
     if (!state.positions) state.positions = {};
-    const lastPos = state.positions[id];
-    if (lastPos && lastPos > 0) {
+    const lastPos = focusIndex != null ? focusIndex : state.positions[id];
+    if (focusIndex != null || (lastPos && lastPos > 0)) {
       requestAnimationFrame(() => {
         const verseEls = document.getElementById("readerBody").querySelectorAll(".verse");
         if (verseEls[lastPos]) {
@@ -2957,6 +3111,32 @@ const HADITHS = [
     el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.onclick(); } };
   }
 
+  // ---------- GÜNÜN ESMÂSI ----------
+  // Rastgele değil, yılın gününe göre sırayla ilerler: 99 gün boyunca hiçbir isim tekrarlanmaz.
+  function renderDailyEsma() {
+    const el = document.getElementById("dailyEsmaCard");
+    if (!el) return;
+    const esma = DUAS.find(d => d.id === "esmaulhusna");
+    if (!esma || !esma.meanings) { el.hidden = true; return; }
+
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    const idx = dayOfYear % esma.verses.length;
+    const name = esma.verses[idx].replace(/^\d+\.\s*/, "");
+    const total = esma.verses.length;
+
+    el.hidden = false;
+    el.innerHTML = `
+      <div class="de-label">Günün Esmâ'sı</div>
+      <div class="de-name">${name}</div>
+      <div class="de-meaning">${esma.meanings[idx]}</div>
+      <div class="de-ghost" aria-hidden="true">${idx + 1}</div>
+      <div class="de-bar"><div class="de-bar-fill" style="width:${((idx + 1) / total * 100).toFixed(1)}%"></div></div>
+      <div class="de-foot"><span>Esmâ-i Hüsnâ</span><span>${idx + 1} / ${total}</span></div>
+    `;
+    el.onclick = () => openReader(esma.id, DUAS, idx);
+    el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.onclick(); } };
+  }
+
   // ---------- PAYLAŞIM ----------
   function showToast(msg) {
     let toast = document.querySelector(".share-toast");
@@ -3035,6 +3215,7 @@ const HADITHS = [
   highlightYasinIfThursdayEvening();
   renderCalendarLeaf();
   renderDailyVerse();
+  renderDailyEsma();
   renderHome();
   renderStreakBadge();
   updateHomeCounterFab();
