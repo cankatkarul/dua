@@ -1096,6 +1096,15 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 .pt-btn:active{ transform: scale(.95); }
 .pt-btn:disabled{ opacity: .6; }
 
+/* ================= YEDEKLEME ================= */
+.settings-sheet{ max-height: 90dvh; overflow-y: auto; }
+.backup-title{ margin: 22px 0 8px; }
+.backup-note{ margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+.backup-actions{ display: flex; gap: 10px; }
+.backup-actions .ghost-btn{ margin-top: 0; flex: 1; width: auto; min-width: 0; font-size: 14px; }
+.backup-status{ margin: 10px 0 0; min-height: 1.3em; font-size: 13px; color: var(--accent); text-align: center; }
+.backup-status.err{ color: #E58A8A; }
+
 /* ================= PAYLAŞIM TOAST ================= */
 .share-toast{
   position: fixed; left: 50%; bottom: 40px;
@@ -1330,6 +1339,15 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
         <button data-size="xlarge">A</button>
       </div>
     </div>
+
+    <h2 class="sheet-title backup-title">Yedekleme</h2>
+    <p class="backup-note">Sayaçların, favorilerin, okuma serin ve ayarların tek bir dosyaya kaydedilir. Telefon değiştirirsen ya da tarayıcı verisi silinirse buradan geri yükleyebilirsin.</p>
+    <div class="backup-actions">
+      <button class="ghost-btn" id="backupExport">Yedeği kaydet</button>
+      <button class="ghost-btn" id="backupImport">Yedekten yükle</button>
+    </div>
+    <input type="file" id="backupFile" accept="application/json,.json" hidden>
+    <p class="backup-status" id="backupStatus" aria-live="polite"></p>
 
     <button class="ghost-btn full" id="settingsClose">Tamam</button>
   </section>
@@ -2456,6 +2474,8 @@ function shortestAngleDelta(from, to) {
 
   const state = loadStore();
   if (!state.cycles) state.cycles = {};
+  if (!state.counters) state.counters = {};
+  if (!state.done) state.done = {};
   if (!state.favorites) state.favorites = {};
   // Reset daily completion checkmarks on a new day
   if (state.doneDate !== todayKey()) {
@@ -3563,6 +3583,88 @@ function shortestAngleDelta(from, to) {
 
   setInterval(renderPrayerCard, 20000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) { renderPrayerCard(); prayerRefreshPos(); } });
+
+  // ---------- YEDEKLEME ----------
+  const BACKUP_APP = "gunluk-dualarim";
+  const bk = {
+    exportBtn: $("#backupExport"), importBtn: $("#backupImport"),
+    file: $("#backupFile"), status: $("#backupStatus"),
+  };
+  function backupSay(msg, isErr) {
+    bk.status.textContent = msg;
+    bk.status.classList.toggle("err", !!isErr);
+  }
+  const isPlainObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+
+  // Yalnızca bilinen anahtarlar ve doğru tipteki değerler kabul edilir
+  function sanitizeBackupData(d) {
+    if (!isPlainObject(d)) return null;
+    const out = {};
+    ["done", "counters", "cycles", "favorites", "positions", "history"].forEach(k => {
+      if (isPlainObject(d[k])) out[k] = JSON.parse(JSON.stringify(d[k]));
+    });
+    if (d.theme === "dark" || d.theme === "light") out.theme = d.theme;
+    if (["small", "medium", "large", "xlarge"].includes(d.fontSize)) out.fontSize = d.fontSize;
+    if (typeof d.doneDate === "string") out.doneDate = d.doneDate;
+    if (typeof d.lastStreakDate === "string") out.lastStreakDate = d.lastStreakDate;
+    if (Number.isFinite(d.streak)) out.streak = d.streak;
+    if (Number.isInteger(d.autoScrollSpeed) && d.autoScrollSpeed >= 0 && d.autoScrollSpeed < AUTO_SPEEDS.length) out.autoScrollSpeed = d.autoScrollSpeed;
+    if (isPlainObject(d.pos) && Number.isFinite(d.pos.lat) && Number.isFinite(d.pos.lon)) {
+      out.pos = { lat: d.pos.lat, lon: d.pos.lon, ts: Number.isFinite(d.pos.ts) ? d.pos.ts : 0 };
+    }
+    return out;
+  }
+
+  async function exportBackup() {
+    const payload = { app: BACKUP_APP, version: 1, exportedAt: new Date().toISOString(), data: state };
+    const name = `gunluk-dualarim-yedek-${todayKey()}.json`;
+    const file = new File([JSON.stringify(payload, null, 2)], name, { type: "application/json" });
+    try {
+      // Telefonlarda paylaşım menüsü (Dosyalar, Drive, AirDrop…) en güvenilir yol
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Günlük Dualarım yedeği" });
+        backupSay("Yedek hazır.");
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === "AbortError") return; // kullanıcı vazgeçti
+    }
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    backupSay("Yedek dosyası indirildi.");
+  }
+
+  async function importBackup(file) {
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      if (!parsed || parsed.app !== BACKUP_APP) throw new Error("app");
+      const clean = sanitizeBackupData(parsed.data);
+      if (!clean || !Object.keys(clean).length) throw new Error("empty");
+      const when = parsed.exportedAt ? new Date(parsed.exportedAt).toLocaleDateString("tr-TR") : "bilinmeyen tarihli";
+      const favCount = Object.keys(clean.favorites || {}).length;
+      const ok = window.confirm(
+        `${when} tarihli yedek yüklenecek (seri: ${clean.streak || 0} gün, favori: ${favCount}).\n` +
+        `Şu anki verilerin bunun üstüne yazılır. Devam edilsin mi?`);
+      if (!ok) { backupSay(""); return; }
+      Object.keys(state).forEach(k => delete state[k]);
+      Object.assign(state, { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} }, clean);
+      saveStore();
+      backupSay("Yedek yüklendi, uygulama yenileniyor…");
+      setTimeout(() => location.reload(), 600);
+    } catch {
+      backupSay("Bu dosya geçerli bir Günlük Dualarım yedeği değil.", true);
+    } finally {
+      bk.file.value = "";
+    }
+  }
+
+  bk.exportBtn.addEventListener("click", exportBackup);
+  bk.importBtn.addEventListener("click", () => bk.file.click());
+  bk.file.addEventListener("change", () => importBackup(bk.file.files[0]));
 
   // ---------- KIBLE ----------
   const qEl = {
