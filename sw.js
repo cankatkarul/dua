@@ -109,11 +109,21 @@ function pickDue(list) {
   }
   return best;
 }
+// Hatırlatmanın saatine göre dua vaktine yakışan varsayılan metin (kendi metnini yazmadıysan)
+function defaultBody(time, hasProgram) {
+  const h = parseInt(time, 10);
+  let text;
+  if (h >= 5 && h < 12) text = "Hayırlı sabahlar. Bismillâh, virdini okumanın vakti geldi.";
+  else if (h >= 12 && h < 18) text = "Bismillâh, dua vakti geldi.";
+  else if (h >= 18 && h < 22) text = "Hayırlı akşamlar. Bismillâh, akşam dualarının vakti geldi.";
+  else text = "Hayırlı geceler. Bismillâh, dua vakti geldi.";
+  return hasProgram ? text + " Başlamak için dokun." : text;
+}
 self.addEventListener("push", e => {
   e.waitUntil((async () => {
     const due = pickDue(await readReminders());
     await self.registration.showNotification(due ? due.label : "Günlük Dualarım", {
-      body: due ? (due.programName ? `${due.programName} programını başlat` : "Dua vakti geldi.") : "Bir hatırlatman var.",
+      body: due ? (due.message || defaultBody(due.time, !!due.program)) : "Bildirimler çalışıyor. Hayırlı olsun.",
       icon: "assets/icon-192.png",
       badge: "assets/icon-192.png",
       tag: due ? "rem-" + due.id : "rem",

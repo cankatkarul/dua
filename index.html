@@ -1496,6 +1496,8 @@ try {
     <div class="rem-days" id="remDays"></div>
     <div class="prog-lab">Dokununca açılacak program</div>
     <select class="prog-input" id="remProgram"></select>
+    <div class="prog-lab">Bildirim metni (isteğe bağlı)</div>
+    <input class="prog-input" id="remMessage" type="text" maxlength="100" placeholder="Boş bırakırsan saate uygun bir metin yazılır" autocomplete="off">
     <button class="ghost-btn full" id="remSave">Kaydet</button>
     <button class="ghost-btn" id="remDelete" hidden>Hatırlatmayı sil</button>
     <button class="ghost-btn" id="remCancel">Vazgeç</button>
@@ -4058,6 +4060,7 @@ function shortestAngleDelta(from, to) {
         time: r.time,
         days: Array.isArray(r.days) ? r.days.filter(x => Number.isInteger(x) && x >= 0 && x <= 6) : [],
         program: typeof r.program === "string" ? r.program.slice(0, 40) : "",
+        message: typeof r.message === "string" ? r.message.slice(0, 100) : "",
         on: r.on !== false,
       }));
     }
@@ -4571,7 +4574,7 @@ function shortestAngleDelta(from, to) {
       const reg = await navigator.serviceWorker.ready;
       const meta = getReminders().filter(r => r.on).map(r => {
         const prog = r.program && getPrograms().find(p => p.id === r.program);
-        return { id: r.id, label: r.label, time: r.time, days: r.days, program: prog ? prog.id : "", programName: prog ? prog.name : "" };
+        return { id: r.id, label: r.label, time: r.time, days: r.days, program: prog ? prog.id : "", programName: prog ? prog.name : "", message: r.message || "" };
       });
       const cache = await caches.open("gunluk-dualarim-meta");
       await cache.put(new URL("__reminders.json", reg.scope).href, new Response(JSON.stringify(meta), { headers: { "Content-Type": "application/json" } }));
@@ -4662,7 +4665,7 @@ function shortestAngleDelta(from, to) {
   function openReminderEditor(id) {
     const ex = id && getReminders().find(r => r.id === id);
     rem.editingId = ex ? ex.id : null;
-    rem.draft = ex ? JSON.parse(JSON.stringify(ex)) : { id: "r" + Date.now().toString(36), label: "Sabah virdi", time: "06:10", days: [], program: "", on: true };
+    rem.draft = ex ? JSON.parse(JSON.stringify(ex)) : { id: "r" + Date.now().toString(36), label: "Sabah virdi", time: "06:10", days: [], program: "", message: "", on: true };
     rem.title.textContent = ex ? "Hatırlatmayı düzenle" : "Yeni hatırlatma";
     // Önce kendi programların (dokununca ad ve program dolar), sonra hazır ayarlar
     rem.presets.innerHTML =
@@ -4670,6 +4673,7 @@ function shortestAngleDelta(from, to) {
       REM_PRESETS.map((p, i) => `<button type="button" data-preset="${i}">${p.label} · ${p.time}</button>`).join("");
     rem.label.value = rem.draft.label;
     rem.time.value = rem.draft.time;
+    $("#remMessage").value = rem.draft.message || "";
     rem.program.innerHTML = `<option value="">Program yok (sadece uygulamayı aç)</option>` + getPrograms().map(p => `<option value="${p.id}">${p.name}</option>`).join("");
     rem.program.value = rem.draft.program || "";
     rem.del.hidden = !ex;
@@ -4710,6 +4714,7 @@ function shortestAngleDelta(from, to) {
     d.label = (rem.label.value || "").trim().slice(0, 30) || "Hatırlatma";
     d.time = /^([01]\d|2[0-3]):[0-5]\d$/.test(rem.time.value) ? rem.time.value : "06:10";
     d.program = rem.program.value;
+    d.message = ($("#remMessage").value || "").trim().slice(0, 100);
     d.on = true;
     if (!Array.isArray(state.reminders)) state.reminders = [];
     const idx = state.reminders.findIndex(r => r.id === d.id);
