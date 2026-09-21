@@ -10,6 +10,7 @@
 
 const CACHE = "gunluk-dualarim-v1";
 const FONT_CACHE = "gunluk-dualarim-fonts-v1";
+const META_CACHE = "gunluk-dualarim-meta"; // sayfanın yazdığı hatırlatma bilgileri (bildirim metni için)
 const PAGE = "./index.html";
 const ASSETS = [
   PAGE,
@@ -33,7 +34,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE && k !== FONT_CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE && k !== FONT_CACHE && k !== META_CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -87,13 +88,51 @@ self.addEventListener("fetch", e => {
   e.respondWith(staleWhileRevalidate(req, CACHE));
 });
 
-// Bildirim tıklandığında uygulamayı aç
+// ---- Hatırlatma bildirimi (Web Push) ----
+// Sunucu gövdesiz bir push gönderir; hangi hatırlatma olduğunu sayfanın önbelleğe yazdığı listeden buluruz.
+async function readReminders() {
+  try {
+    const cache = await caches.open(META_CACHE);
+    const res = await cache.match(new URL("__reminders.json", self.registration.scope).href);
+    return res ? await res.json() : [];
+  } catch { return []; }
+}
+function pickDue(list) {
+  const now = new Date();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  let best = null, bestDiff = 1e9;
+  for (const r of list) {
+    if (r.days && r.days.length && !r.days.includes(now.getDay())) continue;
+    const [h, m] = r.time.split(":").map(Number);
+    const diff = mins - (h * 60 + m);
+    if (diff >= 0 && diff <= 30 && diff < bestDiff) { best = r; bestDiff = diff; }
+  }
+  return best;
+}
+self.addEventListener("push", e => {
+  e.waitUntil((async () => {
+    const due = pickDue(await readReminders());
+    await self.registration.showNotification(due ? due.label : "Günlük Dualarım", {
+      body: due ? (due.programName ? `${due.programName} programını başlat` : "Dua vakti geldi.") : "Bir hatırlatman var.",
+      icon: "assets/icon-192.png",
+      badge: "assets/icon-192.png",
+      tag: due ? "rem-" + due.id : "rem",
+      data: { program: due ? due.program : "" },
+    });
+  })());
+});
+
+// Bildirime dokununca uygulamayı aç (program bağlıysa başlat)
 self.addEventListener("notificationclick", e => {
   e.notification.close();
+  const pid = (e.notification.data && e.notification.data.program) || "";
   e.waitUntil(
-    clients.matchAll({ type: "window" }).then(list => {
-      if (list.length) return list[0].focus();
-      return clients.openWindow("./index.html");
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(list => {
+      if (list.length) {
+        if (pid) list[0].postMessage({ type: "start-program", id: pid });
+        return list[0].focus();
+      }
+      return clients.openWindow(pid ? "./index.html#p=" + encodeURIComponent(pid) : "./index.html");
     })
   );
 });

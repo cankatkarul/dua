@@ -1,7 +1,15 @@
-# Günlük Dualarım — bulut eşitleme (Cloudflare Worker + KV)
+# Günlük Dualarım — sunucu (eşitleme + hatırlatma): Cloudflare Worker + KV
 name = "dua-sync"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
+
+# Her dakika: vakti gelen hatırlatmalar için push gönder
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+VAPID_PUBLIC = "BFKd-St1Ng4bKsFMwO9zYgR9ryAlgQLBRKJN9oCLQWG4xlXsC7OO0zBlo--6by1LJAzJg7WQCJO3_Y669C3abME"
+VAPID_SUBJECT = "https://dua.eskisehir.fit"
 
 # KV alanı ilk "wrangler deploy" sırasında kendiliğinden oluşturulur
 [[kv_namespaces]]
