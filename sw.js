@@ -113,7 +113,7 @@ function pickDue(list) {
 function defaultBody(time, hasProgram) {
   const h = parseInt(time, 10);
   let text;
-  if (h >= 5 && h < 12) text = "Hayırlı sabahlar. Bismillâh, virdini okumanın vakti geldi.";
+  if (h >= 5 && h < 12) text = "Hayırlı sabahlar. Bismillâh, dua vakti geldi.";
   else if (h >= 12 && h < 18) text = "Bismillâh, dua vakti geldi.";
   else if (h >= 18 && h < 22) text = "Hayırlı akşamlar. Bismillâh, akşam dualarının vakti geldi.";
   else text = "Hayırlı geceler. Bismillâh, dua vakti geldi.";
