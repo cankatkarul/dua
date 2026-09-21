@@ -1062,6 +1062,40 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 .hero-esma-card .hero-esma-eyebrow{ color: var(--tone); }
 .hero-esma-card .hero-esma-btn.primary{ background: var(--tone); color: #06241F; }
 
+/* ================= NAMAZ VAKİTLERİ KARTI ================= */
+.prayer-card{
+  position: relative; overflow: hidden;
+  background: linear-gradient(155deg, var(--surface-strong) 0%, var(--surface) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px 12px;
+  margin-bottom: 16px;
+}
+.pt-top{ display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.pt-label{ font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); }
+.pt-next{ display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
+.pt-next-name{ font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1.1; }
+.pt-next-time{ font-size: 15px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.pt-left{ text-align: right; }
+.pt-left b{ display: block; font-family: var(--display); font-size: 24px; line-height: 1.1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.pt-left span{ font-size: 11.5px; color: var(--text-tertiary); }
+.pt-row{ display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--divider); }
+.pt-cell{ text-align: center; padding: 4px 0 5px; border-radius: 10px; }
+.pt-cell span{ display: block; font-size: 10.5px; color: var(--text-tertiary); }
+.pt-cell b{ display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.pt-cell.passed b{ color: var(--text-tertiary); font-weight: 500; }
+.pt-cell.next{ background: var(--accent-glow); }
+.pt-cell.next span{ color: var(--accent); font-weight: 700; }
+.pt-note{ margin: 8px 0 0; font-size: 11px; color: var(--text-tertiary); }
+.pt-ask{ margin: 6px 0 0; font-size: 14px; color: var(--text-secondary); }
+.pt-btn{
+  margin-top: 10px; padding: 10px 18px; border-radius: 999px;
+  background: var(--accent); color: #0F2A22; font-weight: 700; font-size: 13.5px;
+  transition: transform .15s ease;
+}
+.pt-btn:active{ transform: scale(.95); }
+.pt-btn:disabled{ opacity: .6; }
+
 /* ================= PAYLAŞIM TOAST ================= */
 .share-toast{
   position: fixed; left: 50%; bottom: 40px;
@@ -1097,6 +1131,8 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
       <input type="search" id="searchInput" class="search-box-input" placeholder="Bu sekmede ara..." autocomplete="off" autocorrect="off" spellcheck="false" />
       <button class="search-box-clear" id="searchClearBtn" aria-label="Aramayı temizle" hidden>✕</button>
     </div>
+
+    <div class="prayer-card" id="prayerCard" aria-label="Namaz vakitleri"></div>
 
     <div class="calendar-leaf-card" id="calendarLeafCard" aria-label="Günün sayfası"></div>
 
@@ -2298,6 +2334,52 @@ function magneticDeclination(latDeg, lonDeg, date = new Date()) {
   return Math.atan2(Y, Xg) / rad;
 }
 
+// ---------- NAMAZ VAKİTLERİ ----------
+// Güneşin konumundan hesaplanır (Diyanet açıları: imsak 18°, yatsı 17°, ikindi standart gölge, temkin payları eklenmiş).
+// tz: saat dilimi farkı (saat), sonuç: yerel saatle ondalık saatler.
+function prayerTimesFor(date, lat, lon, tz) {
+  const rad = Math.PI / 180;
+  const sin = d => Math.sin(d * rad), cos = d => Math.cos(d * rad), tan = d => Math.tan(d * rad);
+  const acos = x => Math.acos(x) / rad, atan = x => Math.atan(x) / rad;
+  const fix = (a, m) => a - m * Math.floor(a / m);
+  // Julian günü (öğle 12:00 UT)
+  const Y = date.getFullYear(), M = date.getMonth() + 1, D = date.getDate();
+  let y = Y, m = M;
+  if (m <= 2) { y -= 1; m += 12; }
+  const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+  const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + D + B - 1524.5 - lon / (15 * 24);
+  const d = jd - 2451545.0;
+  // Güneş: bildirim ve zaman denklemi
+  const g = fix(357.529 + 0.98560028 * d, 360);
+  const q = fix(280.459 + 0.98564736 * d, 360);
+  const L = fix(q + 1.915 * sin(g) + 0.020 * sin(2 * g), 360);
+  const e = 23.439 - 0.00000036 * d;
+  const RA = fix(Math.atan2(cos(e) * sin(L), cos(L)) / rad, 360) / 15;
+  const dec = Math.asin(sin(e) * sin(L)) / rad;
+  const eqt = q / 15 - RA;
+  const eqtN = eqt - 24 * Math.round(eqt / 24);
+  const noon = 12 + tz - lon / 15 - eqtN;
+  // Güneşin ufuktan 'angle' derece altına indiği/çıktığı an ile öğle arası fark (saat)
+  const hourAngle = (angle) => {
+    const c = (-sin(angle) - sin(dec) * sin(lat)) / (cos(dec) * cos(lat));
+    return c < -1 || c > 1 ? NaN : acos(c) / 15;
+  };
+  const asrAngle = -atan(1 / (1 + tan(Math.abs(lat - dec)))) ; // gölge = nesne + öğle gölgesi
+  const asrHA = (() => {
+    const c = (sin(-asrAngle) - sin(dec) * sin(lat)) / (cos(dec) * cos(lat));
+    return c < -1 || c > 1 ? NaN : acos(c) / 15;
+  })();
+  // Diyanet'in temkin payları (dakika): güneş -7, öğle +5, ikindi +4, akşam +7
+  return {
+    imsak: noon - hourAngle(18),
+    gunes: noon - hourAngle(0.833) - 7 / 60,
+    ogle: noon + 5 / 60,
+    ikindi: noon + asrHA + 4 / 60,
+    aksam: noon + hourAngle(0.833) + 7 / 60,
+    yatsi: noon + hourAngle(17),
+  };
+}
+
 // İki yön arasındaki en kısa işaretli fark (-180..180)
 function shortestAngleDelta(from, to) {
   return ((((to - from) % 360) + 540) % 360) - 180;
@@ -3378,6 +3460,110 @@ function shortestAngleDelta(from, to) {
   document.addEventListener("visibilitychange", () => { if (document.hidden) stopAutoScroll(); });
   autoRenderUi();
 
+  // ---------- KAYITLI KONUM (kıble ve namaz vakitleri ortak kullanır) ----------
+  function getSavedPos() {
+    const p = state.pos || state.qiblaPos; // qiblaPos: eski sürümden kalan kayıt
+    return p && typeof p.lat === "number" && typeof p.lon === "number" ? p : null;
+  }
+  function savePos(lat, lon) {
+    state.pos = { lat, lon, ts: Date.now() };
+    delete state.qiblaPos;
+    saveStore();
+    renderPrayerCard();
+  }
+
+  // ---------- NAMAZ VAKİTLERİ KARTI ----------
+  const PRAYER_KEYS = [["imsak", "İmsak"], ["gunes", "Güneş"], ["ogle", "Öğle"], ["ikindi", "İkindi"], ["aksam", "Akşam"], ["yatsi", "Yatsı"]];
+  const prayerEl = $("#prayerCard");
+  const prayer = { locating: false, denied: false };
+
+  function fmtClock(h) {
+    if (!isFinite(h)) return "—";
+    const t = Math.round((((h % 24) + 24) % 24) * 60) % 1440;
+    return String(Math.floor(t / 60)).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
+  }
+  function prayerDay(date, pos) {
+    return prayerTimesFor(date, pos.lat, pos.lon, -date.getTimezoneOffset() / 60);
+  }
+  function fmtLeft(mins) {
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return h > 0 ? `${h} sa ${m} dk` : `${m} dk`;
+  }
+
+  function renderPrayerCard() {
+    if (!prayerEl) return;
+    const pos = getSavedPos();
+    if (!pos) {
+      prayerEl.innerHTML = `
+        <div class="pt-label">Namaz Vakitleri</div>
+        <p class="pt-ask">${prayer.denied
+          ? "Konum izni verilmedi. Tarayıcı ayarlarından izin verip tekrar deneyebilirsiniz."
+          : "Vakitleri hesaplamak için konumunuza ihtiyaç var. Konum cihazınızdan çıkmaz."}</p>
+        <button class="pt-btn" id="prayerLocateBtn" ${prayer.locating ? "disabled" : ""}>${prayer.locating ? "Konum alınıyor…" : "Konumumu kullan"}</button>`;
+      const btn = prayerEl.querySelector("#prayerLocateBtn");
+      if (btn) btn.addEventListener("click", prayerLocate);
+      return;
+    }
+    const now = new Date();
+    const today = prayerDay(now, pos);
+    const nowH = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+    let nextIdx = PRAYER_KEYS.findIndex(([k]) => isFinite(today[k]) && today[k] > nowH);
+    let nextName = "—", nextH = NaN;
+    if (nextIdx !== -1) {
+      nextName = PRAYER_KEYS[nextIdx][1]; nextH = today[PRAYER_KEYS[nextIdx][0]];
+    } else {
+      // Yatsıdan sonra sıradaki vakit yarının ilk vakti
+      const t2 = prayerDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), pos);
+      const j = PRAYER_KEYS.findIndex(([k]) => isFinite(t2[k]));
+      if (j !== -1) { nextName = PRAYER_KEYS[j][1]; nextH = t2[PRAYER_KEYS[j][0]] + 24; }
+    }
+    const mins = isFinite(nextH) ? Math.max(0, Math.ceil((nextH - nowH) * 60)) : null;
+    const cells = PRAYER_KEYS.map(([k, label], i) => {
+      const cls = i === nextIdx ? " next" : (isFinite(today[k]) && today[k] <= nowH ? " passed" : "");
+      return `<div class="pt-cell${cls}"><span>${label}</span><b>${fmtClock(today[k])}</b></div>`;
+    }).join("");
+    prayerEl.innerHTML = `
+      <div class="pt-top">
+        <div>
+          <div class="pt-label">Sıradaki vakit</div>
+          <div class="pt-next"><span class="pt-next-name">${nextName}</span><span class="pt-next-time">${fmtClock(nextH)}</span></div>
+        </div>
+        <div class="pt-left"><b>${mins == null ? "—" : fmtLeft(mins)}</b><span>kaldı</span></div>
+      </div>
+      <div class="pt-row">${cells}</div>
+      <p class="pt-note">Diyanet açılarıyla hesaplanır; resmî takvimle ±2 dk fark olabilir.</p>`;
+  }
+
+  function prayerLocate() {
+    if (!navigator.geolocation) { prayer.denied = true; renderPrayerCard(); return; }
+    prayer.locating = true; prayer.denied = false;
+    renderPrayerCard();
+    navigator.geolocation.getCurrentPosition(pos => {
+      prayer.locating = false;
+      savePos(pos.coords.latitude, pos.coords.longitude);
+    }, err => {
+      prayer.locating = false;
+      prayer.denied = !!(err && err.code === 1);
+      renderPrayerCard();
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+  }
+
+  // İzin zaten verilmişse konumu sessizce tazele (şehir değiştirdiyse vakitler de değişsin)
+  function prayerRefreshPos() {
+    const pos = getSavedPos();
+    if (!pos || !navigator.permissions || !navigator.geolocation) return;
+    if (pos.ts && Date.now() - pos.ts < 6 * 3600 * 1000) return;
+    navigator.permissions.query({ name: "geolocation" }).then(st => {
+      if (st.state !== "granted") return;
+      navigator.geolocation.getCurrentPosition(
+        p => savePos(p.coords.latitude, p.coords.longitude),
+        () => {}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 3600000 });
+    }).catch(() => {});
+  }
+
+  setInterval(renderPrayerCard, 20000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { renderPrayerCard(); prayerRefreshPos(); } });
+
   // ---------- KIBLE ----------
   const qEl = {
     screen: $("#qibla"), backBtn: $("#qiblaBackBtn"), openBtn: $("#openQibla"),
@@ -3528,8 +3714,7 @@ function shortestAngleDelta(from, to) {
     navigator.geolocation.getCurrentPosition(pos => {
       qs.locating = false;
       qs.locError = null;
-      state.qiblaPos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-      saveStore();
+      savePos(pos.coords.latitude, pos.coords.longitude);
       qiblaSetPosition(pos.coords.latitude, pos.coords.longitude, false);
     }, err => {
       qs.locating = false;
@@ -3553,7 +3738,7 @@ function shortestAngleDelta(from, to) {
     showScreen(qEl.screen, els.home);
     keepAwake("qibla", true);
     qiblaStartCompass();               // önce: dokunuş bağlamı kaybolmadan
-    const cached = state.qiblaPos;
+    const cached = getSavedPos();
     if (cached && typeof cached.lat === "number") qiblaSetPosition(cached.lat, cached.lon, true);
     qiblaLocate();
     qiblaRenderStatus();
@@ -3801,6 +3986,8 @@ function shortestAngleDelta(from, to) {
   renderCalendarLeaf();
   renderDailyVerse();
   renderDailyEsma();
+  renderPrayerCard();
+  prayerRefreshPos();
   renderHome();
   renderStreakBadge();
   updateHomeCounterFab();
