@@ -3961,8 +3961,8 @@ function shortestAngleDelta(from, to) {
   bk.file.addEventListener("change", () => importBackup(bk.file.files[0]));
 
   // ---------- BULUT EŞİTLEME ----------
-  // Sunucu adresi (worker/ klasöründeki Cloudflare Worker); boşsa bölüm gizli kalır
-  const SYNC_URL = window.SABAH_SYNC_URL || "";
+  // Sunucu adresi (worker/ klasöründeki Cloudflare Worker); boş bırakılırsa bölüm gizli kalır
+  const SYNC_URL = window.SABAH_SYNC_URL || "https://dua-sync.eskisehirfit.workers.dev";
   const SYNC_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const sy = {
     section: $("#syncSection"), off: $("#syncOff"), on: $("#syncOn"),
