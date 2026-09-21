@@ -4,7 +4,7 @@
    - Yâsîn Perşembe bildirimi için arka plan desteği
    ========================================================= */
 
-const CACHE = "sabah-virdi-v15";
+const CACHE = "sabah-virdi-v16";
 const ASSETS = [
   "./index.html",
   "./manifest.json",

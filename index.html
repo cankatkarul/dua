@@ -905,6 +905,20 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
   color: var(--text-primary); margin-bottom: 6px;
 }
 .cl-hadith-source{ font-size: 12px; color: var(--text-tertiary); }
+.cl-event-label{ font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.cl-event-row{ display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cl-event-name{ font-family: var(--display); font-size: 19px; font-weight: 700; }
+.cl-event-when{ font-size: 12.5px; color: var(--text-secondary); }
+.cl-event-go{
+  margin-top: 8px; padding: 7px 14px; border-radius: 999px;
+  background: var(--surface-strong); border: 1px solid var(--border);
+  color: var(--accent); font-size: 12.5px; font-weight: 700;
+}
+.cl-event.is-now{
+  margin: -2px -6px 0; padding: 10px 12px 12px; border-radius: var(--radius-sm);
+  background: var(--accent-glow); border: 1px solid var(--accent);
+}
+.cl-event.is-now .cl-event-when{ color: var(--accent); font-weight: 700; }
 
 /* ================= BUGÜNÜN ÂYETİ KARTI ================= */
 .daily-verse-card{
@@ -3582,7 +3596,11 @@ function shortestAngleDelta(from, to) {
   }
 
   setInterval(renderPrayerCard, 20000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) { renderPrayerCard(); prayerRefreshPos(); } });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    renderPrayerCard(); prayerRefreshPos();
+    renderCalendarLeaf(); renderDailyVerse(); renderDailyEsma(); // gün değiştiyse tazele
+  });
 
   // ---------- YEDEKLEME ----------
   const BACKUP_APP = "gunluk-dualarim";
@@ -3923,12 +3941,82 @@ function shortestAngleDelta(from, to) {
     return { day, month: HICRI_AYLAR[month - 1], year };
   }
 
+  // ---------- HİCRÎ TAKVİM ----------
+  // Tarayıcının Umm al-Qura takvimi kullanılır (Diyanet ile çoğu gün aynı, bazı aylarda 1 gün fark olabilir).
+  // Desteklemeyen eski tarayıcılarda aritmetik hesaba düşer.
+  const HICRI_FMT = (() => {
+    try {
+      const f = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { day: "numeric", month: "numeric", year: "numeric", timeZone: "UTC" });
+      return f.resolvedOptions().calendar === "islamic-umalqura" ? f : null;
+    } catch { return null; }
+  })();
+  function hijriOf(date) {
+    if (HICRI_FMT) {
+      const parts = Object.fromEntries(HICRI_FMT.formatToParts(
+        new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12))).map(x => [x.type, x.value]));
+      return { day: +parts.day, monthNum: +parts.month, year: +parts.year };
+    }
+    const h = gregorianToHijri(date);
+    return { day: h.day, monthNum: HICRI_AYLAR.indexOf(h.month) + 1, year: h.year };
+  }
+
+  // Özel günler: kandil:true olanlar bir önceki akşam başlar ("Bu akşam"). oner: dokununca açılacak dua.
+  const OZEL_GUNLER = [
+    { m: 1,  d: 1,  ad: "Hicrî Yılbaşı" },
+    { m: 1,  d: 10, ad: "Aşure Günü" },
+    { m: 3,  d: 12, ad: "Mevlid Kandili", kandil: true, oner: "salavat-i-serif" },
+    { m: 7,  d: 1,  ad: "Üç Ayların Başlangıcı" },
+    { m: 7,  d: 27, ad: "Miraç Kandili", kandil: true, oner: "yasin" },
+    { m: 8,  d: 15, ad: "Berat Kandili", kandil: true, oner: "yasin" },
+    { m: 9,  d: 1,  ad: "Ramazan Başlangıcı" },
+    { m: 9,  d: 27, ad: "Kadir Gecesi", kandil: true, oner: "kadr" },
+    { m: 10, d: 1,  ad: "Ramazan Bayramı" },
+    { m: 12, d: 9,  ad: "Arefe Günü" },
+    { m: 12, d: 10, ad: "Kurban Bayramı" },
+  ];
+  const DAY_MS = 86400000;
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+
+  // Bugünden itibaren ~1 yıl içindeki ilk özel günü bulur
+  function nextSpecialDay(now) {
+    const today = startOfDay(now);
+    let best = null;
+    for (let i = 0; i <= 380; i++) {
+      const day = addDays(today, i);
+      const h = hijriOf(day);
+      const cands = [];
+      OZEL_GUNLER.filter(o => o.m === h.monthNum && o.d === h.day).forEach(o => cands.push(o));
+      if (h.day === 30 || h.day === 29) {
+        // Ramazan Bayramı arefesi: 1 Şevval'den bir gün önce
+        const hn = hijriOf(addDays(day, 1));
+        if (hn.monthNum === 10 && hn.day === 1) cands.push({ ad: "Ramazan Arefesi" });
+      }
+      if (h.monthNum === 7 && h.day <= 7 && day.getDay() === 5) {
+        // Receb'in ilk Cuması (ayın 1-7'si arasındaki Cuma); kandil bir önceki Perşembe akşamı
+        cands.push({ ad: "Regaib Kandili", kandil: true, oner: "yasin" });
+      }
+      for (const o of cands) {
+        const eff = o.kandil ? addDays(day, -1) : day; // kandiller bir önceki akşam
+        if (eff < today) continue;
+        // Aynı güne denk gelirse kandil öne geçer
+        if (!best || eff < best.eff || (+eff === +best.eff && o.kandil && !best.kandil)) {
+          best = { ...o, eff, eventDay: day, daysLeft: Math.round((eff - today) / DAY_MS) };
+        }
+      }
+      if (best && i > best.daysLeft + 2) break;
+    }
+    return best;
+  }
+
   // ---------- GÜNÜN SAYFASI (hicri tarih + günün hadisi) ----------
   function renderCalendarLeaf() {
     const el = document.getElementById("calendarLeafCard");
     if (!el) return;
     const now = new Date();
-    const hicri = gregorianToHijri(now);
+    const h = hijriOf(now);
+    const hicri = { day: h.day, month: HICRI_AYLAR[h.monthNum - 1], year: h.year };
+    const ozel = nextSpecialDay(now);
 
     const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
     const hadith = HADITHS[dayOfYear % HADITHS.length];
@@ -3948,7 +4036,32 @@ function shortestAngleDelta(from, to) {
       <div class="cl-hadith-label">Günün Hadîsi</div>
       <div class="cl-hadith-text">"${hadith.text}"</div>
       <div class="cl-hadith-source">${hadith.source}</div>
+      ${renderSpecialDayHtml(ozel)}
     `;
+    const goBtn = el.querySelector("[data-open-dua]");
+    if (goBtn) goBtn.addEventListener("click", () => {
+      const id = goBtn.dataset.openDua;
+      openReader(id, DUAS.some(d => d.id === id) ? DUAS : TESBIHAT);
+    });
+  }
+
+  function renderSpecialDayHtml(o) {
+    if (!o) return "";
+    const oner = o.oner && (DUAS.find(d => d.id === o.oner) || TESBIHAT.find(t => t.id === o.oner));
+    let when, tone = "";
+    if (o.daysLeft === 0) { when = o.kandil ? "Bu akşam" : "Bugün"; tone = " is-now"; }
+    else if (o.daysLeft === 1) { when = o.kandil ? "Yarın akşam" : "Yarın"; }
+    else {
+      const dt = o.eff.toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
+      when = `${o.daysLeft} gün sonra · ${dt}`;
+    }
+    return `
+      <div class="cl-divider"></div>
+      <div class="cl-event${tone}">
+        <div class="cl-event-label">${o.daysLeft === 0 ? "Özel gün" : "Yaklaşan özel gün"}</div>
+        <div class="cl-event-row"><span class="cl-event-name">${o.ad}</span><span class="cl-event-when">${when}</span></div>
+        ${oner ? `<button class="cl-event-go" data-open-dua="${oner.id}">${oner.name} oku ›</button>` : ""}
+      </div>`;
   }
 
   // ---------- BUGÜNÜN ÂYETİ ----------
