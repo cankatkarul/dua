@@ -209,24 +209,6 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 .dua-counter-btn:active{ transform: scale(.9); background: var(--surface-strong); }
 
 /* ---------- Home: Esmâ-i Hüsnâ öne çıkan kart ---------- */
-.hero-esma-card{
-  position: relative; overflow: hidden;
-  padding: 24px 20px; border-radius: var(--radius-lg); text-align: center;
-  background: linear-gradient(160deg, var(--accent-glow), transparent 70%), var(--surface);
-  border: 1px solid var(--accent-glow);
-  box-shadow: var(--shadow-soft);
-}
-.hero-esma-eyebrow{ font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
-.hero-esma-title{ font-family: var(--display); font-size: 27px; font-weight: 700; margin: 0 0 4px; color: var(--text-primary); }
-.hero-esma-sub{ font-size: 12.5px; color: var(--text-secondary); margin: 0 0 16px; }
-.hero-esma-actions{ display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-.hero-esma-btn{
-  font-family: inherit; font-size: 13px; font-weight: 700; padding: 10px 18px;
-  border-radius: 999px; cursor: pointer; transition: transform .18s ease;
-}
-.hero-esma-btn:active{ transform: scale(.95); }
-.hero-esma-btn.primary{ background: var(--accent); color: #0F2A22; border: none; }
-.hero-esma-btn.ghost{ background: var(--surface-strong); color: var(--text-primary); border: 1px solid var(--border); }
 
 .home-counter-fab{
   position: fixed; left: 20px; bottom: calc(20px + env(safe-area-inset-bottom,0px)); z-index: 20;
@@ -868,128 +850,77 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 }
 
 
-/* ================= GÜNÜN SAYFASI (eski yaprak takvim hissi) ================= */
-.calendar-leaf-card{
-  position: relative;
-  background: linear-gradient(155deg, var(--surface-strong) 0%, var(--surface) 100%);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 22px 20px 18px;
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-.cl-rings{
-  position: absolute; top: -7px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 38px;
-}
-.cl-rings span{
-  width: 13px; height: 13px; border-radius: 50%;
-  background: var(--bg); border: 1px solid var(--border);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
-}
-.cl-top{ display: flex; align-items: flex-end; gap: 14px; padding-top: 4px; }
-.cl-hicri-day{
-  font-family: var(--display); font-size: 46px; font-weight: 700; line-height: 1;
-  color: var(--accent); flex: 0 0 auto;
-}
-.cl-hicri-meta{ flex: 1; min-width: 0; padding-bottom: 2px; }
-.cl-hicri-month{ font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--text-primary); }
-.cl-gregorian{ font-size: 12px; color: var(--text-secondary); margin-top: 2px; text-transform: capitalize; }
-.cl-divider{ height: 1px; background: var(--divider); margin: 14px 0; }
-.cl-hadith-label{
-  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 6px;
-}
-.cl-hadith-text{
-  font-family: var(--serif); font-size: 14.5px; line-height: 1.6;
-  color: var(--text-primary); margin-bottom: 6px;
-}
-.cl-hadith-source{ font-size: 12px; color: var(--text-tertiary); }
-.cl-event-label{ font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
-.cl-event-row{ display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.cl-event-name{ font-family: var(--display); font-size: 19px; font-weight: 700; }
-.cl-event-when{ font-size: 12.5px; color: var(--text-secondary); }
-.cl-event-go{
-  margin-top: 8px; padding: 7px 14px; border-radius: 999px;
-  background: var(--surface-strong); border: 1px solid var(--border);
-  color: var(--accent); font-size: 12.5px; font-weight: 700;
-}
-.cl-event.is-now{
-  margin: -2px -6px 0; padding: 10px 12px 12px; border-radius: var(--radius-sm);
-  background: var(--accent-glow); border: 1px solid var(--accent);
-}
-.cl-event.is-now .cl-event-when{ color: var(--accent); font-weight: 700; }
+/* ================= RENK TONLARI (kutucuklar ve bölümler) ================= */
+.theme-dark .tone-h{ --tone: #C9A24C; --tone-rgb: 201,162,76; }
+.theme-dark .tone-a, .theme-dark .tone-y{ --tone: #A79FF2; --tone-rgb: 167,159,242; }
+.theme-dark .tone-e{ --tone: #3FB8AF; --tone-rgb: 63,184,175; }
+.theme-dark .tone-v{ --tone: #E68AA0; --tone-rgb: 230,138,160; }
+.theme-light .tone-h{ --tone: #A9821F; --tone-rgb: 169,130,31; }
+.theme-light .tone-a, .theme-light .tone-y{ --tone: #6D62D6; --tone-rgb: 109,98,214; }
+.theme-light .tone-e{ --tone: #1F8F87; --tone-rgb: 31,143,135; }
+.theme-light .tone-v{ --tone: #C24E6B; --tone-rgb: 194,78,107; }
+.tone-label{ font-size: 9.5px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--tone); }
 
-/* ================= BUGÜNÜN ÂYETİ KARTI ================= */
-.daily-verse-card{
-  position: relative;
+/* ================= TARİH ŞERİDİ (Hicrî tarih + yaklaşan özel gün) ================= */
+.date-strip{
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 9px 14px; margin-bottom: 12px;
   background: linear-gradient(155deg, var(--surface-strong) 0%, var(--surface) 100%);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 18px 20px 16px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: transform .2s ease;
-  overflow: hidden;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  color: inherit; touch-action: manipulation;
 }
-.daily-verse-card:active{ transform: scale(.98); }
-.daily-verse-card::before{
-  content: "✦";
-  position: absolute; top: 12px; right: 16px;
-  color: var(--accent); opacity: .5; font-size: 14px;
+.date-strip.has-event:active{ transform: scale(.985); }
+.date-strip.is-now{ border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.dt-day{ font-family: var(--display); font-size: 30px; font-weight: 700; line-height: 1; color: var(--accent); flex: 0 0 auto; }
+.dt-meta{ min-width: 0; }
+.dt-month{ font-family: var(--display); font-size: 15px; font-weight: 700; line-height: 1.15; }
+.dt-greg{ font-size: 11.5px; color: var(--text-secondary); }
+.dt-chip{
+  margin-left: auto; flex: 0 1 auto; min-width: 0; max-width: 50%;
+  font-size: 11px; font-weight: 700; line-height: 1.25; text-align: center; padding: 5px 11px; border-radius: 14px;
+  background: var(--accent-glow); color: var(--accent);
 }
-.dv-label{
-  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 8px;
-}
-.dv-text{
-  font-family: var(--serif); font-size: 16px; line-height: 1.6;
-  color: var(--text-primary); margin-bottom: 6px;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-}
-.dv-source{ font-size: 12px; color: var(--text-tertiary); }
+.dt-chip.is-now{ background: var(--accent); color: #0F2A22; }
 
-/* ================= GÜNÜN ESMÂSI KARTI ================= */
-.daily-esma-card{
-  position: relative;
+/* ================= ÜÇLÜ TEK CAM (Hadîs / Âyet / Esmâ) ================= */
+.tri-wrap{
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  padding: 12px 0 10px; margin-bottom: 6px; border-radius: 22px;
   background: linear-gradient(155deg, var(--surface-strong) 0%, var(--surface) 100%);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 16px 20px 14px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: transform .2s ease;
-  overflow: hidden;
-  box-shadow: var(--shadow-soft);
 }
-.daily-esma-card:active{ transform: scale(.98); }
-.de-label{
-  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--accent);
+.tri-col{
+  position: relative; display: flex; flex-direction: column; gap: 7px;
+  min-height: 140px; padding: 0 10px; text-align: left; color: inherit;
+  touch-action: manipulation; transition: opacity .15s ease;
 }
-.de-name{
-  position: relative; z-index: 1;
-  font-family: var(--display); font-size: 36px; line-height: 1.15; font-weight: 700;
-  margin: 8px 0 2px; color: var(--text-primary);
+.tri-col:active{ opacity: .65; }
+.tri-col + .tri-col::before{ content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 1px; background: var(--divider); }
+.tri-mark, .tri-num{ font-family: var(--display); font-size: 34px; line-height: .9; font-weight: 700; color: var(--tone); }
+.tri-text{
+  font-family: var(--serif); font-size: 12px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
-.de-meaning{
-  position: relative; z-index: 1;
-  font-family: var(--serif); font-style: italic; font-size: 15px; line-height: 1.4;
-  color: var(--text-secondary); max-width: 80%;
+.tri-arabic{ font-family: var(--display); font-size: 30px; line-height: 1.4; color: var(--tone); direction: rtl; text-align: left; }
+.tri-arabic.long{ font-size: 14px; line-height: 1.6; }
+.tri-name{ font-family: var(--display); font-size: 17px; line-height: 1.1; font-weight: 700; }
+.tri-src{
+  margin-top: auto; font-size: 10px; line-height: 1.3; color: var(--text-tertiary);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.de-ghost{
-  position: absolute; right: 14px; bottom: 30px;
-  font-family: var(--display); font-weight: 700; font-size: 80px; line-height: 1;
-  color: var(--accent); opacity: .16; letter-spacing: -.02em; pointer-events: none;
-}
-.de-bar{ position: relative; height: 3px; border-radius: 3px; background: var(--divider); margin-top: 14px; }
-.de-bar-fill{ position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); }
-.de-foot{
-  display: flex; justify-content: space-between; margin-top: 6px;
-  font-size: 11.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums;
-}
+.tri-hint{ text-align: center; font-size: 10.5px; color: var(--text-tertiary); margin: 0 0 14px; }
+
+/* ================= GÜNÜN İÇERİĞİ (alttan tam metin sayfası) ================= */
+.daily-sheet{ max-height: 90dvh; overflow-y: auto; }
+.dsh-text{ font-family: var(--serif); font-size: calc(20px * var(--font-scale)); line-height: 1.7; margin: 10px 0 6px; }
+.dsh-src{ font-size: 13px; color: var(--text-tertiary); margin-bottom: 4px; }
+.dsh-arabic{ font-family: var(--display); font-size: 58px; line-height: 1.5; text-align: center; color: var(--tone); direction: rtl; margin-top: 6px; }
+.dsh-arabic.long{ font-size: 26px; }
+.dsh-name{ font-family: var(--display); font-size: 30px; font-weight: 700; text-align: center; }
+.dsh-mean{ text-align: center; font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--text-secondary); margin-top: 4px; }
+.dsh-count{ text-align: center; font-size: 12.5px; color: var(--text-tertiary); margin-top: 6px; font-variant-numeric: tabular-nums; }
+.dsh-when{ font-size: 14px; color: var(--text-secondary); margin: 2px 0 4px; }
+.daily-sheet .ghost-btn{ margin-top: 12px; }
 
 /* Esmâ-i Hüsnâ okuma ekranında isim altındaki anlam */
 .dua-text .verse-meaning{
@@ -1068,13 +999,45 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
   background: linear-gradient(155deg, #A79FF2 0%, #6A61C4 100%); color: #16123A;
   box-shadow: 0 4px 10px rgba(142,134,232,0.4);
 }
-.hero-esma-card{
-  --tone: #3FB8AF; --tone-glow: rgba(63,184,175,0.32);
-  background: linear-gradient(160deg, var(--tone-glow), transparent 70%), var(--surface);
-  border-color: rgba(63,184,175,0.45);
+/* Sûreler: Esmâ-i Hüsnâ / Vâkıa (uzun ikili) ve Yâsîn (geniş) kutucukları */
+.sp-pair{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sp-pair > .sp-tile:only-child{ grid-column: 1 / -1; }
+.sp-tile{
+  position: relative; overflow: hidden; display: flex; flex-direction: column; text-align: left;
+  min-height: 190px; padding: 12px 13px; border-radius: 20px; color: inherit; cursor: pointer;
+  background:
+    radial-gradient(130% 85% at 100% 0%, rgba(var(--tone-rgb), .26) 0%, transparent 62%),
+    linear-gradient(165deg, var(--surface-strong), var(--surface));
+  border: 1px solid rgba(var(--tone-rgb), .34);
+  box-shadow: var(--shadow-soft);
+  transition: transform .2s ease, border-color .2s ease;
+  touch-action: manipulation;
 }
-.hero-esma-card .hero-esma-eyebrow{ color: var(--tone); }
-.hero-esma-card .hero-esma-btn.primary{ background: var(--tone); color: #06241F; }
+.sp-tile:active{ transform: scale(.97); }
+.sp-top{ display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 22px; }
+.sp-top .dua-fav-btn{ margin: -4px -6px -4px 0; }
+.sp-chip{ font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px; color: var(--tone); background: rgba(var(--tone-rgb), .16); margin-left: auto; }
+.sp-arabic{
+  font-family: var(--display); font-size: 26px; line-height: 1.55; margin-top: 8px;
+  color: var(--tone); direction: rtl; text-align: left;
+  text-shadow: 0 0 22px rgba(var(--tone-rgb), .38);
+}
+.sp-name{ font-family: var(--display); font-size: 19px; font-weight: 700; line-height: 1.1; margin-top: auto; }
+.sp-meta{ font-size: 11.5px; line-height: 1.35; color: var(--text-secondary); margin-top: 2px; }
+.sp-bar{ position: relative; height: 3px; border-radius: 3px; background: var(--divider); margin-top: 8px; }
+.sp-bar i{ position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--tone); }
+.sp-btns{ display: flex; gap: 6px; margin-top: 10px; }
+.sp-btn{ font-size: 11px; font-weight: 800; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-strong); color: var(--text-primary); }
+.sp-btn.primary{ background: var(--tone); border-color: transparent; color: #06241F; }
+.theme-light .sp-btn.primary{ color: #fff; }
+.sp-done{ display: none; margin-left: 6px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #0F2A22; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; vertical-align: middle; }
+.sp-tile.is-done .sp-done{ display: inline-flex; }
+.sp-tile.is-done{ border-color: rgba(74,222,128,0.4); }
+.sp-wide{ flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; min-height: 0; padding: 12px 14px; }
+.sp-wide .sp-info{ display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.sp-wide .sp-name{ margin-top: 2px; font-size: 18px; }
+.sp-wide .sp-arabic{ font-size: 34px; line-height: 1.25; margin-top: 0; flex: 0 0 auto; }
+body.yasin-time .sp-tile.tone-y{ border-color: rgba(242,184,75,0.65); box-shadow: 0 0 0 3px rgba(242,184,75,0.16), var(--shadow-soft); }
 
 /* ================= NAMAZ VAKİTLERİ KARTI ================= */
 .prayer-card{
@@ -1157,11 +1120,10 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 
     <div class="prayer-card" id="prayerCard" aria-label="Namaz vakitleri"></div>
 
-    <div class="calendar-leaf-card" id="calendarLeafCard" aria-label="Günün sayfası"></div>
+    <button class="date-strip" id="calendarLeafCard" aria-label="Günün tarihi"></button>
 
-    <div class="daily-verse-card" id="dailyVerseCard" role="button" tabindex="0" aria-label="Bugünün âyeti"></div>
-
-    <div class="daily-esma-card" id="dailyEsmaCard" role="button" tabindex="0" aria-label="Günün Esmâ'sı"></div>
+    <div class="tri-wrap" id="dailyTriptych" aria-label="Günün içerikleri"></div>
+    <div class="tri-hint">Bir bölüme dokun, tam metin açılır</div>
 
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="sure">Sûreler</button>
@@ -1331,6 +1293,15 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
   </main>
 
   <!-- ================= SETTINGS SHEET ================= -->
+  <div class="sheet-backdrop" id="dailyBackdrop" hidden></div>
+  <section class="sheet daily-sheet" id="dailySheet" hidden>
+    <div class="sheet-handle"></div>
+    <div class="tone-label" id="dshKicker"></div>
+    <div id="dshBody"></div>
+    <button class="ghost-btn full" id="dshAction" hidden></button>
+    <button class="ghost-btn" id="dshClose">Kapat</button>
+  </section>
+
   <div class="sheet-backdrop" id="settingsBackdrop" hidden></div>
   <section class="sheet settings-sheet" id="settingsSheet" hidden>
     <div class="sheet-handle"></div>
@@ -1370,6 +1341,109 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 /* =========================================================
    DUA VE SÛRE VERİLERİ (GÜNCELLENMİŞ VE TAMAMLANMIŞ)
    ========================================================= */
+
+// Esmâ-i Hüsnâ Arapça yazılışları — ESMA_MEANINGS ile aynı sırada
+const ESMA_ARABIC = [
+  "اللّٰهُ",
+  "الرَّحْمٰنُ",
+  "الرَّحِيمُ",
+  "الْمَلِكُ",
+  "الْقُدُّوسُ",
+  "السَّلَامُ",
+  "الْمُؤْمِنُ",
+  "الْمُهَيْمِنُ",
+  "الْعَزِيزُ",
+  "الْجَبَّارُ",
+  "الْمُتَكَبِّرُ",
+  "الْخَالِقُ",
+  "الْبَارِئُ",
+  "الْمُصَوِّرُ",
+  "الْغَفَّارُ",
+  "الْقَهَّارُ",
+  "الْوَهَّابُ",
+  "الرَّزَّاقُ",
+  "الْفَتَّاحُ",
+  "الْعَلِيمُ",
+  "الْقَابِضُ",
+  "الْبَاسِطُ",
+  "الْخَافِضُ",
+  "الرَّافِعُ",
+  "الْمُعِزُّ",
+  "الْمُذِلُّ",
+  "السَّمِيعُ",
+  "الْبَصِيرُ",
+  "الْحَكَمُ",
+  "الْعَدْلُ",
+  "اللَّطِيفُ",
+  "الْخَبِيرُ",
+  "الْحَلِيمُ",
+  "الْعَظِيمُ",
+  "الْغَفُورُ",
+  "الشَّكُورُ",
+  "الْعَلِيُّ",
+  "الْكَبِيرُ",
+  "الْحَفِيظُ",
+  "الْمُقِيتُ",
+  "الْحَسِيبُ",
+  "الْجَلِيلُ",
+  "الْكَرِيمُ",
+  "الرَّقِيبُ",
+  "الْمُجِيبُ",
+  "الْوَاسِعُ",
+  "الْحَكِيمُ",
+  "الْوَدُودُ",
+  "الْمَجِيدُ",
+  "الْبَاعِثُ",
+  "الشَّهِيدُ",
+  "الْحَقُّ",
+  "الْوَكِيلُ",
+  "الْقَوِيُّ",
+  "الْمَتِينُ",
+  "الْوَلِيُّ",
+  "الْحَمِيدُ",
+  "الْمُحْصِي",
+  "الْمُبْدِئُ",
+  "الْمُعِيدُ",
+  "الْمُحْيِي",
+  "الْمُمِيتُ",
+  "الْحَيُّ",
+  "الْقَيُّومُ",
+  "الْوَاجِدُ",
+  "الْمَاجِدُ",
+  "الْوَاحِدُ",
+  "الْأَحَدُ",
+  "الصَّمَدُ",
+  "الْقَادِرُ",
+  "الْمُقْتَدِرُ",
+  "الْمُقَدِّمُ",
+  "الْمُؤَخِّرُ",
+  "الْأَوَّلُ",
+  "الْآخِرُ",
+  "الظَّاهِرُ",
+  "الْبَاطِنُ",
+  "الْوَالِي",
+  "الْمُتَعَالِي",
+  "الْبَرُّ",
+  "التَّوَّابُ",
+  "الْمُنْتَقِمُ",
+  "الْعَفُوُّ",
+  "الرَّؤُوفُ",
+  "مَالِكُ الْمُلْكِ ذُو الْجَلَالِ وَالْإِكْرَامِ الْمُقْسِطُ",
+  "الْجَامِعُ",
+  "الْغَنِيُّ",
+  "الْمُغْنِي",
+  "الْمُعْطِي",
+  "الْمَانِعُ",
+  "الضَّارُّ",
+  "النَّافِعُ",
+  "النُّورُ",
+  "الْهَادِي",
+  "الْبَدِيعُ",
+  "الْبَاقِي",
+  "الْوَارِثُ",
+  "الرَّشِيدُ",
+  "الصَّبُورُ"
+];
 
 // Esmâ-i Hüsnâ kısa anlamları — sırası DUAS içindeki "esmaulhusna" âyetleriyle birebir aynı
 const ESMA_MEANINGS = [
@@ -2556,7 +2630,7 @@ function shortestAngleDelta(from, to) {
       toggleFavorite(favBtn.dataset.favId);
       return;
     }
-    const card = e.target.closest(".dua-card");
+    const card = e.target.closest(".dua-card, .sp-tile");
     if (card && card._duaId) {
       openReader(card._duaId, card._duaList);
     }
@@ -2700,22 +2774,48 @@ function shortestAngleDelta(from, to) {
     return row;
   }
 
-  function buildHeroEsmaCard(dua) {
-    const card = document.createElement("button");
-    card.className = "hero-esma-card";
-    card.innerHTML = `
-      <p class="hero-esma-eyebrow">Esmâ-i Hüsnâ</p>
-      <p class="hero-esma-title">${dua.name}</p>
-      <p class="hero-esma-sub">${dua.meta}</p>
-      <span class="hero-esma-actions">
-        <span class="hero-esma-btn primary" data-open-reader="${dua.id}">Oku</span>
-        <span class="hero-esma-btn ghost" data-counter-id="${dua.id}">Say</span>
-      </span>`;
-    card.addEventListener("click", (e) => {
-      if (e.target.closest("[data-counter-id]")) return; // sayaç butonu kendi delegasyonuyla açılır
-      openReader(dua.id, DUAS);
+  // Esmâ-i Hüsnâ ve Vâkıa uzun ikili, Yâsîn geniş kutucuk olarak listedeki kendi sırasında görünür
+  const SP_KIND = { esmaulhusna: "tall", vakia: "tall", yasin: "wide" };
+  const SP_TONE = { esmaulhusna: "tone-e", vakia: "tone-v", yasin: "tone-y" };
+  const SP_LABEL = { esmaulhusna: "Esmâ-i Hüsnâ", vakia: "Vâkıa", yasin: "Yâsîn" };
+  const SP_NAME = { esmaulhusna: "Esmâ-i Hüsnâ", vakia: "Vâkıa Sûresi", yasin: "Yâsîn-i Şerîf" };
+  const SP_ARABIC = { esmaulhusna: "الْأَسْمَاءُ الْحُسْنَى", vakia: "الْوَاقِعَة", yasin: "يٰسٓ" };
+
+  function buildSpecialTile(dua) {
+    const isEsma = dua.id === "esmaulhusna";
+    const wide = SP_KIND[dua.id] === "wide";
+    const cyc = dua.cycle ? getCycle(dua.id) : null;
+    const el = document.createElement("div");
+    el.className = `sp-tile ${wide ? "sp-wide " : ""}${SP_TONE[dua.id]}${state.done[dua.id] ? " is-done" : ""}`;
+    el.setAttribute("role", "button");
+    el.tabIndex = 0;
+    el.dataset.id = dua.id;
+    el._duaId = dua.id;
+    el._duaList = DUAS;
+    const star = isEsma ? "" : favStarHtml(dua.id);
+    const chip = cyc ? `<span class="sp-chip">Gün ${cyc.day}/${dua.cycle.length}</span>` : "";
+    const name = `${SP_NAME[dua.id]}<span class="sp-done">✓</span>`;
+    if (wide) {
+      el.innerHTML = `
+        <div class="sp-info">
+          <div class="sp-top"><span class="tone-label">${SP_LABEL[dua.id]}</span>${star}</div>
+          <div class="sp-name">${name}</div>
+          <div class="sp-meta">${dua.meta}</div>
+        </div>
+        <div class="sp-arabic">${SP_ARABIC[dua.id]}</div>`;
+    } else {
+      el.innerHTML = `
+        <div class="sp-top"><span class="tone-label">${SP_LABEL[dua.id]}</span>${chip}${star}</div>
+        <div class="sp-arabic">${SP_ARABIC[dua.id]}</div>
+        <div class="sp-name">${name}</div>
+        <div class="sp-meta">${dua.meta}</div>
+        ${cyc ? `<div class="sp-bar"><i style="width:${Math.min(100, cyc.day / dua.cycle.length * 100)}%"></i></div>` : ""}
+        ${isEsma ? `<div class="sp-btns"><span class="sp-btn primary">Oku</span><span class="sp-btn" data-counter-id="${dua.id}">Say</span></div>` : ""}`;
+    }
+    el.addEventListener("keydown", (e) => {
+      if (e.target === el && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); el.click(); }
     });
-    return card;
+    return el;
   }
 
   // Arama sırasında â/î/ş/ğ/ü/ö/ı gibi aksanlı harfleri sadeleştirir,
@@ -2739,11 +2839,19 @@ function shortestAngleDelta(from, to) {
     const q = normalizeSearchText(searchQuery.trim());
 
     if (activeTab === "sure") {
-      // Esmâ-i Hüsnâ büyük kart olarak listenin içinde yer alır; numaralar yalnızca sıradan satırları sayar
+      // Özel kutucuklar (Esmâ, Vâkıa, Yâsîn) kendi sırasında; numaralar yalnızca sıradan satırları sayar
       const appendRows = (list) => {
-        let n = 0;
-        list.forEach(dua => els.duaList.appendChild(
-          dua.group === "esma" ? buildHeroEsmaCard(dua) : buildDuaCardRow(dua, ++n)));
+        let n = 0, pair = null;
+        list.forEach(dua => {
+          const kind = SP_KIND[dua.id];
+          if (kind === "tall") {
+            if (!pair) { pair = document.createElement("div"); pair.className = "sp-pair"; els.duaList.appendChild(pair); }
+            pair.appendChild(buildSpecialTile(dua));
+            return;
+          }
+          pair = null;
+          els.duaList.appendChild(kind === "wide" ? buildSpecialTile(dua) : buildDuaCardRow(dua, ++n));
+        });
       };
       const sureler = getSureList();
       if (q) {
@@ -2755,7 +2863,7 @@ function shortestAngleDelta(from, to) {
       const favs = sureler.filter(d => d.group !== "esma" && isFavorite(d.id));
       if (favs.length) {
         els.duaList.appendChild(buildSectionLabelEl("Favorilerim", favs.length));
-        appendRows(favs);
+        favs.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
       }
       appendRows(sureler);
 
@@ -3599,7 +3707,7 @@ function shortestAngleDelta(from, to) {
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) return;
     renderPrayerCard(); prayerRefreshPos();
-    renderCalendarLeaf(); renderDailyVerse(); renderDailyEsma(); // gün değiştiyse tazele
+    renderCalendarLeaf(); renderDailyTriptych(); // gün değiştiyse tazele
   });
 
   // ---------- YEDEKLEME ----------
@@ -4009,118 +4117,142 @@ function shortestAngleDelta(from, to) {
     return best;
   }
 
-  // ---------- GÜNÜN SAYFASI (hicri tarih + günün hadisi) ----------
+  // ---------- GÜNÜN İÇERİĞİ (tarih şeridi + üçlü tek cam) ----------
+  const daily = { hadith: null, ayet: null, esma: null, ozel: null };
+  const OZEL_KISA = { "Üç Ayların Başlangıcı": "Üç Aylar", "Ramazan Başlangıcı": "Ramazan" };
+  const dailyDayOfYear = () => Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  function ozelWhen(o, short) {
+    if (o.daysLeft === 0) return o.kandil ? "Bu akşam" : "Bugün";
+    if (o.daysLeft === 1) return o.kandil ? "Yarın akşam" : "Yarın";
+    return short ? `${o.daysLeft} gün` : `${o.daysLeft} gün sonra · ${o.eff.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })}`;
+  }
+
+  // Hicrî tarih ve yaklaşan özel gün; dokununca özel gün ayrıntısı açılır
   function renderCalendarLeaf() {
     const el = document.getElementById("calendarLeafCard");
     if (!el) return;
     const now = new Date();
     const h = hijriOf(now);
-    const hicri = { day: h.day, month: HICRI_AYLAR[h.monthNum - 1], year: h.year };
     const ozel = nextSpecialDay(now);
-
-    const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
-    const hadith = HADITHS[dayOfYear % HADITHS.length];
-
-    const gregorianStr = now.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric", weekday: "long" });
-
+    daily.ozel = ozel;
+    const gregorianStr = now.toLocaleDateString("tr-TR", { day: "numeric", month: "long" }) + " · " + now.toLocaleDateString("tr-TR", { weekday: "long" });
+    const chip = ozel
+      ? `<span class="dt-chip${ozel.daysLeft === 0 ? " is-now" : ""}">${OZEL_KISA[ozel.ad] || ozel.ad} · ${ozelWhen(ozel, true)}</span>`
+      : "";
+    el.className = "date-strip" + (ozel ? " has-event" : "") + (ozel && ozel.daysLeft === 0 ? " is-now" : "");
     el.innerHTML = `
-      <div class="cl-rings"><span></span><span></span></div>
-      <div class="cl-top">
-        <div class="cl-hicri-day">${hicri.day}</div>
-        <div class="cl-hicri-meta">
-          <div class="cl-hicri-month">${hicri.month} ${hicri.year}</div>
-          <div class="cl-gregorian">${gregorianStr}</div>
-        </div>
-      </div>
-      <div class="cl-divider"></div>
-      <div class="cl-hadith-label">Günün Hadîsi</div>
-      <div class="cl-hadith-text">"${hadith.text}"</div>
-      <div class="cl-hadith-source">${hadith.source}</div>
-      ${renderSpecialDayHtml(ozel)}
-    `;
-    const goBtn = el.querySelector("[data-open-dua]");
-    if (goBtn) goBtn.addEventListener("click", () => {
-      const id = goBtn.dataset.openDua;
-      openReader(id, DUAS.some(d => d.id === id) ? DUAS : TESBIHAT);
-    });
+      <span class="dt-day">${h.day}</span>
+      <span class="dt-meta">
+        <div class="dt-month">${HICRI_AYLAR[h.monthNum - 1]} ${h.year}</div>
+        <div class="dt-greg">${gregorianStr}</div>
+      </span>${chip}`;
+    el.onclick = () => { if (ozel) openDailySheet("ozel"); };
   }
 
-  function renderSpecialDayHtml(o) {
-    if (!o) return "";
-    const oner = o.oner && (DUAS.find(d => d.id === o.oner) || TESBIHAT.find(t => t.id === o.oner));
-    let when, tone = "";
-    if (o.daysLeft === 0) { when = o.kandil ? "Bu akşam" : "Bugün"; tone = " is-now"; }
-    else if (o.daysLeft === 1) { when = o.kandil ? "Yarın akşam" : "Yarın"; }
-    else {
-      const dt = o.eff.toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
-      when = `${o.daysLeft} gün sonra · ${dt}`;
-    }
-    return `
-      <div class="cl-divider"></div>
-      <div class="cl-event${tone}">
-        <div class="cl-event-label">${o.daysLeft === 0 ? "Özel gün" : "Yaklaşan özel gün"}</div>
-        <div class="cl-event-row"><span class="cl-event-name">${o.ad}</span><span class="cl-event-when">${when}</span></div>
-        ${oner ? `<button class="cl-event-go" data-open-dua="${oner.id}">${oner.name} oku ›</button>` : ""}
-      </div>`;
-  }
-
-  // ---------- BUGÜNÜN ÂYETİ ----------
+  // ---------- BUGÜNÜN ÂYETİ / HADİSİ / ESMÂSI ----------
   function seededRandom(seed) {
     const x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
   }
 
-  function renderDailyVerse() {
-    const el = document.getElementById("dailyVerseCard");
-    if (!el) return;
-    // Gerçek içeriği olan (placeholder olmayan) duaları topla
+  function pickDailyContent() {
+    const doy = dailyDayOfYear();
+    daily.hadith = HADITHS[doy % HADITHS.length];
+    // Gerçek içeriği olan (placeholder olmayan) âyetler; gün boyunca aynı âyet gösterilir
     const eligible = [];
     DUAS.forEach(dua => {
       dua.verses.forEach((v, i) => {
         if (!v.startsWith("[[") && v.length > 15) eligible.push({ dua, verse: v, index: i });
       });
     });
-    if (eligible.length === 0) { el.hidden = true; return; }
-
-    // Bugüne göre sabit bir seed - gün boyunca aynı âyet gösterilir
-    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    const idx = Math.floor(seededRandom(dayOfYear) * eligible.length);
-    const pick = eligible[idx];
-
-    el.innerHTML = `
-      <div class="dv-label">Bugünün Âyeti</div>
-      <div class="dv-text">${pick.verse}</div>
-      <div class="dv-source">${pick.dua.name} — ${pick.index + 1}. âyet</div>
-    `;
-    el.onclick = () => openReader(pick.dua.id, DUAS);
-    el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.onclick(); } };
-  }
-
-  // ---------- GÜNÜN ESMÂSI ----------
-  // Rastgele değil, yılın gününe göre sırayla ilerler: 99 gün boyunca hiçbir isim tekrarlanmaz.
-  function renderDailyEsma() {
-    const el = document.getElementById("dailyEsmaCard");
-    if (!el) return;
+    daily.ayet = eligible.length ? eligible[Math.floor(seededRandom(doy) * eligible.length)] : null;
+    // Esmâ: rastgele değil, yılın gününe göre sırayla ilerler (99 gün boyunca tekrar yok)
     const esma = DUAS.find(d => d.id === "esmaulhusna");
-    if (!esma || !esma.meanings) { el.hidden = true; return; }
-
-    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    const idx = dayOfYear % esma.verses.length;
-    const name = esma.verses[idx].replace(/^\d+\.\s*/, "");
-    const total = esma.verses.length;
-
-    el.hidden = false;
-    el.innerHTML = `
-      <div class="de-label">Günün Esmâ'sı</div>
-      <div class="de-name">${name}</div>
-      <div class="de-meaning">${esma.meanings[idx]}</div>
-      <div class="de-ghost" aria-hidden="true">${idx + 1}</div>
-      <div class="de-bar"><div class="de-bar-fill" style="width:${((idx + 1) / total * 100).toFixed(1)}%"></div></div>
-      <div class="de-foot"><span>Esmâ-i Hüsnâ</span><span>${idx + 1} / ${total}</span></div>
-    `;
-    el.onclick = () => openReader(esma.id, DUAS, idx);
-    el.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.onclick(); } };
+    if (esma && esma.meanings) {
+      const idx = doy % esma.verses.length;
+      daily.esma = {
+        dua: esma, idx, total: esma.verses.length,
+        name: esma.verses[idx].replace(/^\d+\.\s*/, ""),
+        meaning: esma.meanings[idx], arabic: ESMA_ARABIC[idx] || "",
+      };
+    } else daily.esma = null;
   }
+
+  function renderDailyTriptych() {
+    const el = document.getElementById("dailyTriptych");
+    if (!el) return;
+    pickDailyContent();
+    const { hadith, ayet, esma } = daily;
+    const shortName = (n) => n.replace(/\s*\(.*\)/, "");
+    const cols = [];
+    if (hadith) cols.push(`
+      <button class="tri-col tone-h" data-tri="hadis">
+        <span class="tone-label">Hadîs</span><div class="tri-mark">“</div>
+        <div class="tri-text">${hadith.text}</div><div class="tri-src">${hadith.source}</div>
+      </button>`);
+    if (ayet) cols.push(`
+      <button class="tri-col tone-a" data-tri="ayet">
+        <span class="tone-label">Âyet</span><div class="tri-num">${ayet.index + 1}</div>
+        <div class="tri-text">${ayet.verse}</div><div class="tri-src">${shortName(ayet.dua.name)}</div>
+      </button>`);
+    if (esma) cols.push(`
+      <button class="tri-col tone-e" data-tri="esma">
+        <span class="tone-label">Esmâ</span>
+        <div class="tri-arabic${esma.arabic.length > 18 ? " long" : ""}">${esma.arabic}</div>
+        <div class="tri-name">${esma.name}</div>
+        <div class="tri-src">${esma.meaning} · ${esma.idx + 1}/${esma.total}</div>
+      </button>`);
+    el.hidden = cols.length === 0;
+    el.innerHTML = cols.join("");
+    el.querySelectorAll("[data-tri]").forEach(b => b.addEventListener("click", () => openDailySheet(b.dataset.tri)));
+  }
+
+  // Alttan açılan tam metin sayfası
+  const dsh = {
+    backdrop: $("#dailyBackdrop"), sheet: $("#dailySheet"), kicker: $("#dshKicker"),
+    body: $("#dshBody"), action: $("#dshAction"), close: $("#dshClose"), onAction: null,
+  };
+  function openDailySheet(kind) {
+    let tone = "tone-h", kicker = "", body = "", actionText = "", onAction = null;
+    if (kind === "hadis" && daily.hadith) {
+      tone = "tone-h"; kicker = "Günün Hadîsi";
+      body = `<div class="dsh-text">“${daily.hadith.text}”</div><div class="dsh-src">${daily.hadith.source}</div>`;
+    } else if (kind === "ayet" && daily.ayet) {
+      const a = daily.ayet;
+      tone = "tone-a"; kicker = "Bugünün Âyeti";
+      body = `<div class="dsh-text">${a.verse}</div><div class="dsh-src">${a.dua.name} — ${a.index + 1}. âyet</div>`;
+      actionText = "Okuma ekranında aç";
+      onAction = () => openReader(a.dua.id, DUAS, a.index);
+    } else if (kind === "esma" && daily.esma) {
+      const e = daily.esma;
+      tone = "tone-e"; kicker = "Günün Esmâ'sı";
+      body = `<div class="dsh-arabic${e.arabic.length > 18 ? " long" : ""}">${e.arabic}</div>
+        <div class="dsh-name">${e.name}</div><div class="dsh-mean">${e.meaning}</div>
+        <div class="dsh-count">${e.idx + 1} / ${e.total}</div>`;
+      actionText = "Esmâ-i Hüsnâ'yı aç";
+      onAction = () => openReader(e.dua.id, DUAS, e.idx);
+    } else if (kind === "ozel" && daily.ozel) {
+      const o = daily.ozel;
+      const oner = o.oner && (DUAS.find(d => d.id === o.oner) || TESBIHAT.find(t => t.id === o.oner));
+      tone = "tone-h"; kicker = o.daysLeft === 0 ? "Özel gün" : "Yaklaşan özel gün";
+      body = `<div class="dsh-name" style="text-align:left;margin-top:8px">${o.ad}</div><div class="dsh-when">${ozelWhen(o, false)}</div>`;
+      if (oner) {
+        actionText = `${oner.name} oku`;
+        onAction = () => openReader(oner.id, DUAS.some(d => d.id === oner.id) ? DUAS : TESBIHAT);
+      }
+    } else return;
+    dsh.sheet.className = `sheet daily-sheet ${tone}`;
+    dsh.kicker.textContent = kicker;
+    dsh.body.innerHTML = body;
+    dsh.action.hidden = !onAction;
+    dsh.action.textContent = actionText;
+    dsh.onAction = onAction;
+    openSheet(dsh.backdrop, dsh.sheet);
+  }
+  const closeDailySheet = () => closeSheet(dsh.backdrop, dsh.sheet);
+  dsh.backdrop.addEventListener("click", closeDailySheet);
+  dsh.close.addEventListener("click", closeDailySheet);
+  dsh.action.addEventListener("click", () => { const f = dsh.onAction; closeDailySheet(); if (f) f(); });
 
   // ---------- PAYLAŞIM ----------
   function showToast(msg) {
@@ -4199,8 +4331,7 @@ function shortestAngleDelta(from, to) {
   updateGreeting();
   highlightYasinIfThursdayEvening();
   renderCalendarLeaf();
-  renderDailyVerse();
-  renderDailyEsma();
+  renderDailyTriptych();
   renderPrayerCard();
   prayerRefreshPos();
   renderHome();
