@@ -4653,9 +4653,11 @@ function shortestAngleDelta(from, to) {
 
   </script>
   <script>
+    /* Çevrimdışı çalışma: servis çalışanı sayfayı ve görselleri önbelleğe alır (sw.js) */
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(() => {});
+      });
     }
   </script>
 </body>
