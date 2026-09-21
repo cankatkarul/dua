@@ -1152,6 +1152,14 @@ body.yasin-time .sp-tile.tone-y{ border-color: rgba(242,184,75,0.65); box-shadow
 </style>
 </head>
 <body class="theme-dark" data-font-size="medium">
+<script>
+/* Tema, sayfa çizilmeden önce uygulanır: "auto" ise telefonun sistem görünümüne uyar */
+try {
+  var t = (JSON.parse(localStorage.getItem("sabahVirdi:v1") || "{}").theme) || "auto";
+  var dark = t === "dark" || (t === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.body.className = dark ? "theme-dark" : "theme-light";
+} catch (e) {}
+</script>
 
   <!-- ================= AÇILIŞ EKRANI ================= -->
   <div class="launch-splash" id="launchSplash" aria-hidden="true"></div>
@@ -1363,7 +1371,8 @@ body.yasin-time .sp-tile.tone-y{ border-color: rgba(242,184,75,0.65); box-shadow
       <span>Görünüm modu</span>
       <div class="segmented" id="themeSegmented">
         <button data-theme="light">Açık</button>
-        <button data-theme="dark" class="active">Koyu</button>
+        <button data-theme="dark">Koyu</button>
+        <button data-theme="auto">Sistem</button>
       </div>
     </div>
 
@@ -2629,7 +2638,7 @@ function shortestAngleDelta(from, to) {
       if (!raw) throw new Error("empty");
       return JSON.parse(raw);
     } catch {
-      return { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} };
+      return { theme: "auto", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} };
     }
   }
   // Bulutla eşitlenen alanlar (konum, eşitleme bilgisi gibi cihaza özel alanlar hariç)
@@ -2665,19 +2674,32 @@ function shortestAngleDelta(from, to) {
     state.done = {};
   }
 
+  // Tek seferlik: eski varsayılan "koyu" idi; artık varsayılan sistem görünümü (isteyen ayarlardan tekrar Koyu seçer)
+  if (!state.themeV2) { state.themeV2 = true; if (!state.theme || state.theme === "dark") state.theme = "auto"; }
   lastSnap = JSON.stringify(syncData()); // açılıştaki durum "değişiklik" sayılmaz
 
   let currentDuaId = null;
   let homeScrollY = 0;
 
   // ---------- THEME ----------
+  const systemDark = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+  // "auto": telefonun sistem görünümüne uyar
+  const resolveTheme = (theme) => theme === "auto" ? (systemDark && systemDark.matches ? "dark" : "light") : theme;
   function applyTheme(theme) {
     state.theme = theme;
-    body.classList.toggle("theme-dark", theme === "dark");
-    body.classList.toggle("theme-light", theme === "light");
+    const eff = resolveTheme(theme);
+    body.classList.toggle("theme-dark", eff === "dark");
+    body.classList.toggle("theme-light", eff === "light");
     els.themeSegmented.querySelectorAll("button").forEach(b =>
       b.classList.toggle("active", b.dataset.theme === theme));
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = eff === "dark" ? "#0A2A22" : "#F4EFDD";
     saveStore();
+  }
+  if (systemDark) {
+    const onSystemChange = () => { if (state.theme === "auto") applyTheme("auto"); };
+    if (systemDark.addEventListener) systemDark.addEventListener("change", onSystemChange);
+    else if (systemDark.addListener) systemDark.addListener(onSystemChange);
   }
 
   // ---------- FONT SIZE ----------
@@ -3825,7 +3847,7 @@ function shortestAngleDelta(from, to) {
     ["done", "counters", "cycles", "favorites", "positions", "history"].forEach(k => {
       if (isPlainObject(d[k])) out[k] = JSON.parse(JSON.stringify(d[k]));
     });
-    if (d.theme === "dark" || d.theme === "light") out.theme = d.theme;
+    if (d.theme === "dark" || d.theme === "light" || d.theme === "auto") out.theme = d.theme;
     if (["small", "medium", "large", "xlarge"].includes(d.fontSize)) out.fontSize = d.fontSize;
     if (typeof d.doneDate === "string") out.doneDate = d.doneDate;
     if (typeof d.lastStreakDate === "string") out.lastStreakDate = d.lastStreakDate;
@@ -3875,7 +3897,7 @@ function shortestAngleDelta(from, to) {
       const keepSync = state.sync;
       Object.keys(state).forEach(k => delete state[k]);
       if (keepSync) state.sync = keepSync;
-      Object.assign(state, { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} }, clean);
+      Object.assign(state, { theme: "auto", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} }, clean);
       saveStore();
       backupSay("Yedek yüklendi, uygulama yenileniyor…");
       setTimeout(() => location.reload(), 600);
@@ -3965,7 +3987,7 @@ function shortestAngleDelta(from, to) {
     const keepSync = { ...state.sync, syncedAt: remote.updatedAt };
     const keepPos = state.pos;
     Object.keys(state).forEach(k => delete state[k]);
-    Object.assign(state, { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} }, clean);
+    Object.assign(state, { theme: "auto", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} }, clean);
     state.sync = keepSync;
     state.updatedAt = remote.updatedAt;
     if (keepPos) state.pos = keepPos;
@@ -4592,7 +4614,7 @@ function shortestAngleDelta(from, to) {
   if (!state.lastStreakDate) state.lastStreakDate = null;
   if (!state.positions) state.positions = {};
   if (!state.history) state.history = {};
-  applyTheme(state.theme || "dark");
+  applyTheme(state.theme || "auto");
   applyFontSize(state.fontSize || "medium");
   // Başlangıçta sadece home ekranı görünür, diğerleri gizli
   els.home.hidden = false;
