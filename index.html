@@ -1237,6 +1237,22 @@ body.in-program .autoscroll-speed{ bottom: calc(118px + 48px + 12px + 7px + env(
 #remEdSheet .ghost-btn{ margin-top: 10px; }
 select.prog-input{ appearance: none; -webkit-appearance: none; }
 
+/* Uzun alttan sayfalarda kapatma her zaman görünsün: yapışkan ✕ ve (ayarlarda) yapışkan Tamam */
+.sheet-x{
+  position: sticky; top: 0; float: right; z-index: 6; width: 34px; height: 34px; margin: -2px -8px 0 8px;
+  border-radius: 50%; display: grid; place-items: center; font-size: 15px; color: var(--text-secondary);
+  background: var(--surface-strong); border: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.sheet-x:active{ transform: scale(.9); }
+.sheet-footer{
+  position: sticky; bottom: calc(-28px - env(safe-area-inset-bottom, 0px)); z-index: 5;
+  margin: 8px -24px calc(-28px - env(safe-area-inset-bottom, 0px));
+  padding: 18px 24px calc(28px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(transparent, var(--bg) 34%);
+}
+.sheet-footer .ghost-btn{ margin-top: 0; }
+
 /* ================= PAYLAŞIM TOAST ================= */
 .share-toast{
   position: fixed; left: 50%; bottom: 40px;
@@ -1473,6 +1489,7 @@ try {
   <div class="sheet-backdrop" id="remEdBackdrop" hidden></div>
   <section class="sheet rem-sheet" id="remEdSheet" hidden>
     <div class="sheet-handle"></div>
+    <button class="sheet-x" id="remEdX" aria-label="Kapat">✕</button>
     <h2 class="sheet-title" id="remEdTitle">Yeni hatırlatma</h2>
     <div class="prog-lab">Hızlı seç</div>
     <div class="rem-presets" id="remPresets"></div>
@@ -1492,6 +1509,7 @@ try {
   <div class="sheet-backdrop" id="progEdBackdrop" hidden></div>
   <section class="sheet prog-sheet" id="progEdSheet" hidden>
     <div class="sheet-handle"></div>
+    <button class="sheet-x" id="progEdX" aria-label="Kapat">✕</button>
     <h2 class="sheet-title" id="progEdTitle">Yeni program</h2>
     <div class="prog-lab">Program adı</div>
     <input class="prog-input" id="progName" type="text" maxlength="30" placeholder="Örn. Cuma sabahı" autocomplete="off">
@@ -1529,6 +1547,7 @@ try {
   <div class="sheet-backdrop" id="settingsBackdrop" hidden></div>
   <section class="sheet settings-sheet" id="settingsSheet" hidden>
     <div class="sheet-handle"></div>
+    <button class="sheet-x" id="settingsX" aria-label="Kapat">✕</button>
     <h2 class="sheet-title">Görünüm</h2>
 
     <div class="setting-row">
@@ -1589,7 +1608,7 @@ try {
       <p class="backup-status" id="syncStatus" aria-live="polite"></p>
     </div>
 
-    <button class="ghost-btn full" id="settingsClose">Tamam</button>
+    <div class="sheet-footer"><button class="ghost-btn full" id="settingsClose">Tamam</button></div>
   </section>
 
   <script>
@@ -3646,6 +3665,7 @@ function shortestAngleDelta(from, to) {
   els.backBtn.addEventListener("click", closeReader);
   els.openSettings.addEventListener("click", () => openSheet(els.settingsBackdrop, els.settingsSheet));
   els.settingsClose.addEventListener("click", () => closeSheet(els.settingsBackdrop, els.settingsSheet));
+  $("#settingsX").addEventListener("click", () => closeSheet(els.settingsBackdrop, els.settingsSheet));
   els.settingsBackdrop.addEventListener("click", () => closeSheet(els.settingsBackdrop, els.settingsSheet));
 
   els.themeSegmented.addEventListener("click", (e) => {
@@ -4513,6 +4533,7 @@ function shortestAngleDelta(from, to) {
     renderHome();
   });
   ped.cancel.addEventListener("click", closePed);
+  $("#progEdX").addEventListener("click", closePed);
   ped.backdrop.addEventListener("click", closePed);
 
   // ---------- HATIRLATMALAR (Web Push) ----------
@@ -4656,6 +4677,7 @@ function shortestAngleDelta(from, to) {
     saveStore(); closeRem(); renderReminders(); remSay(""); remSyncServer(true);
   });
   rem.cancel.addEventListener("click", closeRem);
+  $("#remEdX").addEventListener("click", closeRem);
   rem.backdrop.addEventListener("click", closeRem);
   rem.add.addEventListener("click", () => openReminderEditor());
   rem.list.addEventListener("click", (e) => {
