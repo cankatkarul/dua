@@ -2254,6 +2254,20 @@ const HADITHS = [
     return el;
   }
 
+  // Sûreler sekmesindeki sıra. Listede olmayan sûreler (ör. sonradan eklenenler) sona eklenir.
+  const SURE_ORDER = [
+    "fil", "kureys", "maun", "kevser", "kafirun", "nasr", "tebbet",
+    "ihlas", "felak", "nas", "asr", "alak", "tekasur", "humeze", "duha",
+    "insirah", "kadr", "tin", "amenerrasulu", "bakara-elif-lam-mim",
+    "esmaulhusna", "vakia", "fatiha", "yasin"
+  ];
+  function getSureList() {
+    const byId = id => DUAS.find(d => d.id === id);
+    const ordered = SURE_ORDER.map(byId).filter(Boolean);
+    const rest = DUAS.filter(d => d.group === "sure" && !SURE_ORDER.includes(d.id));
+    return ordered.concat(rest);
+  }
+
   function buildDuaCardRow(dua, idx) {
     const done = !!state.done[dua.id];
     const card = document.createElement("button");
@@ -2350,7 +2364,7 @@ const HADITHS = [
     const q = normalizeSearchText(searchQuery.trim());
 
     if (activeTab === "sure") {
-      const sureler = DUAS.filter(d => d.group === "sure");
+      const sureler = getSureList();
       if (q) {
         const filtered = sureler.filter(d => matchesQuery(d, q));
         if (!filtered.length) { els.duaList.appendChild(buildEmptyStateEl()); return; }
