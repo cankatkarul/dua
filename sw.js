@@ -4,11 +4,15 @@
    - Yâsîn Perşembe bildirimi için arka plan desteği
    ========================================================= */
 
-const CACHE = "sabah-virdi-v17";
+const CACHE = "sabah-virdi-v18";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
-  "./assets/allah-lafza.png"
+  "./assets/allah-lafza.png",
+  "./assets/icon-180.png",
+  "./assets/icon-192.png",
+  "./assets/icon-512.png",
+  "./assets/icon-maskable-512.png"
 ];
 
 // Kurulum: tüm dosyaları önbelleğe al
