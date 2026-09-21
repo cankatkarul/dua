@@ -3199,6 +3199,34 @@ function shortestAngleDelta(from, to) {
   els.statsBackBtn.addEventListener("click", closeStats);
   els.streakBadge.addEventListener("click", openStats);
 
+  // ---------- EKRANI AÇIK TUT ----------
+  // Otomatik kaydırma ve kıble ekranı açıkken ekran kararmasın (Screen Wake Lock)
+  const awake = { lock: null, busy: false, reasons: new Set() };
+  async function awakeSync() {
+    if (!navigator.wakeLock || awake.busy) return;
+    awake.busy = true;
+    try {
+      const want = awake.reasons.size > 0 && !document.hidden;
+      if (want && !awake.lock) {
+        awake.lock = await navigator.wakeLock.request("screen");
+        awake.lock.addEventListener("release", () => { awake.lock = null; });
+      } else if (!want && awake.lock) {
+        const l = awake.lock;
+        awake.lock = null;
+        await l.release();
+      }
+    } catch { /* desteklenmiyor ya da izin verilmedi: sessizce geç */ }
+    awake.busy = false;
+    // İstek sürerken durum değiştiyse yeniden değerlendir
+    if ((awake.reasons.size > 0 && !document.hidden) !== !!awake.lock) awakeSync();
+  }
+  function keepAwake(reason, on) {
+    if (on) awake.reasons.add(reason); else awake.reasons.delete(reason);
+    awakeSync();
+  }
+  // Sekme arka plana gidince tarayıcı kilidi kendiliğinden bırakır; geri dönünce yeniden al
+  document.addEventListener("visibilitychange", awakeSync);
+
   // ---------- OTOMATİK KAYDIRMA ----------
   const AUTO_SPEEDS = [
     { label: "Yavaş", pxPerSec: 20 },
@@ -3257,12 +3285,14 @@ function shortestAngleDelta(from, to) {
     auto.last = 0; auto.pos = window.scrollY; auto.lastY = window.scrollY;
     auto.touching = false; auto.pausedUntil = 0;
     autoRenderUi();
+    keepAwake("autoscroll", true);
     auto.raf = requestAnimationFrame(autoTick);
   }
   function stopAutoScroll() {
     if (!auto.playing) return;
     auto.playing = false;
     cancelAnimationFrame(auto.raf);
+    keepAwake("autoscroll", false);
     autoRenderUi();
   }
   auto.fab.addEventListener("click", () => auto.playing ? stopAutoScroll() : startAutoScroll());
@@ -3448,6 +3478,7 @@ function shortestAngleDelta(from, to) {
     qEl.dist.textContent = "Konum alınıyor…";
     qEl.dialWrap.classList.remove("aligned");
     showScreen(qEl.screen, els.home);
+    keepAwake("qibla", true);
     qiblaStartCompass();               // önce: dokunuş bağlamı kaybolmadan
     const cached = state.qiblaPos;
     if (cached && typeof cached.lat === "number") qiblaSetPosition(cached.lat, cached.lon, true);
@@ -3460,6 +3491,7 @@ function shortestAngleDelta(from, to) {
     window.removeEventListener("deviceorientation", onQiblaOrientation, true);
     qs.listening = false;
     clearTimeout(qs.sensorTimer);
+    keepAwake("qibla", false);
     showScreen(els.home, qEl.screen, false);
     requestAnimationFrame(() => window.scrollTo(0, homeScrollY));
   }
