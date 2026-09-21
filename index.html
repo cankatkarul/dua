@@ -1181,6 +1181,20 @@ body.theme-light::before{
 .theme-light .sheet{ background: rgba(255,255,255,.88); }
 .theme-light .search-box, .theme-light .tab-bar{ box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 4px 14px rgba(10,42,34,.06); }
 
+.sync-label{ font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.sync-code{
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 15px; font-weight: 700; letter-spacing: .06em;
+  text-align: center; padding: 12px 8px; border-radius: 14px; word-break: break-all;
+  background: var(--surface-strong); border: 1px solid var(--border); user-select: all; -webkit-user-select: all;
+}
+.sync-input{
+  width: 100%; margin: 10px 0 0; padding: 12px 14px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--border); color: var(--text-primary);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 15px; letter-spacing: .05em; text-transform: uppercase; outline: none;
+}
+#syncSection .ghost-btn{ margin-top: 10px; }
+#syncSection .backup-actions .ghost-btn{ margin-top: 0; }
+
 /* ================= PAYLAŞIM TOAST ================= */
 .share-toast{
   position: fixed; left: 50%; bottom: 40px;
@@ -1441,6 +1455,30 @@ body.theme-light::before{
     </div>
     <input type="file" id="backupFile" accept="application/json,.json" hidden>
     <p class="backup-status" id="backupStatus" aria-live="polite"></p>
+
+    <div id="syncSection" hidden>
+      <h2 class="sheet-title backup-title">Bulut eşitleme</h2>
+      <p class="backup-note">Sayaçların, favorilerin ve okuma serin bir kodla buluta yedeklenir. Uygulamayı silip yeniden eklesen ya da yeni bir telefon alsan bile kodunla geri getirebilirsin. Konumun buluta gönderilmez.</p>
+      <div id="syncOff">
+        <button class="ghost-btn full" id="syncEnable">Eşitlemeyi aç</button>
+        <button class="ghost-btn" id="syncShowRestore">Kodum var, geri yükle</button>
+        <div id="syncRestoreRow" hidden>
+          <input class="sync-input" id="syncCodeInput" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX">
+          <button class="ghost-btn full" id="syncRestore">Geri yükle</button>
+        </div>
+      </div>
+      <div id="syncOn" hidden>
+        <div class="sync-label">Eşitleme kodun</div>
+        <div class="sync-code" id="syncCode"></div>
+        <p class="backup-note" style="margin-top:8px">Bu kodu bir yere (örneğin Notlar) kaydet. Kodu bilen herkes verine ulaşabilir, o yüzden kimseyle paylaşma.</p>
+        <div class="backup-actions">
+          <button class="ghost-btn" id="syncCopy">Kodu kopyala</button>
+          <button class="ghost-btn" id="syncNow">Şimdi eşitle</button>
+        </div>
+        <button class="ghost-btn" id="syncDisable" style="margin-top:10px">Eşitlemeyi kapat</button>
+      </div>
+      <p class="backup-status" id="syncStatus" aria-live="polite"></p>
+    </div>
 
     <button class="ghost-btn full" id="settingsClose">Tamam</button>
   </section>
@@ -2664,7 +2702,25 @@ function shortestAngleDelta(from, to) {
       return { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} };
     }
   }
-  function saveStore() {
+  // Bulutla eşitlenen alanlar (konum, eşitleme bilgisi gibi cihaza özel alanlar hariç)
+  const SYNC_KEYS = ["done", "counters", "cycles", "favorites", "positions", "history", "theme", "fontSize", "doneDate", "lastStreakDate", "streak", "autoScrollSpeed"];
+  function syncData() {
+    const o = {};
+    SYNC_KEYS.forEach(k => { if (state[k] !== undefined) o[k] = state[k]; });
+    return o;
+  }
+  let lastSnap = "";
+  const cloud = { timer: 0, busy: false, error: false };
+  // silent=true: yalnızca eşitleme bilgisi değişti; "veri değişti" sayılmaz
+  function saveStore(silent) {
+    if (!silent) {
+      const snap = JSON.stringify(syncData());
+      if (snap !== lastSnap) {
+        lastSnap = snap;
+        state.updatedAt = Date.now();
+        scheduleCloudPush();
+      }
+    }
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {}
   }
 
@@ -2678,6 +2734,8 @@ function shortestAngleDelta(from, to) {
     state.doneDate = todayKey();
     state.done = {};
   }
+
+  lastSnap = JSON.stringify(syncData()); // açılıştaki durum "değişiklik" sayılmaz
 
   let currentDuaId = null;
   let homeScrollY = 0;
@@ -3884,7 +3942,9 @@ function shortestAngleDelta(from, to) {
         `${when} tarihli yedek yüklenecek (seri: ${clean.streak || 0} gün, favori: ${favCount}).\n` +
         `Şu anki verilerin bunun üstüne yazılır. Devam edilsin mi?`);
       if (!ok) { backupSay(""); return; }
+      const keepSync = state.sync;
       Object.keys(state).forEach(k => delete state[k]);
+      if (keepSync) state.sync = keepSync;
       Object.assign(state, { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} }, clean);
       saveStore();
       backupSay("Yedek yüklendi, uygulama yenileniyor…");
@@ -3899,6 +3959,178 @@ function shortestAngleDelta(from, to) {
   bk.exportBtn.addEventListener("click", exportBackup);
   bk.importBtn.addEventListener("click", () => bk.file.click());
   bk.file.addEventListener("change", () => importBackup(bk.file.files[0]));
+
+  // ---------- BULUT EŞİTLEME ----------
+  // Sunucu adresi (worker/ klasöründeki Cloudflare Worker); boşsa bölüm gizli kalır
+  const SYNC_URL = window.SABAH_SYNC_URL || "";
+  const SYNC_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const sy = {
+    section: $("#syncSection"), off: $("#syncOff"), on: $("#syncOn"),
+    enable: $("#syncEnable"), showRestore: $("#syncShowRestore"), restoreRow: $("#syncRestoreRow"),
+    input: $("#syncCodeInput"), restore: $("#syncRestore"),
+    code: $("#syncCode"), copy: $("#syncCopy"), now: $("#syncNow"), disable: $("#syncDisable"), status: $("#syncStatus"),
+  };
+  const fmtCode = (c) => c.match(/.{1,4}/g).join("-");
+  const normCode = (c) => (c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const timeStr = (ms) => new Date(ms).toLocaleString("tr-TR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+  function newSyncCode() {
+    const bytes = new Uint8Array(20);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, b => SYNC_ALPHABET[b % 32]).join("");
+  }
+  function syncSay(msg, isErr) { sy.status.textContent = msg; sy.status.classList.toggle("err", !!isErr); }
+  function syncRenderUi() {
+    const on = !!(state.sync && state.sync.code);
+    sy.off.hidden = on;
+    sy.on.hidden = !on;
+    if (on) {
+      sy.code.textContent = fmtCode(state.sync.code);
+      syncSay(cloud.error ? "Şu an eşitlenemedi, internet gelince yeniden denenecek."
+        : state.sync.syncedAt ? `Son eşitleme: ${timeStr(state.sync.syncedAt)}` : "", cloud.error);
+    }
+  }
+
+  async function syncFetch(method, body) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 9000);
+    try {
+      return await fetch(`${SYNC_URL}/v1/${state.sync.code}`, {
+        method, signal: ctrl.signal, keepalive: method === "PUT",
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } finally { clearTimeout(t); }
+  }
+
+  function scheduleCloudPush() {
+    if (!SYNC_URL || !state.sync || !state.sync.code) return;
+    clearTimeout(cloud.timer);
+    cloud.timer = setTimeout(cloudPush, 15000);
+  }
+
+  async function cloudPush() {
+    if (!SYNC_URL || !state.sync || !state.sync.code || cloud.busy) return;
+    clearTimeout(cloud.timer);
+    cloud.busy = true;
+    try {
+      const updatedAt = state.updatedAt || Date.now();
+      const res = await syncFetch("PUT", { app: BACKUP_APP, version: 1, updatedAt, data: syncData() });
+      if (!res.ok) throw new Error("http " + res.status);
+      state.sync.syncedAt = updatedAt;
+      if (!state.updatedAt) state.updatedAt = updatedAt;
+      cloud.error = false;
+      saveStore(true);
+    } catch {
+      cloud.error = true;
+    } finally {
+      cloud.busy = false;
+      syncRenderUi();
+    }
+  }
+
+  // Buluttaki veriyi bu cihaza uygula (yalnızca bilinen alanlar, tip denetimiyle)
+  function applyRemote(remote) {
+    const clean = sanitizeBackupData(remote.data);
+    if (!clean || !Object.keys(clean).length) throw new Error("empty");
+    const keepSync = { ...state.sync, syncedAt: remote.updatedAt };
+    const keepPos = state.pos;
+    Object.keys(state).forEach(k => delete state[k]);
+    Object.assign(state, { theme: "dark", fontSize: "medium", doneDate: todayKey(), done: {}, counters: {}, cycles: {}, favorites: {} }, clean);
+    state.sync = keepSync;
+    state.updatedAt = remote.updatedAt;
+    if (keepPos) state.pos = keepPos;
+    saveStore(true);
+  }
+
+  // Açılışta: bulutta daha yeni veri varsa al, bu cihazda daha yeni veri varsa gönder
+  async function cloudCheck() {
+    if (!SYNC_URL || !state.sync || !state.sync.code) return;
+    try {
+      const res = await syncFetch("GET");
+      if (res.status === 404) { await cloudPush(); return; }
+      if (!res.ok) throw new Error("http " + res.status);
+      const remote = await res.json();
+      const synced = state.sync.syncedAt || 0;
+      const localChanged = (state.updatedAt || 0) > synced;
+      if (remote.updatedAt > synced) {
+        if (!localChanged || window.confirm(
+          `Bulutta ${timeStr(remote.updatedAt)} tarihli daha yeni bir yedek var.\n` +
+          `Tamam: buluttakini yükle (bu telefondaki değişiklikler gider)\nİptal: bu telefondakini buluta gönder`)) {
+          applyRemote(remote);
+          location.reload();
+          return;
+        }
+        await cloudPush();
+      } else if (localChanged) {
+        await cloudPush();
+      } else {
+        cloud.error = false;
+        state.sync.syncedAt = synced;
+        syncRenderUi();
+      }
+    } catch {
+      cloud.error = true;
+      syncRenderUi();
+    }
+  }
+
+  async function syncEnable() {
+    state.sync = { code: newSyncCode(), syncedAt: 0 };
+    state.updatedAt = state.updatedAt || Date.now();
+    saveStore(true);
+    syncSay("Buluta gönderiliyor…");
+    await cloudPush();
+    syncRenderUi();
+    if (cloud.error) { delete state.sync; saveStore(true); syncRenderUi(); syncSay("Sunucuya ulaşılamadı. İnternet bağlantını kontrol edip tekrar dene.", true); }
+  }
+
+  async function syncRestoreFromCode() {
+    const code = normCode(sy.input.value);
+    if (code.length < 20) { syncSay("Kod eksik görünüyor, 20 karakterlik kodu yapıştır.", true); return; }
+    const prev = state.sync;
+    state.sync = { code, syncedAt: 0 };
+    try {
+      const res = await syncFetch("GET");
+      if (res.status === 404) throw new Error("notfound");
+      if (!res.ok) throw new Error("http");
+      const remote = await res.json();
+      const clean = sanitizeBackupData(remote.data);
+      if (!clean || !Object.keys(clean).length) throw new Error("empty");
+      const favCount = Object.keys(clean.favorites || {}).length;
+      if (!window.confirm(`${timeStr(remote.updatedAt)} tarihli yedek bulundu (seri: ${clean.streak || 0} gün, favori: ${favCount}).\nŞu anki verilerin bunun üstüne yazılır. Devam edilsin mi?`)) {
+        state.sync = prev; if (!prev) delete state.sync; syncSay(""); return;
+      }
+      applyRemote(remote);
+      syncSay("Geri yüklendi, uygulama yenileniyor…");
+      setTimeout(() => location.reload(), 600);
+    } catch (e) {
+      state.sync = prev; if (!prev) delete state.sync;
+      syncSay(e.message === "notfound" ? "Bu kodla kayıtlı bir yedek bulunamadı." : "Geri yüklenemedi. Kodu ve internet bağlantısını kontrol et.", true);
+    }
+  }
+
+  if (SYNC_URL) {
+    sy.section.hidden = false;
+    syncRenderUi();
+    sy.enable.addEventListener("click", syncEnable);
+    sy.showRestore.addEventListener("click", () => { sy.restoreRow.hidden = !sy.restoreRow.hidden; if (!sy.restoreRow.hidden) sy.input.focus(); });
+    sy.restore.addEventListener("click", syncRestoreFromCode);
+    sy.now.addEventListener("click", async () => { syncSay("Eşitleniyor…"); await cloudCheck(); await cloudPush(); syncRenderUi(); });
+    sy.copy.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(state.sync.code); syncSay("Kod kopyalandı."); }
+      catch { syncSay("Kopyalanamadı; kodu basılı tutup seçerek kopyala.", true); }
+    });
+    sy.disable.addEventListener("click", () => {
+      if (!window.confirm("Eşitleme kapatılacak. Buluttaki yedek silinmez ama bu telefon artık göndermez. Devam edilsin mi?")) return;
+      delete state.sync; saveStore(true); syncRenderUi(); syncSay("Eşitleme kapatıldı.");
+    });
+    // Uygulama arka plana giderken bekleyen değişikliği hemen gönder, öne gelince kontrol et
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) { if (state.sync && (state.updatedAt || 0) > (state.sync.syncedAt || 0)) cloudPush(); }
+      else cloudCheck();
+    });
+    cloudCheck();
+  }
 
   // ---------- KIBLE ----------
   const qEl = {

@@ -1,0 +1,8 @@
+# Günlük Dualarım — bulut eşitleme (Cloudflare Worker + KV)
+name = "dua-sync"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+# KV alanı ilk "wrangler deploy" sırasında kendiliğinden oluşturulur
+[[kv_namespaces]]
+binding = "SYNC"
