@@ -233,7 +233,20 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 }
 .home-counter-fab:active .counter-fab-ring{ transform: scale(.88); }
 
-.home-footer{ position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom,0px)); z-index: 20; }
+.home-footer{
+  position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom,0px)); z-index: 20;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.qibla-fab{
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--surface-strong); border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  box-shadow: var(--shadow-soft);
+  transition: transform .2s ease;
+}
+.qibla-fab:active{ transform: scale(.9); }
 .settings-fab{
   width: 54px; height: 54px; border-radius: 50%;
   background: var(--surface-strong); border: 1px solid var(--border);
@@ -735,7 +748,7 @@ body::before{
   pointer-events: none;
   z-index: 0;
 }
-.home-screen, .reader-screen, .stats-screen{ position: relative; z-index: 1; }
+.home-screen, .reader-screen, .stats-screen, .qibla-screen{ position: relative; z-index: 1; }
 
 /* Perşembe akşamı Yâsîn kartı vurgusu */
 body.yasin-time .dua-card[data-id="yasin"]{
@@ -966,6 +979,35 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
   color: var(--text-tertiary);
 }
 
+/* ================= KIBLE ================= */
+.qibla-screen{ min-height: 100dvh; max-width: 680px; margin: 0 auto; padding-bottom: 40px; }
+.qibla-body{ padding: 4px 20px 40px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.qibla-info{ text-align: center; }
+.qibla-label{ font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); }
+.qibla-deg{ font-family: var(--display); font-size: 52px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.qibla-dist{ font-size: 13.5px; color: var(--text-secondary); min-height: 1.4em; }
+.qibla-dial-wrap{ width: min(100%, 340px); aspect-ratio: 1; }
+.qibla-dial{ width: 100%; height: 100%; display: block; overflow: visible; }
+.qd-face{ fill: var(--surface); stroke: var(--border); stroke-width: 1.5; transition: stroke .25s ease, filter .25s ease; }
+.qd-inner{ fill: none; stroke: var(--divider); stroke-width: 1; }
+.qd-tick{ stroke: var(--text-tertiary); stroke-width: 1.2; }
+.qd-tick.major{ stroke: var(--text-secondary); stroke-width: 2; }
+.qd-card{ font-family: var(--display); font-size: 20px; font-weight: 700; fill: var(--text-secondary); text-anchor: middle; }
+.qd-card.north{ fill: var(--accent); }
+.qd-line{ stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 3 5; opacity: .45; }
+.qd-kaaba{ fill: #101512; stroke: var(--accent); stroke-width: 1.5; }
+.qd-kaaba-band{ fill: var(--accent); }
+.qd-pointer{ fill: var(--accent); }
+.qd-heading{ font-family: var(--display); font-size: 40px; font-weight: 700; fill: var(--text-primary); text-anchor: middle; font-variant-numeric: tabular-nums; }
+.qd-heading-sub{ font-size: 11px; letter-spacing: .07em; text-transform: uppercase; fill: var(--text-tertiary); text-anchor: middle; }
+.qibla-dial-wrap.aligned .qd-face{ stroke: var(--accent); filter: drop-shadow(0 0 14px var(--accent-glow)); }
+.qibla-status{ margin: 0; text-align: center; font-size: 15px; font-weight: 600; color: var(--text-primary); min-height: 1.5em; }
+.qibla-status.ok{ color: var(--accent); }
+.qibla-status.warn{ color: var(--text-secondary); font-weight: 500; }
+.qibla-actions{ width: 100%; max-width: 340px; display: flex; flex-direction: column; }
+.qibla-actions .ghost-btn{ margin-top: 0; }
+.qibla-hint{ margin: 6px 0 0; max-width: 340px; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--text-tertiary); }
+
 /* ================= PAYLAŞIM TOAST ================= */
 .share-toast{
   position: fixed; left: 50%; bottom: 40px;
@@ -1025,6 +1067,9 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
     </button>
 
     <footer class="home-footer">
+      <button class="qibla-fab" id="openQibla" aria-label="Kıble bul">
+        <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5l-2 5-5 2 2-5z" fill="currentColor" fill-opacity=".85" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      </button>
       <button class="settings-fab" id="openSettings" aria-label="Ayarlar">
         <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.4.96a7.4 7.4 0 0 0-1.73-1l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.63.24-1.2.58-1.73 1l-2.4-.96a.5.5 0 0 0-.6.22L2.63 9.28a.5.5 0 0 0 .12.64L4.78 11.5c-.04.33-.06.66-.06 1s.02.67.06 1L2.75 15.08a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.4-.96c.53.42 1.1.76 1.73 1l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.63-.24 1.2-.58 1.73-1l2.4.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64L19.4 13.5Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
       </button>
@@ -1117,6 +1162,50 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
       <div style="width:38px"></div>
     </header>
     <div class="stats-body" id="statsBody"></div>
+  </main>
+
+  <!-- ================= KIBLE EKRANI ================= -->
+  <main id="qibla" class="screen qibla-screen" hidden>
+    <header class="reader-header">
+      <button class="icon-btn" id="qiblaBackBtn" aria-label="Geri">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="reader-title-wrap">
+        <div class="reader-title">Kıble</div>
+        <div class="reader-subtitle">Kâbe yönü</div>
+      </div>
+      <div style="width:38px"></div>
+    </header>
+    <div class="qibla-body">
+      <div class="qibla-info">
+        <div class="qibla-label">Kıble yönü</div>
+        <div class="qibla-deg" id="qiblaDeg">—</div>
+        <div class="qibla-dist" id="qiblaDist">Konum alınıyor…</div>
+      </div>
+      <div class="qibla-dial-wrap" id="qiblaDialWrap">
+        <svg class="qibla-dial" viewBox="0 0 300 300" role="img" aria-label="Kıble pusulası">
+          <circle class="qd-face" cx="150" cy="150" r="130"/>
+          <g id="qiblaRing">
+            <g id="qiblaTicks"></g>
+            <circle class="qd-inner" cx="150" cy="150" r="66"/>
+            <g id="qiblaMarker">
+              <line class="qd-line" x1="150" y1="150" x2="150" y2="62"/>
+              <rect class="qd-kaaba" x="138" y="34" width="24" height="24" rx="4"/>
+              <rect class="qd-kaaba-band" x="138" y="41" width="24" height="4"/>
+            </g>
+          </g>
+          <polygon class="qd-pointer" points="150,24 140,3 160,3"/>
+          <text class="qd-heading" id="qiblaHeading" x="150" y="156">—</text>
+          <text class="qd-heading-sub" x="150" y="178">Bakış yönü</text>
+        </svg>
+      </div>
+      <p class="qibla-status" id="qiblaStatus" aria-live="polite"></p>
+      <div class="qibla-actions">
+        <button class="ghost-btn full" id="qiblaStart" hidden>Pusulayı başlat</button>
+        <button class="ghost-btn" id="qiblaRetry" hidden>Konumu tekrar dene</button>
+      </div>
+      <p class="qibla-hint">Telefonu yere paralel tutun, metal ve mıknatıslardan uzak durun. Pusula manyetik kuzeyi esas aldığı için birkaç derece sapma olabilir.</p>
+    </div>
   </main>
 
   <!-- ================= SETTINGS SHEET ================= -->
@@ -2043,6 +2132,46 @@ const HADITHS = [
   { text: "Birbirinize hediye veriniz ki aranızda sevgi artsın.", source: "Buhârî (el-Edebü'l-Müfred)" },
   { text: "Cennete girmedikçe iman etmiş olmazsınız; birbirinizi sevmedikçe de tam iman etmiş olmazsınız.", source: "Müslim" }
 ];
+
+// ---------- KIBLE HESABI ----------
+const KAABA = { lat: 21.4225, lon: 39.8262 };
+
+// Verilen konumdan Kâbe'ye büyük daire yönü (gerçek kuzeyden saat yönünde derece, 0-360)
+function qiblaBearing(lat, lon) {
+  const rad = Math.PI / 180;
+  const p1 = lat * rad, p2 = KAABA.lat * rad;
+  const dl = (KAABA.lon - lon) * rad;
+  const y = Math.sin(dl);
+  const x = Math.cos(p1) * Math.tan(p2) - Math.sin(p1) * Math.cos(dl);
+  return ((Math.atan2(y, x) / rad) + 360) % 360;
+}
+
+// Kâbe'ye kuş uçuşu mesafe (km)
+function distanceToKaabaKm(lat, lon) {
+  const rad = Math.PI / 180;
+  const dLat = (KAABA.lat - lat) * rad, dLon = (KAABA.lon - lon) * rad;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat * rad) * Math.cos(KAABA.lat * rad) * Math.sin(dLon / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// alpha/beta/gamma'dan pusula yönü. Telefon yataya yakınsa üst kenarın, dikey tutuluyorsa
+// arka yüzün baktığı yön alınır (ikisi de yatay düzleme iz düşürülür).
+function compassHeadingFromEuler(alpha, beta, gamma) {
+  const d = Math.PI / 180;
+  const a = alpha * d, b = beta * d, g = gamma * d;
+  const cA = Math.cos(a), sA = Math.sin(a), cB = Math.cos(b), sB = Math.sin(b), cG = Math.cos(g), sG = Math.sin(g);
+  const topE = -sA * cB, topN = cA * cB;
+  const backE = -cA * sG - sA * sB * cG, backN = -sA * sG + cA * sB * cG;
+  const useTop = Math.hypot(topE, topN) >= Math.hypot(backE, backN);
+  const e = useTop ? topE : backE, n = useTop ? topN : backN;
+  return ((Math.atan2(e, n) / d) + 360) % 360;
+}
+
+// İki yön arasındaki en kısa işaretli fark (-180..180)
+function shortestAngleDelta(from, to) {
+  return ((((to - from) % 360) + 540) % 360) - 180;
+}
 
 (() => {
   "use strict";
@@ -3002,6 +3131,195 @@ const HADITHS = [
 
   els.statsBackBtn.addEventListener("click", closeStats);
   els.streakBadge.addEventListener("click", openStats);
+
+  // ---------- KIBLE ----------
+  const qEl = {
+    screen: $("#qibla"), backBtn: $("#qiblaBackBtn"), openBtn: $("#openQibla"),
+    ring: $("#qiblaRing"), ticks: $("#qiblaTicks"), marker: $("#qiblaMarker"),
+    deg: $("#qiblaDeg"), dist: $("#qiblaDist"), heading: $("#qiblaHeading"),
+    dialWrap: $("#qiblaDialWrap"), status: $("#qiblaStatus"),
+    startBtn: $("#qiblaStart"), retryBtn: $("#qiblaRetry"),
+  };
+  const Q_ALIGN_TOLERANCE = 3; // derece
+  const qs = {
+    bearing: null, dist: null, fromCache: false,
+    heading: null, ringAngle: 0, aligned: false,
+    locating: false, locError: null,
+    listening: false, gotSensor: false, noSensor: false, permDenied: false, needsPermission: false, lowAccuracy: false,
+    sensorTimer: null,
+  };
+
+  // Pusula halkasındaki çentikler ve yön harfleri (bir kez çizilir)
+  (function buildQiblaDial() {
+    const NS = "http://www.w3.org/2000/svg";
+    for (let a = 0; a < 360; a += 10) {
+      const major = a % 30 === 0;
+      const ln = document.createElementNS(NS, "line");
+      ln.setAttribute("class", "qd-tick" + (major ? " major" : ""));
+      ln.setAttribute("x1", 150); ln.setAttribute("x2", 150);
+      ln.setAttribute("y1", 20); ln.setAttribute("y2", major ? 33 : 27);
+      ln.setAttribute("transform", `rotate(${a} 150 150)`);
+      qEl.ticks.appendChild(ln);
+    }
+    [["K", 0], ["D", 90], ["G", 180], ["B", 270]].forEach(([ch, a]) => {
+      const t = document.createElementNS(NS, "text");
+      t.setAttribute("class", "qd-card" + (a === 0 ? " north" : ""));
+      t.setAttribute("x", 150); t.setAttribute("y", 96);
+      t.setAttribute("transform", `rotate(${a} 150 150)`);
+      t.textContent = ch;
+      qEl.ticks.appendChild(t);
+    });
+  })();
+
+  function qiblaSetPosition(lat, lon, fromCache) {
+    qs.bearing = qiblaBearing(lat, lon);
+    qs.dist = distanceToKaabaKm(lat, lon);
+    qs.fromCache = fromCache;
+    qEl.deg.textContent = Math.round(qs.bearing) + "°";
+    qEl.dist.textContent = qs.dist < 1
+      ? "Kâbe'desiniz"
+      : `Kâbe'ye ${Math.round(qs.dist).toLocaleString("tr-TR")} km` + (fromCache ? " · son bilinen konum" : "");
+    qEl.marker.setAttribute("transform", `rotate(${qs.bearing.toFixed(2)} 150 150)`);
+    qiblaRender();
+  }
+
+  function qiblaRender() {
+    // Halka: telefon dönünce ters yöne döner, böylece Kâbe işareti kıble yönünde kalır
+    if (qs.heading != null) {
+      qs.ringAngle += shortestAngleDelta(qs.ringAngle, -qs.heading);
+      qEl.ring.setAttribute("transform", `rotate(${qs.ringAngle.toFixed(2)} 150 150)`);
+      qEl.heading.textContent = Math.round(qs.heading) + "°";
+    }
+    const wasAligned = qs.aligned;
+    qs.aligned = qs.bearing != null && qs.heading != null &&
+      Math.abs(shortestAngleDelta(qs.heading, qs.bearing)) <= Q_ALIGN_TOLERANCE;
+    qEl.dialWrap.classList.toggle("aligned", qs.aligned);
+    if (qs.aligned && !wasAligned && navigator.vibrate) navigator.vibrate(30);
+    qiblaRenderStatus();
+  }
+
+  function qiblaRenderStatus() {
+    let text = "", cls = "";
+    const staticDeg = qs.bearing != null ? Math.round(qs.bearing) : null;
+    if (qs.dist != null && qs.dist < 1) { text = "Kâbe'nin tam yanındasınız"; cls = "ok"; }
+    else if (qs.bearing == null && qs.locError === "denied") { text = "Konum izni verilmedi. Kıble yönü için konum gerekli."; cls = "warn"; }
+    else if (qs.bearing == null && qs.locError) { text = "Konum alınamadı. Tekrar deneyebilirsiniz."; cls = "warn"; }
+    else if (qs.bearing == null) { text = "Konum alınıyor…"; cls = "warn"; }
+    else if (qs.permDenied) { text = "Pusula izni verilmedi. Ayarlar > Safari > Hareket ve Yön Erişimi'ni açın."; cls = "warn"; }
+    else if (qs.noSensor) { text = `Bu cihazda pusula bulunamadı. Kıble, kuzeyden ${staticDeg}° saat yönünde.`; cls = "warn"; }
+    else if (!qs.gotSensor) { text = "Pusula bekleniyor…"; cls = "warn"; }
+    else if (qs.aligned) { text = "Kıbledesiniz ✓"; cls = "ok"; }
+    else if (qs.lowAccuracy) { text = "Pusula hassasiyeti düşük. Telefonu havada 8 çizerek kalibre edin."; cls = "warn"; }
+    else { text = "Telefonu döndürün, Kâbe işaretini üstteki oka getirin."; }
+    qEl.status.textContent = text;
+    qEl.status.className = "qibla-status" + (cls ? " " + cls : "");
+    qEl.retryBtn.hidden = !(qs.locError && !qs.locating);
+    qEl.startBtn.hidden = !(qs.permDenied || qs.needsPermission);
+  }
+
+  function qiblaReadHeading(e) {
+    let h = null;
+    if (typeof e.webkitCompassHeading === "number" && !isNaN(e.webkitCompassHeading)) {
+      // iOS: doğrudan pusula yönü + doğruluk bilgisi
+      h = e.webkitCompassHeading;
+      qs.lowAccuracy = typeof e.webkitCompassAccuracy === "number" &&
+        (e.webkitCompassAccuracy < 0 || e.webkitCompassAccuracy > 25);
+    } else if (e.alpha != null && (e.absolute || e.type === "deviceorientationabsolute")) {
+      // Android: mutlak yön (manyetik kuzeye göre)
+      h = (e.beta == null || e.gamma == null) ? (360 - e.alpha) : compassHeadingFromEuler(e.alpha, e.beta, e.gamma);
+      h += (screen.orientation && screen.orientation.angle) || 0;
+    }
+    return h == null ? null : ((h % 360) + 360) % 360;
+  }
+
+  function onQiblaOrientation(e) {
+    const h = qiblaReadHeading(e);
+    if (h == null) return;
+    qs.gotSensor = true;
+    qs.noSensor = false;
+    // Titremeyi azaltmak için dairesel alçak geçiren filtre
+    qs.heading = qs.heading == null ? h : (qs.heading + shortestAngleDelta(qs.heading, h) * 0.3 + 360) % 360;
+    qiblaRender();
+  }
+
+  function qiblaBeginListening() {
+    if (!qs.listening) {
+      window.addEventListener("deviceorientationabsolute", onQiblaOrientation, true);
+      window.addEventListener("deviceorientation", onQiblaOrientation, true);
+      qs.listening = true;
+    }
+    clearTimeout(qs.sensorTimer);
+    qs.sensorTimer = setTimeout(() => {
+      if (!qs.gotSensor) { qs.noSensor = true; qiblaRenderStatus(); }
+    }, 2500);
+  }
+
+  // iOS'ta izin isteği kullanıcı dokunuşunun içinde çağrılmalı
+  function qiblaStartCompass() {
+    const DOE = window.DeviceOrientationEvent;
+    qs.permDenied = false;
+    qs.needsPermission = false;
+    if (DOE && typeof DOE.requestPermission === "function") {
+      DOE.requestPermission().then(res => {
+        if (res === "granted") qiblaBeginListening();
+        else qs.permDenied = true;
+        qiblaRenderStatus();
+      }).catch(() => { qs.needsPermission = true; qiblaRenderStatus(); });
+    } else {
+      qiblaBeginListening();
+    }
+  }
+
+  function qiblaLocate() {
+    qs.locError = null;
+    if (!navigator.geolocation) { qs.locError = "unsupported"; qiblaRenderStatus(); return; }
+    qs.locating = true;
+    qiblaRenderStatus();
+    navigator.geolocation.getCurrentPosition(pos => {
+      qs.locating = false;
+      qs.locError = null;
+      state.qiblaPos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      saveStore();
+      qiblaSetPosition(pos.coords.latitude, pos.coords.longitude, false);
+    }, err => {
+      qs.locating = false;
+      qs.locError = err && err.code === 1 ? "denied" : "failed";
+      // Kayıtlı bir konum varsa onunla devam edilir; yoksa hata gösterilir
+      qiblaRenderStatus();
+    }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+  }
+
+  function openQibla() {
+    if (els.home && !els.home.hidden) homeScrollY = window.scrollY;
+    qs.heading = null; qs.ringAngle = 0; qs.aligned = false;
+    qs.gotSensor = false; qs.noSensor = false; qs.lowAccuracy = false;
+    qs.bearing = null; qs.dist = null; qs.locError = null;
+    qEl.ring.setAttribute("transform", "rotate(0 150 150)");
+    qEl.heading.textContent = "—";
+    qEl.deg.textContent = "—";
+    qEl.dist.textContent = "Konum alınıyor…";
+    qEl.dialWrap.classList.remove("aligned");
+    showScreen(qEl.screen, els.home);
+    qiblaStartCompass();               // önce: dokunuş bağlamı kaybolmadan
+    const cached = state.qiblaPos;
+    if (cached && typeof cached.lat === "number") qiblaSetPosition(cached.lat, cached.lon, true);
+    qiblaLocate();
+    qiblaRenderStatus();
+  }
+
+  function closeQibla() {
+    window.removeEventListener("deviceorientationabsolute", onQiblaOrientation, true);
+    window.removeEventListener("deviceorientation", onQiblaOrientation, true);
+    qs.listening = false;
+    clearTimeout(qs.sensorTimer);
+    showScreen(els.home, qEl.screen, false);
+    requestAnimationFrame(() => window.scrollTo(0, homeScrollY));
+  }
+
+  qEl.openBtn.addEventListener("click", openQibla);
+  qEl.backBtn.addEventListener("click", closeQibla);
+  qEl.retryBtn.addEventListener("click", qiblaLocate);
+  qEl.startBtn.addEventListener("click", qiblaStartCompass);
 
   // ---------- DONE FAB EVENTS ----------
   document.addEventListener("click", (e) => {
