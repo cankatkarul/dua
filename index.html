@@ -1236,6 +1236,8 @@ body.in-program .autoscroll-speed{ bottom: calc(118px + 48px + 12px + 7px + env(
 .rem-presets, .rem-days{ display: flex; flex-wrap: wrap; gap: 8px; }
 .rem-presets button, .rem-days button{ padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); }
 .rem-days button{ min-width: 46px; text-align: center; }
+.rem-presets .rem-prog-chip{ display: inline-flex; align-items: center; gap: 6px; color: var(--tone); border-color: rgba(var(--tone-rgb), .45); background: rgba(var(--tone-rgb), .12); }
+.rem-prog-chip svg{ width: 15px; height: 15px; }
 .rem-days button.on{ background: var(--accent); color: #0F2A22; border-color: transparent; }
 #remEdSheet .ghost-btn{ margin-top: 10px; }
 select.prog-input{ appearance: none; -webkit-appearance: none; }
@@ -1576,6 +1578,7 @@ try {
     <p class="backup-note">Belirlediğin saatte bildirim gelir; bir programa bağlarsan dokununca o program başlar. Uygulama kapalıyken de çalışır. iPhone'da bunun için uygulamanın ana ekrandan açılması gerekir (iOS 16.4 ve üstü).</p>
     <div id="remList"></div>
     <button class="ghost-btn" id="remAdd">+ Hatırlatma ekle</button>
+    <button class="ghost-btn" id="remTest">Bildirimi dene</button>
     <p class="backup-status" id="remStatus" aria-live="polite"></p>
 
     <h2 class="sheet-title backup-title">Yedekleme</h2>
@@ -4588,27 +4591,34 @@ function shortestAngleDelta(from, to) {
   const urlB64ToBytes = (b64u) => Uint8Array.from(atob(b64u.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
 
   // İzin + abonelik + sunucuya kayıt. prompt=true ise (kullanıcı dokunuşu) izin de istenir.
+  // ÖNEMLİ: izin penceresi iOS'ta yalnızca dokunuşun hemen içinde açılır; bu yüzden ilk iş izin isteği yapılır.
   async function remSyncServer(prompt) {
     const enabled = getReminders().filter(r => r.on);
+    const permPromise = (prompt && enabled.length && "Notification" in window && Notification.permission === "default")
+      ? Notification.requestPermission() : null;
     remWriteMeta();
     if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
       if (prompt && enabled.length) remSay(isIOS() && !isStandalone() ? "Bildirimler için uygulamayı ana ekrandan aç." : "Bu tarayıcı bildirimleri desteklemiyor.", true);
       return false;
     }
     if (isIOS() && !isStandalone()) { if (prompt && enabled.length) remSay("Bildirimler için uygulamayı ana ekrandan aç.", true); return false; }
+    let step = "başlangıç";
     try {
+      step = "servis çalışanı";
       const reg = await navigator.serviceWorker.ready;
+      step = "abonelik";
       let sub = await reg.pushManager.getSubscription();
       if (!enabled.length) {
         if (sub) await fetch(`${SYNC_URL}/push/v1`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ endpoint: sub.endpoint }) }).catch(() => {});
         return true;
       }
-      if (Notification.permission === "default" && prompt) await Notification.requestPermission();
+      if (permPromise) await permPromise;
       if (Notification.permission !== "granted") {
         if (prompt) remSay("Bildirim izni verilmedi. iPhone Ayarlar → Bildirimler bölümünden açabilirsin.", true);
         return false;
       }
-      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToBytes(VAPID_PUBLIC) });
+      if (!sub) { step = "abonelik oluşturma"; sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToBytes(VAPID_PUBLIC) }); }
+      step = "sunucu";
       const res = await fetch(`${SYNC_URL}/push/v1`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -4617,13 +4627,44 @@ function shortestAngleDelta(from, to) {
           reminders: enabled.map(r => ({ id: r.id, time: r.time, days: r.days })),
         }),
       });
-      if (!res.ok) throw new Error("http " + res.status);
+      if (!res.ok) throw new Error("sunucu cevabı " + res.status);
       if (prompt) remSay("Hatırlatmalar kaydedildi.");
       return true;
-    } catch {
-      if (prompt) remSay("Sunucuya ulaşılamadı, tekrar dene.", true);
+    } catch (e) {
+      if (prompt) remSay(`Hata (${step}): ${e && (e.name ? e.name + " " : "")}${e && e.message ? e.message : ""}`.slice(0, 160), true);
       return false;
     }
+  }
+
+  // Bildirimi dene: yerel durumu raporlar, gerekirse abone olur, sunucudan hemen bir push gönderilmesini ister
+  async function remTest() {
+    const lines = [];
+    const say = () => remSay(lines.join(" · "), lines.some(l => l.startsWith("✗")));
+    if (!("Notification" in window) || !("PushManager" in window) || !("serviceWorker" in navigator)) { lines.push("✗ Bu tarayıcıda bildirim desteği yok"); say(); return; }
+    lines.push(isStandalone() ? "ana ekran uygulaması ✓" : "✗ ana ekrandan açılmamış"); 
+    const permPromise = Notification.permission === "default" ? Notification.requestPermission() : null;
+    remSay("Deneniyor…");
+    try {
+      if (permPromise) await permPromise;
+      lines.push("izin: " + (Notification.permission === "granted" ? "verildi ✓" : "✗ " + Notification.permission));
+      if (Notification.permission !== "granted") { say(); return; }
+      const reg = await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToBytes(VAPID_PUBLIC) });
+      lines.push("abonelik ✓");
+      // sunucuda kayıtlı olsun (hatırlatma yoksa da deneme çalışsın)
+      const reminders = getReminders().filter(r => r.on).map(r => ({ id: r.id, time: r.time, days: r.days }));
+      const put = await fetch(`${SYNC_URL}/push/v1`, { method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: sub.toJSON(), tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Istanbul", reminders }) });
+      lines.push(put.ok ? "sunucu kaydı ✓" : "✗ sunucu kaydı " + put.status);
+      if (put.ok) {
+        const t = await fetch(`${SYNC_URL}/push/v1/test`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ endpoint: sub.endpoint }) }).then(r => r.json());
+        lines.push(t.ok ? `push gönderildi (${t.status}) ✓ bildirim birkaç saniyede gelmeli` : `✗ push servisi ${t.status}${t.body ? " " + t.body : ""}`);
+      }
+    } catch (e) {
+      lines.push(`✗ ${e && e.name ? e.name + " " : ""}${e && e.message ? e.message : e}`);
+    }
+    say();
   }
 
   function openReminderEditor(id) {
@@ -4631,7 +4672,10 @@ function shortestAngleDelta(from, to) {
     rem.editingId = ex ? ex.id : null;
     rem.draft = ex ? JSON.parse(JSON.stringify(ex)) : { id: "r" + Date.now().toString(36), label: "Sabah virdi", time: "06:10", days: [], program: "", on: true };
     rem.title.textContent = ex ? "Hatırlatmayı düzenle" : "Yeni hatırlatma";
-    rem.presets.innerHTML = REM_PRESETS.map((p, i) => `<button type="button" data-preset="${i}">${p.label} · ${p.time}</button>`).join("");
+    // Önce kendi programların (dokununca ad ve program dolar), sonra hazır ayarlar
+    rem.presets.innerHTML =
+      getPrograms().map(p => `<button type="button" class="rem-prog-chip ${p.tone}" data-prog="${p.id}">${progIcon(p.icon)}<span>${p.name}</span></button>`).join("") +
+      REM_PRESETS.map((p, i) => `<button type="button" data-preset="${i}">${p.label} · ${p.time}</button>`).join("");
     rem.label.value = rem.draft.label;
     rem.time.value = rem.draft.time;
     rem.program.innerHTML = `<option value="">Program yok (sadece uygulamayı aç)</option>` + getPrograms().map(p => `<option value="${p.id}">${p.name}</option>`).join("");
@@ -4646,6 +4690,14 @@ function shortestAngleDelta(from, to) {
   }
   const closeRem = () => closeSheet(rem.backdrop, rem.sheet);
   rem.presets.addEventListener("click", (e) => {
+    const pb = e.target.closest("[data-prog]");
+    if (pb) {
+      const prog = getPrograms().find(x => x.id === pb.dataset.prog);
+      if (!prog) return;
+      rem.draft.label = prog.name; rem.draft.program = prog.id;
+      rem.label.value = prog.name; rem.program.value = prog.id;
+      return;
+    }
     const b = e.target.closest("[data-preset]"); if (!b) return;
     const pr = REM_PRESETS[+b.dataset.preset];
     rem.draft.label = pr.label; rem.draft.time = pr.time; rem.draft.days = pr.days.slice();
@@ -4683,6 +4735,7 @@ function shortestAngleDelta(from, to) {
   $("#remEdX").addEventListener("click", closeRem);
   rem.backdrop.addEventListener("click", closeRem);
   rem.add.addEventListener("click", () => openReminderEditor());
+  $("#remTest").addEventListener("click", remTest);
   rem.list.addEventListener("click", (e) => {
     const tg = e.target.closest("[data-toggle]");
     if (tg) {

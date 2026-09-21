@@ -108,12 +108,33 @@ async function runReminders(env, now = new Date()) {
       s.lastSent = s.lastSent || {};
       if (s.lastSent[r.id] === ln.date) continue;        // bugün zaten gönderildi
       const res = await sendPush(s.sub, env).catch(() => null);
-      if (res && (res.status === 404 || res.status === 410)) { delete subs[k]; changed = true; break; } // abonelik ölmüş
-      if (res && res.ok) { s.lastSent[r.id] = ln.date; changed = true; sent++; }
+      s.lastAttempt = { at: now.toISOString(), status: res ? res.status : 0, reminder: r.id };
+      changed = true;
+      if (res && (res.status === 404 || res.status === 410)) { delete subs[k]; break; } // abonelik ölmüş
+      if (res && res.ok) { s.lastSent[r.id] = ln.date; sent++; }
     }
   }
   if (changed) await saveSubs(env, subs);
   return { sent };
+}
+
+async function pushInfo(req, env, cors, mode) {
+  let body; try { body = JSON.parse(await req.text()); } catch { return json({ error: "bad_json" }, 400, cors); }
+  if (!body || typeof body.endpoint !== "string") return json({ error: "bad_request" }, 400, cors);
+  const subs = await loadSubs(env);
+  const id = await sha256Hex(body.endpoint);
+  const s = subs[id];
+  if (!s) return json({ error: "no_subscription" }, 404, cors);
+  if (mode === "status") {
+    return json({ ok: true, tz: s.tz, reminders: s.reminders, lastSent: s.lastSent || {}, lastAttempt: s.lastAttempt || null,
+      now: localNow(s.tz || "Europe/Istanbul"), serverTime: new Date().toISOString() }, 200, cors);
+  }
+  // test: hemen bir push gönder ve push servisinin cevabını aynen döndür
+  const res = await sendPush(s.sub, env).catch(e => ({ status: 0, text: async () => String(e && e.message || e) }));
+  const text = (await res.text().catch(() => "")).slice(0, 300);
+  s.lastAttempt = { at: new Date().toISOString(), status: res.status, test: true, body: text };
+  await saveSubs(env, subs);
+  return json({ ok: res.status >= 200 && res.status < 300, status: res.status, body: text }, 200, cors);
 }
 
 async function handlePush(req, env, cors) {
@@ -154,6 +175,8 @@ export default {
 
     const path = new URL(req.url).pathname;
     if (path === "/push/v1") return handlePush(req, env, cors);
+    if (path === "/push/v1/test" && req.method === "POST") return pushInfo(req, env, cors, "test");
+    if (path === "/push/v1/status" && req.method === "POST") return pushInfo(req, env, cors, "status");
     // Yerel denemede zamanlayıcıyı elle tetiklemek için (yalnızca dev)
     if (path === "/push/run" && env.ALLOW_RUN === "1") return json(await runReminders(env), 200, cors);
 
