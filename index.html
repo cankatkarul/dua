@@ -116,6 +116,7 @@ body[data-font-size="xlarge"]{ --font-scale: 1.48; }
 html,body{ height: 100%; }
 /* Sayfa hiçbir ekranda yana kaymasın (taşan sabit süsler, iOS'ta yatay esneme) */
 html, body{ max-width: 100%; touch-action: pan-y pinch-zoom; overscroll-behavior-x: none; }
+@supports (overflow: clip){ .home-screen, .reader-screen, .stats-screen, .qibla-screen{ overflow-x: clip; } }
 @supports (overflow: clip){ html, body{ overflow-x: clip; } }
 body{
   margin: 0;
@@ -145,7 +146,7 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 .home-bg-emblem{
   position: absolute;
   top: -10px;
-  right: -10px;
+  right: 0;
   width: 150px;
   height: 230px;
   background-image: var(--emblem-img);
@@ -925,14 +926,14 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 
 /* ================= ÜÇLÜ TEK CAM (Hadîs / Âyet / Esmâ) ================= */
 .tri-wrap{
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
   padding: 12px 0 10px; margin-bottom: 6px; border-radius: 22px;
   background: linear-gradient(155deg, var(--surface-strong) 0%, var(--surface) 100%);
   border: 1px solid var(--border);
 }
 .tri-col{
   position: relative; display: flex; flex-direction: column; gap: 7px;
-  min-height: 140px; padding: 0 10px; text-align: left; color: inherit;
+  min-height: 140px; min-width: 0; padding: 0 10px; text-align: left; color: inherit; overflow: hidden;
   touch-action: manipulation; transition: opacity .15s ease;
 }
 .tri-col:active{ opacity: .65; }
@@ -943,7 +944,9 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
   display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
 .tri-arabic{ font-family: var(--display); font-size: 30px; line-height: 1.4; color: var(--tone); direction: rtl; text-align: left; }
+.tri-arabic.mid{ font-size: 22px; line-height: 1.5; }
 .tri-arabic.long{ font-size: 14px; line-height: 1.6; }
+.tri-name, .tri-text, .tri-src{ overflow-wrap: anywhere; }
 .tri-name{ font-family: var(--display); font-size: 17px; line-height: 1.1; font-weight: 700; }
 .tri-src{
   margin-top: auto; font-size: 10px; line-height: 1.3; color: var(--text-tertiary);
@@ -1247,6 +1250,7 @@ select.prog-input{ appearance: none; -webkit-appearance: none; }
 }
 .sheet-footer .ghost-btn{ margin-top: 0; }
 
+.diag-out{ margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-size: 11.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; color: var(--text-secondary); user-select: all; -webkit-user-select: all; }
 /* ================= PAYLAŞIM TOAST ================= */
 .share-toast{
   position: fixed; left: 50%; bottom: 40px;
@@ -1600,6 +1604,8 @@ try {
       <p class="backup-status" id="syncStatus" aria-live="polite"></p>
     </div>
 
+    <button class="ghost-btn" id="diagBtn">Ekran ölçüsünü göster (tanılama)</button>
+    <pre class="diag-out" id="diagOut" hidden></pre>
     <div class="sheet-footer"><button class="ghost-btn full" id="settingsClose">Tamam</button></div>
   </section>
 
@@ -4752,6 +4758,30 @@ function shortestAngleDelta(from, to) {
     setTimeout(() => launchProgramFromNotification(decodeURIComponent(m[1])), 300);
   })();
 
+  // ---------- TANILAMA: ekran ölçüsü ve taşan öğeler ----------
+  $("#diagBtn").addEventListener("click", () => {
+    const vw = document.documentElement.clientWidth;
+    const vv = window.visualViewport;
+    const wide = [];
+    document.querySelectorAll("body *").forEach(e => {
+      const cs = getComputedStyle(e);
+      if (cs.display === "none" || cs.visibility === "hidden") return;
+      const r = e.getBoundingClientRect();
+      if (r.width === 0 || (r.right <= vw + 0.5 && r.left >= -0.5)) return;
+      wide.push({ n: (e.id ? "#" + e.id : "") + "." + String(e.className).split(" ").filter(Boolean).slice(0, 2).join("."), r: r.right, l: r.left, p: cs.position });
+    });
+    wide.sort((a, b) => b.r - a.r);
+    const out = $("#diagOut");
+    out.hidden = false;
+    out.textContent = [
+      `pencere: ${window.innerWidth}x${window.innerHeight} · istemci genişliği: ${vw}`,
+      `sayfa genişliği: ${document.documentElement.scrollWidth} (html) / ${document.body.scrollWidth} (body)`,
+      `kaydırma x: ${window.scrollX} · yakınlaştırma: ${vv ? vv.scale.toFixed(3) : "?"} · görünür genişlik: ${vv ? vv.width.toFixed(1) : "?"}`,
+      `ana ekran: ${isStandalone() ? "evet" : "hayır"} · yoğunluk: ${window.devicePixelRatio} · tema: ${document.body.className}`,
+      wide.length ? "ekrandan taşanlar:\n" + wide.slice(0, 6).map(w => `  ${w.n} sağ=${w.r.toFixed(1)} sol=${w.l.toFixed(1)} ${w.p}`).join("\n") : "ekrandan taşan öğe yok",
+    ].join("\n");
+  });
+
   // ---------- KIBLE ----------
   const qEl = {
     screen: $("#qibla"), backBtn: $("#qiblaBackBtn"), openBtn: $("#openQibla"),
@@ -5127,7 +5157,7 @@ function shortestAngleDelta(from, to) {
     if (esma) cols.push(`
       <button class="tri-col tone-e" data-tri="esma">
         <span class="tone-label">Esmâ</span>
-        <div class="tri-arabic${esma.arabic.length > 18 ? " long" : ""}">${esma.arabic}</div>
+        <div class="tri-arabic${esma.arabic.length > 18 ? " long" : esma.arabic.length > 9 ? " mid" : ""}">${esma.arabic}</div>
         <div class="tri-name">${esma.name}</div>
         <div class="tri-src">${esma.meaning} · ${esma.idx + 1}/${esma.total}</div>
       </button>`);
