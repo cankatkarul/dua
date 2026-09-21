@@ -235,18 +235,23 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 
 .home-footer{
   position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom,0px)); z-index: 20;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
 }
 .qibla-fab{
-  width: 46px; height: 46px; border-radius: 50%;
-  background: var(--surface-strong); border: 1px solid var(--border);
-  backdrop-filter: blur(20px);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--accent);
-  box-shadow: var(--shadow-soft);
+  height: 44px; padding: 0 16px 0 12px; border-radius: 999px;
+  background: linear-gradient(155deg, var(--accent) 0%, var(--accent-dim) 100%);
+  border: none;
+  display: flex; align-items: center; gap: 8px;
+  color: #0F2A22; font-weight: 700; font-size: 14px; letter-spacing: .01em;
+  box-shadow: 0 6px 16px var(--accent-glow);
   transition: transform .2s ease;
+  animation: qiblaPulse 3.2s ease-in-out infinite;
 }
-.qibla-fab:active{ transform: scale(.9); }
+.qibla-fab:active{ transform: scale(.94); }
+@keyframes qiblaPulse{
+  0%, 100%{ box-shadow: 0 6px 16px var(--accent-glow), 0 0 0 0 transparent; }
+  50%{ box-shadow: 0 6px 16px var(--accent-glow), 0 0 0 7px rgba(201,162,76,0.18); }
+}
 .settings-fab{
   width: 54px; height: 54px; border-radius: 50%;
   background: var(--surface-strong); border: 1px solid var(--border);
@@ -1008,6 +1013,55 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 .qibla-actions .ghost-btn{ margin-top: 0; }
 .qibla-hint{ margin: 6px 0 0; max-width: 340px; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--text-tertiary); }
 
+/* ================= OTOMATİK KAYDIRMA ================= */
+.autoscroll-fab{
+  position: fixed;
+  bottom: calc(20px + 48px + 12px + env(safe-area-inset-bottom,0px));
+  left: 20px; z-index: 20;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--surface-strong); border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-soft);
+  transition: background .2s ease, color .2s ease, transform .15s ease;
+  touch-action: manipulation;
+}
+.autoscroll-fab.active{ background: var(--accent); color: #0F2A22; border-color: transparent; }
+.autoscroll-fab:active{ transform: scale(.88); }
+.autoscroll-fab[hidden], .autoscroll-speed[hidden]{ display: none !important; }
+.autoscroll-speed{
+  position: fixed;
+  bottom: calc(20px + 48px + 12px + 7px + env(safe-area-inset-bottom,0px));
+  left: calc(20px + 48px + 8px); z-index: 20;
+  height: 34px; padding: 0 14px; border-radius: 999px;
+  background: var(--surface-strong); border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  color: var(--accent); font-weight: 700; font-size: 13px;
+  box-shadow: var(--shadow-soft);
+  touch-action: manipulation;
+}
+.autoscroll-speed:active{ transform: scale(.94); }
+
+/* ================= AYIRT EDİLEN KARTLAR (Esmâ-i Hüsnâ / Vâkıa / Yâsîn) ================= */
+.dua-card:not(.is-done)[data-id="vakia"]{ border-color: rgba(217,116,140,0.38); }
+.dua-card:not(.is-done)[data-id="vakia"] .dua-index{
+  background: linear-gradient(155deg, #E68AA0 0%, #B04E68 100%); color: #2A0E17;
+  box-shadow: 0 4px 10px rgba(217,116,140,0.38);
+}
+.dua-card:not(.is-done)[data-id="yasin"]{ border-color: rgba(142,134,232,0.4); }
+.dua-card:not(.is-done)[data-id="yasin"] .dua-index{
+  background: linear-gradient(155deg, #A79FF2 0%, #6A61C4 100%); color: #16123A;
+  box-shadow: 0 4px 10px rgba(142,134,232,0.4);
+}
+.hero-esma-card{
+  --tone: #3FB8AF; --tone-glow: rgba(63,184,175,0.32);
+  background: linear-gradient(160deg, var(--tone-glow), transparent 70%), var(--surface);
+  border-color: rgba(63,184,175,0.45);
+}
+.hero-esma-card .hero-esma-eyebrow{ color: var(--tone); }
+.hero-esma-card .hero-esma-btn.primary{ background: var(--tone); color: #06241F; }
+
 /* ================= PAYLAŞIM TOAST ================= */
 .share-toast{
   position: fixed; left: 50%; bottom: 40px;
@@ -1038,6 +1092,12 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
       <h1 class="home-title">Günlük Dualarım</h1>
     </header>
 
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" width="17" height="17" class="search-box-icon"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" id="searchInput" class="search-box-input" placeholder="Bu sekmede ara..." autocomplete="off" autocorrect="off" spellcheck="false" />
+      <button class="search-box-clear" id="searchClearBtn" aria-label="Aramayı temizle" hidden>✕</button>
+    </div>
+
     <div class="calendar-leaf-card" id="calendarLeafCard" aria-label="Günün sayfası"></div>
 
     <div class="daily-verse-card" id="dailyVerseCard" role="button" tabindex="0" aria-label="Bugünün âyeti"></div>
@@ -1048,12 +1108,6 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
       <button class="tab-btn active" data-tab="sure">Sûreler</button>
       <button class="tab-btn" data-tab="dualar">Dualar</button>
       <button class="tab-btn" data-tab="tesbihat">Tesbihat</button>
-    </div>
-
-    <div class="search-box">
-      <svg viewBox="0 0 24 24" width="17" height="17" class="search-box-icon"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <input type="search" id="searchInput" class="search-box-input" placeholder="Bu sekmede ara..." autocomplete="off" autocorrect="off" spellcheck="false" />
-      <button class="search-box-clear" id="searchClearBtn" aria-label="Aramayı temizle" hidden>✕</button>
     </div>
 
     <button class="streak-badge" id="streakBadge" aria-label="İstatistikler"></button>
@@ -1068,7 +1122,8 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 
     <footer class="home-footer">
       <button class="qibla-fab" id="openQibla" aria-label="Kıble bul">
-        <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5l-2 5-5 2 2-5z" fill="currentColor" fill-opacity=".85" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="4" y="4" width="16" height="17" rx="2" fill="currentColor"/><rect x="4" y="8.5" width="16" height="2.6" fill="var(--accent)"/><rect x="13.2" y="13.2" width="4" height="7.8" rx=".8" fill="var(--accent)"/></svg>
+        <span>Kıble</span>
       </button>
       <button class="settings-fab" id="openSettings" aria-label="Ayarlar">
         <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.4.96a7.4 7.4 0 0 0-1.73-1l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.63.24-1.2.58-1.73 1l-2.4-.96a.5.5 0 0 0-.6.22L2.63 9.28a.5.5 0 0 0 .12.64L4.78 11.5c-.04.33-.06.66-.06 1s.02.67.06 1L2.75 15.08a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.4-.96c.53.42 1.1.76 1.73 1l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.63-.24 1.2-.58 1.73-1l2.4.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64L19.4 13.5Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
@@ -1114,6 +1169,13 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
     <button class="slide-toggle-fab" id="slideToggleFab" aria-label="Slayt modu">
       <svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="3" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
+
+    <!-- Otomatik kaydırma: oynat/durdur + hız -->
+    <button class="autoscroll-fab" id="autoScrollFab" aria-label="Otomatik kaydır">
+      <svg class="as-icon-play" viewBox="0 0 24 24" width="20" height="20"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+      <svg class="as-icon-pause" viewBox="0 0 24 24" width="20" height="20" hidden><rect x="6.5" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>
+    </button>
+    <button class="autoscroll-speed" id="autoScrollSpeed" aria-label="Kaydırma hızı" hidden>Yavaş</button>
 
     <button class="counter-fab" id="counterFab" aria-label="Sayaç">
       <span class="counter-fab-ring"><span class="counter-fab-num" id="counterFabNum">0</span></span>
@@ -1752,7 +1814,7 @@ const DUAS = [
   },
   {
     id: "ayetel-kursi",
-    group: "namaz",
+    group: "sure",
     name: "Âyetel Kursî",
     meta: "Bakara Sûresi, 255. âyet",
     note: "Kur'an-ı Kerim'in en azametli ayetidir. Farz namazlardan sonra ve korunma amacıyla sıklıkla okunur.",
@@ -2387,7 +2449,7 @@ function shortestAngleDelta(from, to) {
   const SURE_ORDER = [
     "fil", "kureys", "maun", "kevser", "kafirun", "nasr", "tebbet",
     "ihlas", "felak", "nas", "asr", "alak", "tekasur", "humeze", "duha",
-    "insirah", "kadr", "tin", "amenerrasulu", "bakara-elif-lam-mim",
+    "insirah", "kadr", "tin", "ayetel-kursi", "amenerrasulu", "bakara-elif-lam-mim",
     "esmaulhusna", "vakia", "fatiha", "yasin"
   ];
   function getSureList() {
@@ -2493,30 +2555,33 @@ function shortestAngleDelta(from, to) {
     const q = normalizeSearchText(searchQuery.trim());
 
     if (activeTab === "sure") {
+      // Esmâ-i Hüsnâ büyük kart olarak listenin içinde yer alır; numaralar yalnızca sıradan satırları sayar
+      const appendRows = (list) => {
+        let n = 0;
+        list.forEach(dua => els.duaList.appendChild(
+          dua.group === "esma" ? buildHeroEsmaCard(dua) : buildDuaCardRow(dua, ++n)));
+      };
       const sureler = getSureList();
       if (q) {
         const filtered = sureler.filter(d => matchesQuery(d, q));
         if (!filtered.length) { els.duaList.appendChild(buildEmptyStateEl()); return; }
-        filtered.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
+        appendRows(filtered);
         return;
       }
-      const favs = sureler.filter(d => isFavorite(d.id));
+      const favs = sureler.filter(d => d.group !== "esma" && isFavorite(d.id));
       if (favs.length) {
         els.duaList.appendChild(buildSectionLabelEl("Favorilerim", favs.length));
-        favs.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
+        appendRows(favs);
       }
-      sureler.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
+      appendRows(sureler);
 
     } else if (activeTab === "dualar") {
       const namazDualari = DUAS.filter(d => d.group === "namaz");
-      const esma = DUAS.find(d => d.group === "esma");
 
       if (q) {
         const filtered = namazDualari.filter(d => matchesQuery(d, q));
-        const esmaMatches = !!(esma && matchesQuery(esma, q));
-        if (!filtered.length && !esmaMatches) { els.duaList.appendChild(buildEmptyStateEl()); return; }
+        if (!filtered.length) { els.duaList.appendChild(buildEmptyStateEl()); return; }
         filtered.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
-        if (esmaMatches) els.duaList.appendChild(buildHeroEsmaCard(esma));
         return;
       }
 
@@ -2527,11 +2592,6 @@ function shortestAngleDelta(from, to) {
       }
       els.duaList.appendChild(buildSectionLabelEl("Namazda Okunan Dualar", namazDualari.length));
       namazDualari.forEach((dua, i) => els.duaList.appendChild(buildDuaCardRow(dua, i + 1)));
-
-      if (esma) {
-        els.duaList.appendChild(buildSectionLabelEl("Esmâ-i Hüsnâ", ""));
-        els.duaList.appendChild(buildHeroEsmaCard(esma));
-      }
 
     } else {
       if (q) {
@@ -2597,6 +2657,8 @@ function shortestAngleDelta(from, to) {
   }
 
   function openReader(id, list, focusIndex) {
+    stopAutoScroll();
+    auto.fab.hidden = false;
     // Ana sayfadaki kaydırma konumunu geri dönüşte geri yüklemek için sakla
     if (els.home && !els.home.hidden) homeScrollY = window.scrollY;
     list = list || DUAS;
@@ -2708,6 +2770,8 @@ function shortestAngleDelta(from, to) {
   let currentDuaList = DUAS;
 
   function enterSlideMode(verses, startIndex) {
+    stopAutoScroll();
+    auto.fab.hidden = true;
     slideVerses = verses;
     slideIndex = startIndex;
     isSlideModeActive = true;
@@ -2718,6 +2782,7 @@ function shortestAngleDelta(from, to) {
   }
 
   function exitSlideMode() {
+    auto.fab.hidden = false;
     isSlideModeActive = false;
     document.getElementById("readerBody").hidden = false;
     els.slideMode.hidden = true;
@@ -2781,6 +2846,7 @@ function shortestAngleDelta(from, to) {
   });
 
   function closeReader() {
+    stopAutoScroll();
     if (isSlideModeActive) exitSlideMode();
     renderHome();
     renderStreakBadge();
@@ -2808,6 +2874,7 @@ function shortestAngleDelta(from, to) {
     els.homeCounterFabNum.textContent = String(getCount(HOME_COUNTER_ID));
   }
   function openCounterFor(id) {
+    stopAutoScroll();
     currentDuaId = id;
     renderCounterSheet();
     openSheet(els.counterBackdrop, els.counterSheet);
@@ -3131,6 +3198,87 @@ function shortestAngleDelta(from, to) {
 
   els.statsBackBtn.addEventListener("click", closeStats);
   els.streakBadge.addEventListener("click", openStats);
+
+  // ---------- OTOMATİK KAYDIRMA ----------
+  const AUTO_SPEEDS = [
+    { label: "Yavaş", pxPerSec: 20 },
+    { label: "Orta", pxPerSec: 40 },
+    { label: "Hızlı", pxPerSec: 70 },
+  ];
+  const auto = {
+    playing: false, raf: 0,
+    last: 0, pos: 0, lastY: 0,
+    touching: false, pausedUntil: 0,
+    fab: $("#autoScrollFab"), speedBtn: $("#autoScrollSpeed"),
+  };
+  function autoSpeedIndex() {
+    const i = state.autoScrollSpeed;
+    return Number.isInteger(i) && i >= 0 && i < AUTO_SPEEDS.length ? i : 0;
+  }
+  function autoRenderUi() {
+    auto.fab.classList.toggle("active", auto.playing);
+    auto.fab.setAttribute("aria-label", auto.playing ? "Otomatik kaydırmayı durdur" : "Otomatik kaydır");
+    auto.fab.querySelector(".as-icon-play").hidden = auto.playing;
+    auto.fab.querySelector(".as-icon-pause").hidden = !auto.playing;
+    auto.speedBtn.hidden = !auto.playing;
+    auto.speedBtn.textContent = AUTO_SPEEDS[autoSpeedIndex()].label;
+  }
+  function autoTick(ts) {
+    if (!auto.playing) return;
+    if (!auto.last) auto.last = ts;
+    const dt = Math.min(ts - auto.last, 64) / 1000;
+    auto.last = ts;
+    const y = window.scrollY;
+    if (auto.touching || ts < auto.pausedUntil) {
+      // Kullanıcı kaydırıyor: konumu takip et, ilerleme yok
+      auto.pos = y; auto.lastY = y;
+    } else if (Math.abs(y - auto.lastY) > 1.5) {
+      // Başka bir şey (ör. atalet, klavye) kaydırdı: yerleşmesini bekle
+      auto.pos = y; auto.lastY = y; auto.pausedUntil = ts + 250;
+    } else {
+      // Kesirli pikselleri kendimiz biriktiriyoruz; yoksa yavaş hızda tarayıcı hiç kıpırdamaz
+      auto.pos += AUTO_SPEEDS[autoSpeedIndex()].pxPerSec * dt;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (auto.pos >= max - 1) {
+        window.scrollTo(0, max);
+        stopAutoScroll();
+        return;
+      }
+      window.scrollTo(0, auto.pos);
+      auto.lastY = window.scrollY;
+    }
+    auto.raf = requestAnimationFrame(autoTick);
+  }
+  function startAutoScroll() {
+    if (auto.playing) return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY >= max - 1) { showToast("Sayfanın sonundasınız"); return; }
+    auto.playing = true;
+    auto.last = 0; auto.pos = window.scrollY; auto.lastY = window.scrollY;
+    auto.touching = false; auto.pausedUntil = 0;
+    autoRenderUi();
+    auto.raf = requestAnimationFrame(autoTick);
+  }
+  function stopAutoScroll() {
+    if (!auto.playing) return;
+    auto.playing = false;
+    cancelAnimationFrame(auto.raf);
+    autoRenderUi();
+  }
+  auto.fab.addEventListener("click", () => auto.playing ? stopAutoScroll() : startAutoScroll());
+  auto.speedBtn.addEventListener("click", () => {
+    state.autoScrollSpeed = (autoSpeedIndex() + 1) % AUTO_SPEEDS.length;
+    saveStore();
+    autoRenderUi();
+  });
+  // Elle kaydırma duraklatır, bırakınca ~1 sn sonra devam eder
+  window.addEventListener("touchstart", () => { if (auto.playing) auto.touching = true; }, { passive: true });
+  const autoTouchEnd = () => { auto.touching = false; auto.pausedUntil = performance.now() + 800; };
+  window.addEventListener("touchend", autoTouchEnd, { passive: true });
+  window.addEventListener("touchcancel", autoTouchEnd, { passive: true });
+  window.addEventListener("wheel", () => { if (auto.playing) auto.pausedUntil = performance.now() + 1000; }, { passive: true });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) stopAutoScroll(); });
+  autoRenderUi();
 
   // ---------- KIBLE ----------
   const qEl = {
