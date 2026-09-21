@@ -110,6 +110,9 @@ body[data-font-size="xlarge"]{ --font-scale: 1.48; }
 
 *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html,body{ height: 100%; }
+/* Sayfa hiçbir ekranda yana kaymasın (taşan sabit süsler, iOS'ta yatay esneme) */
+html, body{ max-width: 100%; touch-action: pan-y pinch-zoom; overscroll-behavior-x: none; }
+@supports (overflow: clip){ html, body{ overflow-x: clip; } }
 body{
   margin: 0;
   font-family: var(--sans);
@@ -286,7 +289,7 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 .reader-bg-emblem{
   position: fixed;
   top: 60px;
-  right: -10px;
+  right: 0;
   width: 120px;
   height: 190px;
   background-image: var(--emblem-img);
