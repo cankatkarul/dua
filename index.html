@@ -1489,7 +1489,7 @@ try {
     <div class="prog-lab">Hızlı seç</div>
     <div class="rem-presets" id="remPresets"></div>
     <div class="prog-lab">Ad</div>
-    <input class="prog-input" id="remLabel" type="text" maxlength="30" placeholder="Örn. Sabah virdi" autocomplete="off">
+    <input class="prog-input" id="remLabel" type="text" maxlength="30" placeholder="Örn. Sabah duaları" autocomplete="off">
     <div class="prog-lab">Saat</div>
     <input class="prog-input" id="remTime" type="time" value="06:10">
     <div class="prog-lab">Günler</div>
@@ -4542,7 +4542,7 @@ function shortestAngleDelta(from, to) {
   const REM_DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
   const REM_DAY_NAMES = { 0: "Paz", 1: "Pzt", 2: "Sal", 3: "Çar", 4: "Per", 5: "Cum", 6: "Cmt" };
   const REM_PRESETS = [
-    { label: "Sabah virdi", time: "06:10", days: [] },
+    { label: "Sabah duaları", time: "06:10", days: [] },
     { label: "Yâsîn · Perşembe akşamı", time: "20:00", days: [4] },
     { label: "Akşam duaları", time: "21:00", days: [] },
   ];
@@ -4665,7 +4665,7 @@ function shortestAngleDelta(from, to) {
   function openReminderEditor(id) {
     const ex = id && getReminders().find(r => r.id === id);
     rem.editingId = ex ? ex.id : null;
-    rem.draft = ex ? JSON.parse(JSON.stringify(ex)) : { id: "r" + Date.now().toString(36), label: "Sabah virdi", time: "06:10", days: [], program: "", message: "", on: true };
+    rem.draft = ex ? JSON.parse(JSON.stringify(ex)) : { id: "r" + Date.now().toString(36), label: "Sabah duaları", time: "06:10", days: [], program: "", message: "", on: true };
     rem.title.textContent = ex ? "Hatırlatmayı düzenle" : "Yeni hatırlatma";
     // Önce kendi programların (dokununca ad ve program dolar), sonra hazır ayarlar
     rem.presets.innerHTML =
