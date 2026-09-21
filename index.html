@@ -272,7 +272,9 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 .reader-header{
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; gap: 10px;
-  padding: calc(env(safe-area-inset-top,0px) + 16px) 14px 14px;
+  /* Yükseklik sabit: kaydırınca değişirse içerik kayar, scrollY eşiği tekrar geçer ve titreme olur */
+  padding: calc(env(safe-area-inset-top,0px) + 12px) 14px 10px;
+  border-bottom: 1px solid transparent;
   background: linear-gradient(var(--bg) 60%, transparent);
   backdrop-filter: blur(14px);
 }
@@ -284,9 +286,9 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
   transition: transform .18s ease;
 }
 .icon-btn:active{ transform: scale(.88); }
-.reader-title-wrap{ flex: 1; min-width: 0; text-align: center; }
-.reader-title{ font-family: var(--display); font-size: 17px; font-weight: 700; }
-.reader-subtitle{ font-size: 12px; color: var(--text-secondary); }
+.reader-title-wrap{ flex: 1; min-width: 0; height: 38px; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.reader-title{ font-family: var(--display); font-size: 17px; line-height: 1.2; font-weight: 700; }
+.reader-subtitle{ font-size: 12px; line-height: 1.2; color: var(--text-secondary); }
 
 .reader-body{ padding: 8px 22px 40px; }
 .reader-note{
@@ -762,17 +764,17 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
   50%{ box-shadow: 0 0 14px 0 var(--accent-glow); }
 }
 
-/* Reader header - scroll ile küçülme */
-.reader-header{ transition: padding .25s ease, background .25s ease; }
+/* Reader header - scroll ile küçülme: yalnızca görsel özellikler (transform/opacity/renk) değişir, düzen değişmez */
+.reader-header{ transition: background .25s ease, border-color .25s ease; }
+.reader-header .reader-title{ transition: transform .25s ease; transform-origin: center; }
+.reader-header .reader-subtitle{ transition: opacity .2s ease; }
 .reader-header.scrolled{
-  padding-top: calc(env(safe-area-inset-top,0px) + 8px);
-  padding-bottom: 8px;
   background: var(--surface);
   backdrop-filter: blur(24px) saturate(160%);
-  border-bottom: 1px solid var(--border);
+  border-bottom-color: var(--border);
 }
-.reader-header.scrolled .reader-title{ font-size: 15px; }
-.reader-header.scrolled .reader-subtitle{ display: none; }
+.reader-header.scrolled .reader-title{ transform: translateY(8px) scale(.88); }
+.reader-header.scrolled .reader-subtitle{ opacity: 0; }
 
 /* Dropcap - ilk âyet büyük harfle başlasın */
 .verse-first{
@@ -2310,6 +2312,7 @@ const HADITHS = [
     document.getElementById("readerBody").hidden = false;
     els.slideToggleFab.classList.remove("active");
 
+    document.querySelector(".reader-header").classList.remove("scrolled");
     els.readerTitle.textContent = dua.name;
     els.readerSubtitle.textContent = dua.meta;
 
@@ -2670,7 +2673,10 @@ const HADITHS = [
     if (els.reader.hidden) return;
     const header = document.querySelector(".reader-header");
     if (!header) return;
-    header.classList.toggle("scrolled", window.scrollY > 40);
+    // Histerezis: eşikte ileri geri gidip gelmesin
+    const y = window.scrollY;
+    if (y > 60) header.classList.add("scrolled");
+    else if (y < 20) header.classList.remove("scrolled");
   }, { passive: true });
 
   els.searchInput.addEventListener("input", () => {
