@@ -1017,6 +1017,20 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 .qibla-status.warn{ color: var(--text-secondary); font-weight: 500; }
 .qibla-actions{ width: 100%; max-width: 340px; display: flex; flex-direction: column; }
 .qibla-actions .ghost-btn{ margin-top: 0; }
+/* Bulut eşitleme: kod girme kutusu ve kod gösterimi (önceden stilsizdi) */
+#syncRestoreRow{ display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+#syncRestoreRow[hidden]{ display: none; }
+#syncRestoreRow .ghost-btn{ margin-top: 0; }
+.sync-input{
+  width: 100%; box-sizing: border-box; height: 50px; padding: 0 16px;
+  border-radius: 14px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-primary); font: 600 16px/1 ui-monospace, Menlo, monospace; /* 16px: iOS yakınlaştırmasını önler */
+  letter-spacing: .04em; text-align: center; outline: none;
+}
+.sync-input:focus{ border-color: var(--accent); }
+.sync-input::placeholder{ color: var(--text-tertiary); font-weight: 400; letter-spacing: .02em; }
+.sync-label{ font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.sync-code{ font: 700 17px/1.4 ui-monospace, Menlo, monospace; letter-spacing: .05em; color: var(--text-primary); word-break: break-all; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); text-align: center; }
 .app-version{ margin: 14px 0 0; text-align: center; font-size: 12px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
 .qibla-hint{ margin: 6px 0 0; max-width: 340px; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--text-tertiary); }
 
@@ -1626,7 +1640,7 @@ try {
 
     <button class="ghost-btn" id="diagBtn">Ekran ölçüsünü göster (tanılama)</button>
     <pre class="diag-out" id="diagOut" hidden></pre>
-    <p class="app-version" id="appVersion">v1.92</p>
+    <p class="app-version" id="appVersion">v1.93</p>
     <div class="sheet-footer"><button class="ghost-btn full" id="settingsClose">Tamam</button></div>
   </section>
 
