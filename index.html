@@ -5077,7 +5077,8 @@ function shortestAngleDelta(from, to) {
 
   // Manyetik alan şiddeti (µT): dünya alanı yaklaşık 25-65 µT. Bunun dışı = girişim/kalibrasyon sorunu.
   function qiblaStartMag() {
-    if (qs.mag || typeof Magnetometer !== "function") return;
+    if (qs.mag) return;
+    if (typeof Magnetometer !== "function") { qs.dbg.magErr = "bu tarayıcıda kapalı (chrome://flags → Generic Sensor Extra Classes)"; return; }
     try {
       const m = new Magnetometer({ frequency: 10 });
       qs.magVals = [];
@@ -5113,7 +5114,7 @@ function shortestAngleDelta(from, to) {
       "ekrandaki yön: " + (qs.heading != null ? fmt(qs.heading) + "°" : "—") + " · sapma: " + fmt(qs.declination) + "°",
       "kıble: " + (qs.bearing != null ? fmt(qs.bearing) + "°" : "—"),
       d.sensorErr ? "sensör hatası: " + d.sensorErr : "",
-      "manyetik alan: " + (qs.magUt != null ? qs.magUt.toFixed(0) + " µT (normal 25-65)" : (d.magErr ? "hata " + d.magErr : "—")),
+      "manyetik alan: " + (qs.magUt != null ? qs.magUt.toFixed(0) + " µT (normal 25-65)" : (d.magErr ? d.magErr : "ölçülüyor…")),
       qs.perms ? "izinler: " + qs.perms : "",
     ].filter(Boolean);
     out.textContent = lines.join("\n");
