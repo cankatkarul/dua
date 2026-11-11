@@ -4924,7 +4924,7 @@ function shortestAngleDelta(from, to) {
     locating: false, locError: null,
     listening: false, gotSensor: false, noSensor: false, permDenied: false, needsPermission: false, lowAccuracy: false,
     sensorTimer: null,
-    mode: "auto", flip: false, dbg: {}, perms: "",
+    mode: "auto", flip: false, dbg: {}, perms: "", mag: null, magVals: [], magUt: null, magBad: false,
   };
 
   // Pusula halkasındaki çentikler ve yön harfleri (bir kez çizilir)
@@ -4991,6 +4991,7 @@ function shortestAngleDelta(from, to) {
     else if (qs.noSensor) { text = `Bu cihazda pusula bulunamadı. Kıble, kuzeyden ${staticDeg}° saat yönünde.`; cls = "warn"; }
     else if (!qs.gotSensor) { text = "Pusula bekleniyor…"; cls = "warn"; }
     else if (qs.aligned) { text = "Kıbledesiniz ✓"; cls = "ok"; }
+    else if (qs.magBad) { text = `Çevredeki manyetik alan normal dışı (${Math.round(qs.magUt)} µT). Metal, kılıf ya da mıknatıstan uzaklaşıp telefonu havada 8 çizerek kalibre edin.`; cls = "warn"; }
     else if (qs.lowAccuracy) { text = "Pusula hassasiyeti düşük. Telefonu havada 8 çizerek kalibre edin."; cls = "warn"; }
     else { text = "Telefonu döndürün, Kâbe işaretini üstteki oka getirin."; }
     qEl.status.textContent = text;
@@ -5074,6 +5075,31 @@ function shortestAngleDelta(from, to) {
     qs.sensorApiActive = false;
   }
 
+  // Manyetik alan şiddeti (µT): dünya alanı yaklaşık 25-65 µT. Bunun dışı = girişim/kalibrasyon sorunu.
+  function qiblaStartMag() {
+    if (qs.mag || typeof Magnetometer !== "function") return;
+    try {
+      const m = new Magnetometer({ frequency: 10 });
+      qs.magVals = [];
+      m.addEventListener("reading", () => {
+        qs.magVals.push(Math.hypot(m.x, m.y, m.z));
+        if (qs.magVals.length > 15) qs.magVals.shift();
+        const avg = qs.magVals.reduce((a, b) => a + b, 0) / qs.magVals.length;
+        const bad = qs.magVals.length >= 5 && (avg < 20 || avg > 70);
+        qs.magUt = avg;
+        if (bad !== qs.magBad) { qs.magBad = bad; qiblaRenderStatus(); }
+        qiblaDiagRender();
+      });
+      m.addEventListener("error", (ev) => { qs.dbg.magErr = ev.error && ev.error.name; });
+      m.start();
+      qs.mag = m;
+    } catch (err) { qs.dbg.magErr = err.name; }
+  }
+  function qiblaStopMag() {
+    if (qs.mag) { try { qs.mag.stop(); } catch (_) {} qs.mag = null; }
+    qs.magBad = false; qs.magUt = null;
+  }
+
   function qiblaDiagRender() {
     const out = $("#qiblaDiagOut");
     if (!out || !$("#qiblaDiag").open) return;
@@ -5087,6 +5113,7 @@ function shortestAngleDelta(from, to) {
       "ekrandaki yön: " + (qs.heading != null ? fmt(qs.heading) + "°" : "—") + " · sapma: " + fmt(qs.declination) + "°",
       "kıble: " + (qs.bearing != null ? fmt(qs.bearing) + "°" : "—"),
       d.sensorErr ? "sensör hatası: " + d.sensorErr : "",
+      "manyetik alan: " + (qs.magUt != null ? qs.magUt.toFixed(0) + " µT (normal 25-65)" : (d.magErr ? "hata " + d.magErr : "—")),
       qs.perms ? "izinler: " + qs.perms : "",
     ].filter(Boolean);
     out.textContent = lines.join("\n");
@@ -5114,6 +5141,7 @@ function shortestAngleDelta(from, to) {
   function qiblaBeginListening() {
     if (!qs.listening) {
       if (qs.mode === "auto" || qs.mode === "sensor") qiblaStartSensorApi();
+      qiblaStartMag();
       window.addEventListener("deviceorientationabsolute", onQiblaOrientation, true);
       window.addEventListener("deviceorientation", onQiblaOrientation, true);
       qs.listening = true;
@@ -5183,6 +5211,7 @@ function shortestAngleDelta(from, to) {
     window.removeEventListener("deviceorientation", onQiblaOrientation, true);
     qs.listening = false;
     qiblaStopSensorApi();
+    qiblaStopMag();
     clearTimeout(qs.sensorTimer);
     keepAwake("qibla", false);
     showScreen(els.home, qEl.screen, false);
