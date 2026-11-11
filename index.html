@@ -3329,10 +3329,8 @@ function shortestAngleDelta(from, to) {
           <div class="audio-actions"><button class="audio-link muted" id="esmaAudioRemove" type="button">Dosyayı kaldır</button></div>
         </div>
         <div id="esmaAudioRemote">
-          <button class="audio-play" id="esmaAudioBtn" type="button">
-            <span class="audio-play-ico"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
-            <span><span class="audio-play-title">Dinle</span><br><span class="audio-play-sub">Mustafa Demirci · Esmâ-i Hüsnâ (Tesbihat) · YouTube</span></span>
-          </button>
+          <div class="audio-play-title">Dinle</div>
+          <div class="audio-play-sub">Mustafa Demirci · Esmâ-i Hüsnâ (Tesbihat)</div>
           <div class="audio-actions">
             <button class="audio-link" id="esmaAudioGet" type="button" hidden>Sesi indir (internetsiz dinle)</button>
             <button class="audio-link" id="esmaAudioAdd" type="button">Ses dosyası ekle (internetsiz dinle)</button>
@@ -3432,7 +3430,7 @@ function shortestAngleDelta(from, to) {
   async function setupEsmaAudio() {
     const $id = (x) => document.getElementById(x);
     const local = $id("esmaAudioLocal"), remote = $id("esmaAudioRemote"), el = $id("esmaAudioEl");
-    const btn = $id("esmaAudioBtn"), addBtn = $id("esmaAudioAdd"), file = $id("esmaAudioFile"), rm = $id("esmaAudioRemove");
+    const addBtn = $id("esmaAudioAdd"), file = $id("esmaAudioFile"), rm = $id("esmaAudioRemove");
     const KEY = "esmaulhusna";
 
     function showLocal(blob) {
@@ -3445,12 +3443,6 @@ function shortestAngleDelta(from, to) {
       }
     }
 
-    btn.addEventListener("click", () => {
-      // Oynatıcı yalnızca dokununca yüklenir (çevrimdışıyken ve normal okurken YouTube'a istek gitmez)
-      if (!navigator.onLine) { btn.querySelector(".audio-play-sub").textContent = "İnternet gerekli — ya da ses dosyası ekleyin"; return; }
-      btn.hidden = true;
-      $id("esmaAudio").insertAdjacentHTML("beforeend", `<div class="audio-frame"><iframe src="https://www.youtube-nocookie.com/embed/4MUPqYILxrU?autoplay=1&playsinline=1&rel=0" title="Esmâ-i Hüsnâ (Tesbihat) — Mustafa Demirci" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`);
-    });
     const getBtn = $id("esmaAudioGet");
     if (esmaCode()) getBtn.hidden = false;
     getBtn.addEventListener("click", async () => {
