@@ -358,11 +358,15 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 .cycle-banner-label{ font-size: 13px; color: var(--text-secondary); }
 .cycle-banner-day{ font-family: var(--serif); font-weight: 700; font-size: 16px; color: var(--accent); }
 .cycle-advance-btn{ margin-top: 0; }
-.cycle-skip{ margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); }
-.cycle-skip-ctl{ display: flex; align-items: center; gap: 8px; }
-.cycle-step{ width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 18px; line-height: 1; }
-.cycle-skip-n{ min-width: 22px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); }
-.cycle-skip-add{ margin-top: 0 !important; font-size: 13px; padding: 8px 12px; width: auto; }
+.cycle-skip{ margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--divider); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.cycle-skip-label{ font-size: 12.5px; letter-spacing: .04em; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; }
+.cycle-skip-ctl{ display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.cycle-skip-step{ display: flex; align-items: center; justify-content: center; gap: 14px; }
+.cycle-step{ width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--accent); font-size: 20px; line-height: 1; font-weight: 600; display: grid; place-items: center; padding: 0; transition: transform .15s ease; }
+.cycle-step:active{ transform: scale(.9); }
+.cycle-skip-n{ min-width: 36px; text-align: center; font-family: var(--serif); font-weight: 700; font-size: 20px; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.cycle-skip-add{ margin: 0; width: auto; display: inline-flex; align-items: center; justify-content: center; padding: 9px 20px; font-size: 14px; border-radius: 999px; background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+.cycle-skip-add:active{ transform: scale(.97); }
 .cycle-advance-btn:disabled{ opacity: .55; }
 .dua-text{
   font-family: var(--serif);
@@ -1640,7 +1644,7 @@ try {
 
     <button class="ghost-btn" id="diagBtn">Ekran ölçüsünü göster (tanılama)</button>
     <pre class="diag-out" id="diagOut" hidden></pre>
-    <p class="app-version" id="appVersion">v1.93</p>
+    <p class="app-version" id="appVersion">v1.94</p>
     <div class="sheet-footer"><button class="ghost-btn full" id="settingsClose">Tamam</button></div>
   </section>
 
@@ -3299,10 +3303,12 @@ function shortestAngleDelta(from, to) {
       <div class="cycle-skip">
         <span class="cycle-skip-label">Atladığım günler</span>
         <div class="cycle-skip-ctl">
-          <button class="cycle-step" data-step="-1" type="button" aria-label="Azalt">−</button>
-          <span class="cycle-skip-n" id="cycleSkipN">${cycleSkipN}</span>
-          <button class="cycle-step" data-step="1" type="button" aria-label="Artır">+</button>
-          <button class="ghost-btn cycle-skip-add" type="button">${cycleSkipN} günü ekle</button>
+          <div class="cycle-skip-step">
+            <button class="cycle-step" data-step="-1" type="button" aria-label="Azalt">−</button>
+            <span class="cycle-skip-n" id="cycleSkipN">${cycleSkipN}</span>
+            <button class="cycle-step" data-step="1" type="button" aria-label="Artır">+</button>
+          </div>
+          <button class="cycle-skip-add" type="button">${cycleSkipN} günü ekle</button>
         </div>
       </div>`;
     const btn = el.querySelector(".cycle-advance-btn");
