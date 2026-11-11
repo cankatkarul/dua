@@ -332,6 +332,13 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 .reader-title{ font-family: var(--display); font-size: 17px; line-height: 1.2; font-weight: 700; }
 .reader-subtitle{ font-size: 12px; line-height: 1.2; color: var(--text-secondary); }
 
+.audio-card{ margin: 0 0 16px; border: 1px solid var(--border, rgba(127,127,127,.25)); border-radius: 16px; padding: 12px 14px; background: var(--card, rgba(127,127,127,.06)); }
+.audio-play{ display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.audio-play-ico{ flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; }
+.audio-play-title{ font-weight: 600; font-size: 15px; }
+.audio-play-sub{ font-size: 12.5px; color: var(--text-secondary); }
+.audio-frame{ position: relative; width: 100%; aspect-ratio: 16 / 9; margin-top: 12px; border-radius: 12px; overflow: hidden; background: #000; }
+.audio-frame iframe{ position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .reader-body{ padding: 8px 22px 40px; }
 .reader-note{
   font-size: 14px; color: var(--text-secondary);
@@ -2647,6 +2654,17 @@ function compassHeadingFromEuler(alpha, beta, gamma) {
   return ((Math.atan2(e, n) / d) + 360) % 360;
 }
 
+// Android AbsoluteOrientationSensor kuaterniyonundan (x,y,z,w) pusula yönü. Euler açılarındaki
+// eğim kaynaklı kaymayı önlemek için dönüş matrisi kullanılır (yer çerçevesi: x doğu, y kuzey, z yukarı).
+function compassHeadingFromQuaternion(q) {
+  const x = q[0], y = q[1], z = q[2], w = q[3];
+  const topE = 2 * (x * y - w * z), topN = 1 - 2 * (x * x + z * z);
+  const backE = -2 * (x * z + w * y), backN = -2 * (y * z - w * x);
+  const useTop = Math.hypot(topE, topN) >= Math.hypot(backE, backN);
+  const e = useTop ? topE : backE, n = useTop ? topN : backN;
+  return ((Math.atan2(e, n) * 180 / Math.PI) + 360) % 360;
+}
+
 // ---------- MANYETİK SAPMA (WMM-2025, derece 12) ----------
 // Pusula manyetik kuzeyi gösterir; kıble açısı gerçek kuzeye göre hesaplanır. İkisi arasındaki fark
 // manyetik sapmadır (doğuya doğru pozitif). Katsayılar NOAA/BGS World Magnetic Model 2025'ten (geçerlilik: 2025-2030).
@@ -3284,6 +3302,13 @@ function shortestAngleDelta(from, to) {
     if (dua.cycle) {
       bodyHtml += `<div class="cycle-banner" id="cycleBanner"></div>`;
     }
+    if (dua.id === "esmaulhusna") {
+      bodyHtml += `<div class="audio-card" id="esmaAudio">
+        <button class="audio-play" id="esmaAudioBtn" type="button">
+          <span class="audio-play-ico"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
+          <span><span class="audio-play-title">Dinle</span><br><span class="audio-play-sub">Mustafa Demirci · Esmâ-i Hüsnâ (Tesbihat) · YouTube</span></span>
+        </button></div>`;
+    }
     if (dua.note) {
       bodyHtml += `<div class="reader-note">${dua.note}</div>`;
     }
@@ -3296,6 +3321,16 @@ function shortestAngleDelta(from, to) {
         `</div>`;
     }
     document.getElementById("readerBody").innerHTML = bodyHtml;
+    const esmaAudioBtn = document.getElementById("esmaAudioBtn");
+    if (esmaAudioBtn) {
+      // Oynatıcı yalnızca dokununca yüklenir (çevrimdışıyken ve normal okurken YouTube'a istek gitmez)
+      esmaAudioBtn.addEventListener("click", () => {
+        const card = document.getElementById("esmaAudio");
+        if (!navigator.onLine) { esmaAudioBtn.querySelector(".audio-play-sub").textContent = "İnternet bağlantısı gerekli"; return; }
+        esmaAudioBtn.hidden = true;
+        card.insertAdjacentHTML("beforeend", `<div class="audio-frame"><iframe src="https://www.youtube-nocookie.com/embed/4MUPqYILxrU?autoplay=1&playsinline=1&rel=0" title="Esmâ-i Hüsnâ (Tesbihat) — Mustafa Demirci" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`);
+      });
+    }
     if (dua.cycle) renderCycleBanner(dua);
 
     showScreen(els.reader, els.home);
@@ -4892,6 +4927,7 @@ function shortestAngleDelta(from, to) {
   }
 
   function onQiblaOrientation(e) {
+    if (qs.sensorApiActive) return;
     const h = qiblaReadHeading(e);
     if (h == null) return;
     qs.gotSensor = true;
@@ -4901,8 +4937,30 @@ function shortestAngleDelta(from, to) {
     qiblaRender();
   }
 
+  // Android/Chrome: birleştirilmiş mutlak yönelim sensörü (Euler olaylarından çok daha kararlı)
+  function qiblaStartSensorApi() {
+    if (qs.sensor || typeof AbsoluteOrientationSensor !== "function") return false;
+    try {
+      const sensor = new AbsoluteOrientationSensor({ frequency: 30, referenceFrame: "screen" });
+      sensor.addEventListener("reading", () => {
+        if (!sensor.quaternion) return;
+        qs.sensorApiActive = true; // artık Euler olayları yok sayılır
+        // referenceFrame "screen" olduğundan ekran dönüklüğü zaten hesaba katılmıştır
+        const h = ((compassHeadingFromQuaternion(sensor.quaternion) + qs.declination) % 360 + 360) % 360;
+        qs.gotSensor = true; qs.noSensor = false;
+        qs.heading = qs.heading == null ? h : (qs.heading + shortestAngleDelta(qs.heading, h) * 0.2 + 360) % 360;
+        qiblaRender();
+      });
+      sensor.addEventListener("error", () => { qs.sensorApiActive = false; });
+      sensor.start();
+      qs.sensor = sensor;
+      return true;
+    } catch (_) { return false; }
+  }
+
   function qiblaBeginListening() {
     if (!qs.listening) {
+      qiblaStartSensorApi();
       window.addEventListener("deviceorientationabsolute", onQiblaOrientation, true);
       window.addEventListener("deviceorientation", onQiblaOrientation, true);
       qs.listening = true;
@@ -4971,6 +5029,8 @@ function shortestAngleDelta(from, to) {
     window.removeEventListener("deviceorientationabsolute", onQiblaOrientation, true);
     window.removeEventListener("deviceorientation", onQiblaOrientation, true);
     qs.listening = false;
+    if (qs.sensor) { try { qs.sensor.stop(); } catch (_) {} qs.sensor = null; }
+    qs.sensorApiActive = false;
     clearTimeout(qs.sensorTimer);
     keepAwake("qibla", false);
     showScreen(els.home, qEl.screen, false);
