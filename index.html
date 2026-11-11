@@ -819,14 +819,15 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 
 /* Reader header - scroll ile küçülme: yalnızca görsel özellikler (transform/opacity/renk) değişir, düzen değişmez */
 .reader-header{ transition: background .25s ease, border-color .25s ease; }
-.reader-header .reader-title{ transition: transform .25s ease; transform-origin: center; }
+/* transform/scale kullanılmaz: iOS Safari katmanı küçük çözünürlükte çizip yazıyı bulanık bırakıyor */
+.reader-header .reader-title{ position: relative; top: 0; transition: top .25s ease, font-size .25s ease; }
 .reader-header .reader-subtitle{ transition: opacity .2s ease; }
 .reader-header.scrolled{
   background: var(--surface);
   backdrop-filter: blur(24px) saturate(160%);
   border-bottom-color: var(--border);
 }
-.reader-header.scrolled .reader-title{ transform: translateY(8px) scale(.88); }
+.reader-header.scrolled .reader-title{ top: 8px; font-size: 15px; }
 .reader-header.scrolled .reader-subtitle{ opacity: 0; }
 
 /* Dropcap - ilk âyet büyük harfle başlasın */
