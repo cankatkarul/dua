@@ -1012,11 +1012,7 @@ body.yasin-time .dua-card[data-id="yasin"] .dua-index{
 .qibla-status.warn{ color: var(--text-secondary); font-weight: 500; }
 .qibla-actions{ width: 100%; max-width: 340px; display: flex; flex-direction: column; }
 .qibla-actions .ghost-btn{ margin-top: 0; }
-.qibla-diag{ width: 100%; max-width: 340px; font-size: 12.5px; color: var(--text-tertiary); }
-.qibla-diag summary{ cursor: pointer; text-align: center; padding: 6px 0; }
-.qibla-diag-row{ display: flex; gap: 8px; margin-top: 6px; }
-.qibla-diag-row .ghost-btn{ margin-top: 0; flex: 1; width: auto; min-width: 0; font-size: 12.5px; padding-left: 8px; padding-right: 8px; }
-.qibla-diag-out{ margin: 8px 0 0; white-space: pre-wrap; word-break: break-all; font: 11.5px/1.5 ui-monospace, Menlo, monospace; color: var(--text-secondary); }
+.app-version{ margin: 14px 0 0; text-align: center; font-size: 12px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
 .qibla-hint{ margin: 6px 0 0; max-width: 340px; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--text-tertiary); }
 
 /* ================= OTOMATİK KAYDIRMA ================= */
@@ -1494,14 +1490,6 @@ try {
       </div>
       <p class="qibla-hint">Telefonu yere paralel tutun, metal ve mıknatıslardan uzak durun. Yön tutmuyorsa telefonu havada yatay “8” çizerek kalibre edin (Android'de gerekebilir).</p>
       <p class="qibla-hint" id="qiblaDeclNote"></p>
-      <details class="qibla-diag" id="qiblaDiag">
-        <summary>Pusula tanısı</summary>
-        <div class="qibla-diag-row">
-          <button class="ghost-btn" id="qiblaModeBtn" type="button">Yöntem: Otomatik</button>
-          <button class="ghost-btn" id="qiblaFlipBtn" type="button">Ters çevir: kapalı</button>
-        </div>
-        <pre class="qibla-diag-out" id="qiblaDiagOut">—</pre>
-      </details>
     </div>
   </main>
 
@@ -1633,6 +1621,7 @@ try {
 
     <button class="ghost-btn" id="diagBtn">Ekran ölçüsünü göster (tanılama)</button>
     <pre class="diag-out" id="diagOut" hidden></pre>
+    <p class="app-version" id="appVersion">v1.91</p>
     <div class="sheet-footer"><button class="ghost-btn full" id="settingsClose">Tamam</button></div>
   </section>
 
@@ -4957,7 +4946,6 @@ function shortestAngleDelta(from, to) {
     locating: false, locError: null,
     listening: false, gotSensor: false, noSensor: false, permDenied: false, needsPermission: false, lowAccuracy: false,
     sensorTimer: null,
-    mode: "auto", flip: false, dbg: {}, perms: "", mag: null, magVals: [], magUt: null, magBad: false,
   };
 
   // Pusula halkasındaki çentikler ve yön harfleri (bir kez çizilir)
@@ -5024,7 +5012,6 @@ function shortestAngleDelta(from, to) {
     else if (qs.noSensor) { text = `Bu cihazda pusula bulunamadı. Kıble, kuzeyden ${staticDeg}° saat yönünde.`; cls = "warn"; }
     else if (!qs.gotSensor) { text = "Pusula bekleniyor…"; cls = "warn"; }
     else if (qs.aligned) { text = "Kıbledesiniz ✓"; cls = "ok"; }
-    else if (qs.magBad) { text = `Çevredeki manyetik alan normal dışı (${Math.round(qs.magUt)} µT). Metal, kılıf ya da mıknatıstan uzaklaşıp telefonu havada 8 çizerek kalibre edin.`; cls = "warn"; }
     else if (qs.lowAccuracy) { text = "Pusula hassasiyeti düşük. Telefonu havada 8 çizerek kalibre edin."; cls = "warn"; }
     else { text = "Telefonu döndürün, Kâbe işaretini üstteki oka getirin."; }
     qEl.status.textContent = text;
@@ -5033,11 +5020,9 @@ function shortestAngleDelta(from, to) {
     qEl.startBtn.hidden = !(qs.permDenied || qs.needsPermission);
   }
 
-  const Q_MODES = [["auto", "Otomatik"], ["sensor", "Sensör (quaternion)"], ["euler", "Olay: Euler"], ["alpha", "Olay: 360−alpha"]];
-  const fmt = (v) => (typeof v === "number" ? v.toFixed(1) : String(v));
   const norm360 = (v) => ((v % 360) + 360) % 360;
 
-  // Ham (manyetik kuzeye göre) yönü verir; sapma ve ters çevirme sonradan uygulanır
+  // Ham (manyetik kuzeye göre) yönü verir; sapma sonradan eklenir
   function qiblaReadHeading(e) {
     let h = null;
     if (typeof e.webkitCompassHeading === "number" && !isNaN(e.webkitCompassHeading)) {
@@ -5045,22 +5030,16 @@ function shortestAngleDelta(from, to) {
       h = e.webkitCompassHeading;
       qs.lowAccuracy = typeof e.webkitCompassAccuracy === "number" &&
         (e.webkitCompassAccuracy < 0 || e.webkitCompassAccuracy > 25);
-      qs.dbg = { src: "iOS webkitCompassHeading", raw: h };
     } else if (e.alpha != null && (e.absolute || e.type === "deviceorientationabsolute")) {
-      // Android: mutlak yön (manyetik kuzeye göre)
-      const byAlpha = qs.mode === "alpha" || e.beta == null || e.gamma == null;
-      h = byAlpha ? (360 - e.alpha) : compassHeadingFromEuler(e.alpha, e.beta, e.gamma);
-      const ang = (screen.orientation && screen.orientation.angle) || 0;
-      h += ang;
-      qs.dbg = { src: e.type + (byAlpha ? " (360−alpha)" : " (Euler)"), a: e.alpha, b: e.beta, g: e.gamma, ang, raw: norm360(h) };
+      // Android (yedek yöntem): mutlak yön
+      h = (e.beta == null || e.gamma == null) ? (360 - e.alpha) : compassHeadingFromEuler(e.alpha, e.beta, e.gamma);
+      h += (screen.orientation && screen.orientation.angle) || 0;
     }
     return h == null ? null : norm360(h);
   }
 
   function qiblaApplyHeading(rawMag, smooth) {
-    let h = norm360(rawMag);
-    if (qs.flip) h = norm360(-h);
-    h = norm360(h + qs.declination);
+    const h = norm360(rawMag + qs.declination);
     qs.gotSensor = true; qs.noSensor = false;
     // Titremeyi azaltmak için dairesel alçak geçiren filtre
     qs.heading = qs.heading == null ? h : (qs.heading + shortestAngleDelta(qs.heading, h) * smooth + 360) % 360;
@@ -5068,39 +5047,25 @@ function shortestAngleDelta(from, to) {
   }
 
   function onQiblaOrientation(e) {
-    if (qs.mode === "sensor") return;
-    if (qs.mode === "auto" && qs.sensorApiActive) return;
+    if (qs.sensorApiActive) return;
     const h = qiblaReadHeading(e);
-    if (h == null) return;
-    qiblaApplyHeading(h, 0.3);
-    qiblaDiagRender();
+    if (h != null) qiblaApplyHeading(h, 0.3);
   }
 
-  // Android/Chrome: birleştirilmiş mutlak yönelim sensörü
+  // Android/Chrome: birleştirilmiş mutlak yönelim sensörü (Euler olaylarından çok daha kararlı)
   function qiblaStartSensorApi() {
-    if (qs.sensor) return true;
-    if (typeof AbsoluteOrientationSensor !== "function") { qs.dbg.sensorErr = "AbsoluteOrientationSensor yok"; return false; }
+    if (qs.sensor || typeof AbsoluteOrientationSensor !== "function") return;
     try {
       const sensor = new AbsoluteOrientationSensor({ frequency: 30, referenceFrame: "screen" });
       sensor.addEventListener("reading", () => {
         if (!sensor.quaternion) return;
         qs.sensorApiActive = true;
-        const raw = compassHeadingFromQuaternion(sensor.quaternion);
-        if (qs.mode === "auto" || qs.mode === "sensor") {
-          qs.dbg = { src: "AbsoluteOrientationSensor", q: Array.from(sensor.quaternion).map(v => v.toFixed(2)).join(","), raw };
-          qiblaApplyHeading(raw, 0.2);
-          qiblaDiagRender();
-        }
+        qiblaApplyHeading(compassHeadingFromQuaternion(sensor.quaternion), 0.2);
       });
-      sensor.addEventListener("error", (ev) => {
-        qs.sensorApiActive = false;
-        qs.dbg.sensorErr = (ev.error && ev.error.name) + ": " + (ev.error && ev.error.message);
-        qiblaDiagRender();
-      });
+      sensor.addEventListener("error", () => { qs.sensorApiActive = false; });
       sensor.start();
       qs.sensor = sensor;
-      return true;
-    } catch (err) { qs.dbg.sensorErr = err.name + ": " + err.message; return false; }
+    } catch (_) { /* olay tabanlı yedek yöntem kullanılır */ }
   }
 
   function qiblaStopSensorApi() {
@@ -5108,74 +5073,9 @@ function shortestAngleDelta(from, to) {
     qs.sensorApiActive = false;
   }
 
-  // Manyetik alan şiddeti (µT): dünya alanı yaklaşık 25-65 µT. Bunun dışı = girişim/kalibrasyon sorunu.
-  function qiblaStartMag() {
-    if (qs.mag) return;
-    if (typeof Magnetometer !== "function") { qs.dbg.magErr = "bu tarayıcıda kapalı (chrome://flags → Generic Sensor Extra Classes)"; return; }
-    try {
-      const m = new Magnetometer({ frequency: 10 });
-      qs.magVals = [];
-      m.addEventListener("reading", () => {
-        qs.magVals.push(Math.hypot(m.x, m.y, m.z));
-        if (qs.magVals.length > 15) qs.magVals.shift();
-        const avg = qs.magVals.reduce((a, b) => a + b, 0) / qs.magVals.length;
-        const bad = qs.magVals.length >= 5 && (avg < 20 || avg > 70);
-        qs.magUt = avg;
-        if (bad !== qs.magBad) { qs.magBad = bad; qiblaRenderStatus(); }
-        qiblaDiagRender();
-      });
-      m.addEventListener("error", (ev) => { qs.dbg.magErr = ev.error && ev.error.name; });
-      m.start();
-      qs.mag = m;
-    } catch (err) { qs.dbg.magErr = err.name; }
-  }
-  function qiblaStopMag() {
-    if (qs.mag) { try { qs.mag.stop(); } catch (_) {} qs.mag = null; }
-    qs.magBad = false; qs.magUt = null;
-  }
-
-  function qiblaDiagRender() {
-    const out = $("#qiblaDiagOut");
-    if (!out || !$("#qiblaDiag").open) return;
-    const d = qs.dbg || {};
-    const lines = [
-      "kaynak: " + (d.src || "veri yok"),
-      "yöntem: " + qs.mode + " · ters: " + (qs.flip ? "evet" : "hayır"),
-      d.a != null ? `alpha/beta/gamma: ${fmt(d.a)} / ${fmt(d.b)} / ${fmt(d.g)}  ekran: ${d.ang}°` : "",
-      d.q ? "quaternion: " + d.q : "",
-      d.raw != null ? "ham yön: " + fmt(d.raw) + "°" : "",
-      "ekrandaki yön: " + (qs.heading != null ? fmt(qs.heading) + "°" : "—") + " · sapma: " + fmt(qs.declination) + "°",
-      "kıble: " + (qs.bearing != null ? fmt(qs.bearing) + "°" : "—"),
-      d.sensorErr ? "sensör hatası: " + d.sensorErr : "",
-      "manyetik alan: " + (qs.magUt != null ? qs.magUt.toFixed(0) + " µT (normal 25-65)" : (d.magErr ? d.magErr : "ölçülüyor…")),
-      qs.perms ? "izinler: " + qs.perms : "",
-    ].filter(Boolean);
-    out.textContent = lines.join("\n");
-  }
-
-  async function qiblaCheckPerms() {
-    if (!navigator.permissions) return;
-    const res = [];
-    for (const n of ["accelerometer", "gyroscope", "magnetometer"]) {
-      try { res.push(n.slice(0, 5) + "=" + (await navigator.permissions.query({ name: n })).state); }
-      catch (_) { res.push(n.slice(0, 5) + "=?"); }
-    }
-    qs.perms = res.join(" ");
-    qiblaDiagRender();
-  }
-
-  function qiblaApplyMode() {
-    qs.heading = null; qs.gotSensor = false;
-    $("#qiblaModeBtn").textContent = "Yöntem: " + Q_MODES.find(m => m[0] === qs.mode)[1];
-    $("#qiblaFlipBtn").textContent = "Ters çevir: " + (qs.flip ? "açık" : "kapalı");
-    if (qs.mode === "auto" || qs.mode === "sensor") qiblaStartSensorApi(); else qiblaStopSensorApi();
-    qiblaDiagRender();
-  }
-
   function qiblaBeginListening() {
     if (!qs.listening) {
-      if (qs.mode === "auto" || qs.mode === "sensor") qiblaStartSensorApi();
-      qiblaStartMag();
+      qiblaStartSensorApi();
       window.addEventListener("deviceorientationabsolute", onQiblaOrientation, true);
       window.addEventListener("deviceorientation", onQiblaOrientation, true);
       qs.listening = true;
@@ -5245,7 +5145,6 @@ function shortestAngleDelta(from, to) {
     window.removeEventListener("deviceorientation", onQiblaOrientation, true);
     qs.listening = false;
     qiblaStopSensorApi();
-    qiblaStopMag();
     clearTimeout(qs.sensorTimer);
     keepAwake("qibla", false);
     showScreen(els.home, qEl.screen, false);
@@ -5256,13 +5155,6 @@ function shortestAngleDelta(from, to) {
   qEl.backBtn.addEventListener("click", closeQibla);
   qEl.retryBtn.addEventListener("click", qiblaLocate);
   qEl.startBtn.addEventListener("click", qiblaStartCompass);
-  $("#qiblaModeBtn").addEventListener("click", () => {
-    const i = Q_MODES.findIndex(m => m[0] === qs.mode);
-    qs.mode = Q_MODES[(i + 1) % Q_MODES.length][0];
-    qiblaApplyMode();
-  });
-  $("#qiblaFlipBtn").addEventListener("click", () => { qs.flip = !qs.flip; qiblaApplyMode(); });
-  $("#qiblaDiag").addEventListener("toggle", () => { if ($("#qiblaDiag").open) { qiblaCheckPerms(); qiblaDiagRender(); } });
 
   // ---------- DONE FAB EVENTS ----------
   document.addEventListener("click", (e) => {
