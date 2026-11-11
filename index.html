@@ -358,6 +358,11 @@ button{ font-family: inherit; border: none; background: none; color: inherit; cu
 .cycle-banner-label{ font-size: 13px; color: var(--text-secondary); }
 .cycle-banner-day{ font-family: var(--serif); font-weight: 700; font-size: 16px; color: var(--accent); }
 .cycle-advance-btn{ margin-top: 0; }
+.cycle-skip{ margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); }
+.cycle-skip-ctl{ display: flex; align-items: center; gap: 8px; }
+.cycle-step{ width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 18px; line-height: 1; }
+.cycle-skip-n{ min-width: 22px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.cycle-skip-add{ margin-top: 0 !important; font-size: 13px; padding: 8px 12px; width: auto; }
 .cycle-advance-btn:disabled{ opacity: .55; }
 .dua-text{
   font-family: var(--serif);
@@ -1621,7 +1626,7 @@ try {
 
     <button class="ghost-btn" id="diagBtn">Ekran ölçüsünü göster (tanılama)</button>
     <pre class="diag-out" id="diagOut" hidden></pre>
-    <p class="app-version" id="appVersion">v1.91</p>
+    <p class="app-version" id="appVersion">v1.92</p>
     <div class="sheet-footer"><button class="ghost-btn full" id="settingsClose">Tamam</button></div>
   </section>
 
@@ -3251,11 +3256,19 @@ function shortestAngleDelta(from, to) {
     saveStore();
     return true;
   }
+  // Atlanan günleri topluca ekler: çevrim ilerler, "bugün" işareti değişmez (bugünü ayrıca işaretleyebilirsiniz)
+  function addCycleDays(id, length, n) {
+    const cyc = getCycle(id);
+    const day = ((cyc.day - 1 + n) % length + length) % length + 1;
+    state.cycles[id] = { day, lastDate: cyc.lastDate };
+    saveStore();
+  }
   function renderCycleBadgeHtml(dua) {
     if (!dua.cycle) return "";
     const cyc = getCycle(dua.id);
     return `<span class="dua-cycle-badge">Gün ${cyc.day}/${dua.cycle.length}</span>`;
   }
+  let cycleSkipN = 1;
   function renderCycleBanner(dua) {
     const el = document.getElementById("cycleBanner");
     if (!el) return;
@@ -3268,7 +3281,16 @@ function shortestAngleDelta(from, to) {
       </div>
       <button class="ghost-btn cycle-advance-btn" ${doneToday ? "disabled" : ""}>
         ${doneToday ? "Bugün işaretlendi ✓" : `Bugünü tamamladım → Gün ${(cyc.day % dua.cycle.length) + 1}'e geç`}
-      </button>`;
+      </button>
+      <div class="cycle-skip">
+        <span class="cycle-skip-label">Atladığım günler</span>
+        <div class="cycle-skip-ctl">
+          <button class="cycle-step" data-step="-1" type="button" aria-label="Azalt">−</button>
+          <span class="cycle-skip-n" id="cycleSkipN">${cycleSkipN}</span>
+          <button class="cycle-step" data-step="1" type="button" aria-label="Artır">+</button>
+          <button class="ghost-btn cycle-skip-add" type="button">${cycleSkipN} günü ekle</button>
+        </div>
+      </div>`;
     const btn = el.querySelector(".cycle-advance-btn");
     if (btn && !doneToday) {
       btn.addEventListener("click", () => {
@@ -3276,6 +3298,15 @@ function shortestAngleDelta(from, to) {
         renderCycleBanner(dua);
       });
     }
+    el.querySelectorAll(".cycle-step").forEach(b => b.addEventListener("click", () => {
+      cycleSkipN = Math.min(dua.cycle.length, Math.max(1, cycleSkipN + Number(b.dataset.step)));
+      renderCycleBanner(dua);
+    }));
+    el.querySelector(".cycle-skip-add").addEventListener("click", () => {
+      addCycleDays(dua.id, dua.cycle.length, cycleSkipN);
+      cycleSkipN = 1;
+      renderCycleBanner(dua);
+    });
   }
 
 
