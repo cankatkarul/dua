@@ -3810,23 +3810,20 @@ function shortestAngleDelta(from, to) {
     setTimeout(() => burst.remove(), 900);
   }
 
-  // GEÇİCİ: başlık bulanıklığı testi — başlığa uzun basınca çizim yöntemi değişir
+  // GEÇİCİ: başlık bulanıklığı testi — başlığa dokununca çizim yöntemi değişir
   (function titleTest() {
     const NAMES = ["Varsayılan", "Sistem yazı tipi", "Amiri normal kalınlık", "Yazı yumuşatma (antialiased)", "Başlık şeridi sabit değil", "Şerit arka planı yok", "Animasyon/konum yok", "GPU katmanı", "Yazı sentezi kapalı", "Arka plan süsleri kapalı"];
-    let n = 0, timer = null;
-    document.addEventListener("pointerdown", (e) => {
+    let n = 0;
+    // Dokununca (uzun basış iOS'ta iptal olabiliyor) bir sonraki varyanta geçer
+    document.addEventListener("click", (e) => {
       if (!e.target.closest || !e.target.closest(".reader-title")) return;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        n = (n + 1) % NAMES.length;
-        if (n) document.body.dataset.tv = n; else delete document.body.dataset.tv;
-        let l = document.querySelector(".tv-label");
-        if (!l) { l = document.createElement("div"); l.className = "tv-label"; document.body.appendChild(l); }
-        l.textContent = "Test " + n + "/9: " + NAMES[n];
-        clearTimeout(l._t); l._t = setTimeout(() => l.remove(), 2500);
-      }, 700);
+      n = (n + 1) % NAMES.length;
+      if (n) document.body.dataset.tv = n; else delete document.body.dataset.tv;
+      let l = document.querySelector(".tv-label");
+      if (!l) { l = document.createElement("div"); l.className = "tv-label"; document.body.appendChild(l); }
+      l.textContent = "Test " + n + "/9: " + NAMES[n];
+      clearTimeout(l._t); l._t = setTimeout(() => l.remove(), 2500);
     });
-    ["pointerup", "pointercancel", "pointermove"].forEach(ev => document.addEventListener(ev, () => clearTimeout(timer)));
   })();
 
   // ---------- EVENTS ----------

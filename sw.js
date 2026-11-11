@@ -39,17 +39,20 @@ self.addEventListener("activate", e => {
   );
 });
 
-function fetchWithTimeout(request, ms) {
+function fetchWithTimeout(request, ms, init = {}) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
-  return fetch(request, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
+  // Gezinme (navigate) isteği yeniden kurulamaz; adresiyle çekilir
+  const target = request.mode === "navigate" ? request.url : request;
+  return fetch(target, { ...init, signal: ctrl.signal }).finally(() => clearTimeout(timer));
 }
 
 // Sayfa: önce ağ (zaman aşımı olur ya da çevrimdışıysa önbellek)
 async function pageNetworkFirst(request) {
   const cache = await caches.open(CACHE);
   try {
-    const res = await fetchWithTimeout(request, NETWORK_TIMEOUT_MS);
+    // cache: "no-cache" → tarayıcı HTTP önbelleğini (GitHub Pages: 10 dk) atlayıp sunucuya sorar; güncelleme hemen görünür
+    const res = await fetchWithTimeout(request, NETWORK_TIMEOUT_MS, { cache: "no-cache" });
     if (res && res.ok) cache.put(PAGE, res.clone());
     return res;
   } catch {
