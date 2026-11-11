@@ -11,6 +11,7 @@ crons = ["* * * * *"]
 VAPID_PUBLIC = "BFKd-St1Ng4bKsFMwO9zYgR9ryAlgQLBRKJN9oCLQWG4xlXsC7OO0zBlo--6by1LJAzJg7WQCJO3_Y669C3abME"
 VAPID_SUBJECT = "https://dua.eskisehir.fit"
 
-# KV alanı ilk "wrangler deploy" sırasında kendiliğinden oluşturulur
+# KV alanı (eşitleme, hatırlatma abonelikleri ve ses dosyası)
 [[kv_namespaces]]
 binding = "SYNC"
+id = "7bd2acf4548b4c4f9d35b3d0ba8e5449"

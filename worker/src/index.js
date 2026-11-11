@@ -7,7 +7,9 @@
      PUT    /push/v1  → { subscription, tz, reminders:[{id,time,days?}] } kaydeder
      DELETE /push/v1  → { endpoint } aboneliği siler
      Her dakika çalışan zamanlayıcı, vakti gelen hatırlatmalar için (gövdesiz) bir push gönderir;
-     bildirimin metnini cihazdaki servis çalışanı hazırlar. */
+     bildirimin metnini cihazdaki servis çalışanı hazırlar.
+   Ses:
+     GET /audio/:kod → gizli kodu bilenlere ses dosyasını verir (KV'de "audio:<sha256(kod)>") */
 
 const APP = "gunluk-dualarim";
 const MAX_BYTES = 256 * 1024;
@@ -179,6 +181,15 @@ export default {
     if (path === "/push/v1/status" && req.method === "POST") return pushInfo(req, env, cors, "status");
     // Yerel denemede zamanlayıcıyı elle tetiklemek için (yalnızca dev)
     if (path === "/push/run" && env.ALLOW_RUN === "1") return json(await runReminders(env), 200, cors);
+
+    // Gizli bağlantıyla indirilen ses dosyası (yalnızca kodu bilen alır; kodun SHA-256 özeti KV anahtarıdır)
+    const am = path.match(/^\/audio\/([A-Za-z0-9]{16,64})$/);
+    if (am) {
+      if (req.method !== "GET") return json({ error: "method_not_allowed" }, 405, cors);
+      const file = await env.SYNC.get("audio:" + await sha256Hex(am[1]), "arrayBuffer");
+      if (!file) return json({ error: "not_found" }, 404, cors);
+      return new Response(file, { status: 200, headers: { ...cors, "Content-Type": "audio/mpeg", "Cache-Control": "private, no-store" } });
+    }
 
     const m = path.match(/^\/v1\/([A-Za-z0-9]{20,64})$/);
     if (!m) return json({ error: "not_found" }, 404, cors);

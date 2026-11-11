@@ -3332,7 +3332,10 @@ function shortestAngleDelta(from, to) {
             <span class="audio-play-ico"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
             <span><span class="audio-play-title">Dinle</span><br><span class="audio-play-sub">Mustafa Demirci · Esmâ-i Hüsnâ (Tesbihat) · YouTube</span></span>
           </button>
-          <div class="audio-actions"><button class="audio-link" id="esmaAudioAdd" type="button">Ses dosyası ekle (internetsiz dinle)</button></div>
+          <div class="audio-actions">
+            <button class="audio-link" id="esmaAudioGet" type="button" hidden>Sesi indir (internetsiz dinle)</button>
+            <button class="audio-link" id="esmaAudioAdd" type="button">Ses dosyası ekle (internetsiz dinle)</button>
+          </div>
         </div>
         <input type="file" id="esmaAudioFile" accept="audio/*,.mp3" hidden>
       </div>`;
@@ -3395,6 +3398,35 @@ function shortestAngleDelta(from, to) {
     return new Promise((res, rej) => { const t = db.transaction(AUDIO_STORE, "readwrite"); t.objectStore(AUDIO_STORE).delete(key); t.oncomplete = res; t.onerror = () => rej(t.error); });
   }
 
+  // Gizli bağlantı: https://…/?ses=KOD → kod bu cihazda saklanır, adres çubuğundan silinir, ses indirilir.
+  const ESMA_CODE_KEY = "esmaAudioCode";
+  const esmaCode = () => { try { return localStorage.getItem(ESMA_CODE_KEY) || ""; } catch (_) { return ""; } };
+  (function readEsmaCodeFromUrl() {
+    try {
+      const u = new URL(location.href), c = u.searchParams.get("ses");
+      if (!c) return;
+      if (/^[A-Za-z0-9]{16,64}$/.test(c)) localStorage.setItem(ESMA_CODE_KEY, c);
+      u.searchParams.delete("ses");
+      history.replaceState(null, "", u.pathname + (u.search || "") + u.hash);
+    } catch (_) {}
+  })();
+  async function esmaDownload() {
+    const code = esmaCode();
+    if (!code) throw new Error("kod yok");
+    const r = await fetch(SYNC_URL + "/audio/" + code, { cache: "no-store" });
+    if (!r.ok) throw new Error("sunucu " + r.status);
+    const blob = await r.blob();
+    if (!blob.size) throw new Error("boş dosya");
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+    await audioPut("esmaulhusna", blob);
+    return blob;
+  }
+  // Bağlantıdan gelindiyse ses arka planda hemen indirilir (başarısızsa kartta "Sesi indir" düğmesi kalır)
+  setTimeout(async () => {
+    if (!esmaCode()) return;
+    try { if (!(await audioGet("esmaulhusna"))) await esmaDownload(); } catch (_) {}
+  }, 1500);
+
   let esmaAudioUrl = null;
   async function setupEsmaAudio() {
     const $id = (x) => document.getElementById(x);
@@ -3417,6 +3449,14 @@ function shortestAngleDelta(from, to) {
       if (!navigator.onLine) { btn.querySelector(".audio-play-sub").textContent = "İnternet gerekli — ya da ses dosyası ekleyin"; return; }
       btn.hidden = true;
       $id("esmaAudio").insertAdjacentHTML("beforeend", `<div class="audio-frame"><iframe src="https://www.youtube-nocookie.com/embed/4MUPqYILxrU?autoplay=1&playsinline=1&rel=0" title="Esmâ-i Hüsnâ (Tesbihat) — Mustafa Demirci" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`);
+    });
+    const getBtn = $id("esmaAudioGet");
+    if (esmaCode()) getBtn.hidden = false;
+    getBtn.addEventListener("click", async () => {
+      getBtn.disabled = true; getBtn.textContent = "İndiriliyor…";
+      try { showLocal(await esmaDownload()); }
+      catch (_) { getBtn.textContent = navigator.onLine ? "İndirilemedi, tekrar deneyin" : "İnternet gerekli, tekrar deneyin"; }
+      getBtn.disabled = false;
     });
     addBtn.addEventListener("click", () => file.click());
     file.addEventListener("change", async () => {
